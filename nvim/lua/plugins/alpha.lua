@@ -13,6 +13,7 @@ return {
       [[| |                _/ |                                  ]],
       [[|_|               |__/                                   ]],
     }
+    theme.section.top_buttons.val = {}
     theme.file_icons.provider = "devicons"
     theme.section.mru.val = { { type = "padding", val = 0 } }
     require("alpha").setup(theme.config)
