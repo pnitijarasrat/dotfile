@@ -11,6 +11,11 @@ return {
       org_deadline_warning_days = 7,
       org_startup_folded = "content",
       org_hide_leading_stars = true,
+      mappings = {
+        org = {
+          org_toggle_checkbox = "<C-CR>",
+        },
+      },
     })
     vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { link = "SignColumn" })
     vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { link = "ERROR" })
