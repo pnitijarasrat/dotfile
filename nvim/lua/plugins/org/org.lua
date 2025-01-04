@@ -17,12 +17,8 @@ return {
         },
       },
     })
-    vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { link = "SignColumn" })
-    vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { link = "ERROR" })
-    vim.api.nvim_set_hl(0, "@org.agenda.deadline", { link = "ERROR" })
+    vim.api.nvim_set_hl(0, "@org.agenda.scheduled_past", { link = "DiagnosticError" })
     vim.api.nvim_set_hl(0, "@org.agenda.today", { link = "Search" })
     vim.api.nvim_set_hl(0, "@org.agenda.day", { link = "MoreMsg" })
-    vim.api.nvim_set_hl(0, "@org.keyword.todo", { link = "DiagnosticError" })
-    vim.api.nvim_set_hl(0, "@org.keyword.done", { link = "DiagnosticHint" })
   end,
 }
