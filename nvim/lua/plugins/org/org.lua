@@ -19,7 +19,7 @@ return {
                 },
             },
         })
-        vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { fg = "#DCD7BA" })
+        vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { link = "TermCursorNc" })
         vim.api.nvim_set_hl(0, "@org.agenda.today", { link = "Underlined" })
         vim.api.nvim_set_hl(0, "@org.keyword.todo", { link = "DiagnosticOk" })
         vim.api.nvim_set_hl(0, "@org.keyword.done", { link = "WhiteSpace" })
