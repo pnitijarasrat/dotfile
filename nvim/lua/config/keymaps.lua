@@ -1,4 +1,9 @@
-vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true })
-vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true })
-vim.keymap.set("n", "n", "nzz", { noremap = true, silent = true })
-vim.keymap.set("n", "N", "Nzz", { noremap = true, silent = true })
+local opts = { noremap = true, silent = true }
+vim.keymap.set("n", "<C-d>", "<C-d>zz", opts)
+vim.keymap.set("n", "<C-u>", "<C-u>zz", opts)
+vim.keymap.set("n", "n", "nzz", opts)
+vim.keymap.set("n", "N", "Nzz", opts)
+vim.keymap.set("n", "<leader>w", ":w<cr>", opts)
+vim.keymap.set("n", "<leader>ww", ":wqa<cr>", opts)
+vim.keymap.set("n", "<leader>s", ":%s/", opts)
+vim.keymap.set("n", "<D-j>", "<C-Down>", opts)
