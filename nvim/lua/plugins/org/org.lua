@@ -7,7 +7,7 @@ return {
             org_agenda_files = "~/personal/org/**/*",
             org_default_notes_file = "~/personal/refile.org",
             win_split_mode = "tabnew",
-            org_todo_keywords = { "TODO(t)", "MEETING(m)", "APPOINT(a)", "WORKOUT(w)", "|", "DONE(d)" },
+            org_todo_keywords = { "NEXT(n)","TODO(t)", "MEETING(m)", "APPOINT(a)", "WORKOUT(w)", "|", "DONE(d)", "CANCELLED(c)", "SKIPPED(s)" },
             org_deadline_warning_days = 7,
             org_startup_folded = "showeverything",
             org_hide_leading_stars = true,
