@@ -9,7 +9,7 @@ return {
             win_split_mode = "tabnew",
             org_todo_keywords = { "TODO(t)", "MEETING(m)", "APPOINT(a)", "WORKOUT(w)", "|", "DONE(d)" },
             org_deadline_warning_days = 7,
-            org_startup_folded = "content",
+            org_startup_folded = "showeverything",
             org_hide_leading_stars = true,
             org_agenda_span = "day",
             org_agenda_start_on_weekday = false,
