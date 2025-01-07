@@ -1,0 +1,12 @@
+# ~/.config/ghostty/config
+config-file = themes/modus-vivendi
+font-size=18
+title=" "
+window-padding-x=8
+window-padding-y=8
+cursor-style=block
+cursor-style-blink=false
+shell-integration-features = no-cursor
+background-opacity=0.8
+background-blur-radius=20
+font-family=Source Code Pro
