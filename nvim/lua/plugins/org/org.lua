@@ -25,7 +25,7 @@ return {
             }
         })
         vim.api.nvim_set_hl(0, "@org.agenda.scheduled", { link = "TermCursorNc" })
-        vim.api.nvim_set_hl(0, "@org.agenda.today", { link = "TSURI" })
+        vim.api.nvim_set_hl(0, "@org.agenda.today", { link = "SpellBad" })
         vim.api.nvim_set_hl(0, "@org.agenda.day", { link = "InfoFloat" })
         vim.api.nvim_set_hl(0, "@org.keyword.todo", { link = "DiagnosticOk" })
         vim.api.nvim_set_hl(0, "@org.keyword.done", { link = "WhiteSpace" })
