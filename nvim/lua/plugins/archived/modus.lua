@@ -5,6 +5,6 @@ return {
             style = "modus_vivendi",
             transparent = true,
         })
-        vim.cmd.colorscheme("modus")
+        -- vim.cmd.colorscheme("modus")
     end
 }
