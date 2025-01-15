@@ -1,7 +1,31 @@
 # ~/.config/ghostty/config
-config-file = themes/modus-vivendi
+
+# theme
+palette = 0=#202020
+palette = 1=#ac4142
+palette = 2=#90a959
+palette = 3=#f4bf75
+palette = 4=#d28445
+palette = 5=#75b5aa
+palette = 6=#aa759f
+palette = 7=#b0b0b0
+palette = 8=#202020
+palette = 9=#ac4142
+palette = 10=#90a959
+palette = 11=#f4bf75
+palette = 12=#d28445
+palette = 13=#75b5aa
+palette = 14=#aa759f
+palette = 15=#b0b0b0
+background = #202020
+foreground = #e0e0e0
+cursor-color = #e0e0e0
+cursor-text = #b0b0b0
+selection-background = #b0b0b0
+selection-foreground = #202020
+
 font-size=18
-title=" "
+title="terminal"
 window-padding-x=8
 window-padding-y=8
 cursor-style=block
@@ -9,4 +33,4 @@ cursor-style-blink=false
 shell-integration-features = no-cursor
 background-opacity=1
 background-blur-radius=20
-font-family=Source Code Pro
+font-family=IBM Plex Mono
