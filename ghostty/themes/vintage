@@ -1,15 +1,15 @@
-# Vintage theme: Work surface (soft IBM 5153 on black)
+# Vintage theme: Work surface (light, K-95-style: navy on white, Windows VGA ANSI)
 # Roles and values from docs/theme-spec.md
 # Ghostty has no trailing comments, so each role name is on the line above its value
 # work_bg
-background = #000000
+background = #FFFFFF
 # work_fg
-foreground = #C4C4C4
+foreground = #000080
 
 # work_cursor
-cursor-color = #4EDC4E
+cursor-color = #000000
 # work_cursor_text
-cursor-text = #000000
+cursor-text = #FFFFFF
 # work_selection
 selection-background = #000080
 # work_selection_text
@@ -19,34 +19,34 @@ selection-foreground = #FFFFFF
 # ansi_0
 palette = 0=#000000
 # ansi_1
-palette = 1=#C40000
+palette = 1=#800000
 # ansi_2
-palette = 2=#00C400
+palette = 2=#008000
 # ansi_3
-palette = 3=#C47E00
+palette = 3=#808000
 # ansi_4
-palette = 4=#0000C4
+palette = 4=#000080
 # ansi_5
-palette = 5=#C400C4
+palette = 5=#800080
 # ansi_6
-palette = 6=#00C4C4
+palette = 6=#008080
 # ansi_7
-palette = 7=#C4C4C4
+palette = 7=#C0C0C0
 
 # Bright colors (8-15)
 # ansi_8
-palette = 8=#4E4E4E
+palette = 8=#808080
 # ansi_9
-palette = 9=#DC4E4E
+palette = 9=#FF0000
 # ansi_10
-palette = 10=#4EDC4E
+palette = 10=#00FF00
 # ansi_11
-palette = 11=#F3F34E
+palette = 11=#FFFF00
 # ansi_12
-palette = 12=#4E4EDC
+palette = 12=#0000FF
 # ansi_13
-palette = 13=#F34EF3
+palette = 13=#FF00FF
 # ansi_14
-palette = 14=#4EF3F3
+palette = 14=#00FFFF
 # ansi_15
 palette = 15=#FFFFFF

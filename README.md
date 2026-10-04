@@ -26,6 +26,12 @@ ln -sfn ~/.config/vscode/vintage-theme ~/.vscode/extensions/pnitijarasrat.vintag
 
 Check the theme against `docs/theme-spec.md` (palette, and the color keys the installed VSCode knows) with `node vscode/tests/vintage_test.mjs`.
 
+## Ghostty
+
+The terminal theme is a hand-written `vintage` theme in `ghostty/themes/vintage`, selected by `ghostty/config` (#13, #44). Starship, ccstatusline and ranger take their colors from it.
+
+Check the theme and config against `docs/theme-spec.md` with `node ghostty/tests/vintage_test.mjs`.
+
 ## Raycast
 
 The launcher theme is "Vintage", in `raycast/vintage.rctheme.json` (#21). Raycast keeps its own copy of imported themes and can't read the file directly. Run `node raycast/import.mjs` to open the theme in Raycast (the same `raycast://theme` link as "Add to Raycast" on themes.ray.so), add it, then select **Vintage** in Settings → Appearance. Re-run it after changing the file. Custom themes need Raycast Pro.
