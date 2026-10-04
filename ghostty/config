@@ -10,7 +10,7 @@ shell-integration-features = no-cursor
 # Vintage theme: Work surface (docs/theme-spec.md)
 theme=vintage
 # work_grid
-split-divider-color=#4E4E4E
+split-divider-color=#C0C0C0
 
 # Purist fidelity: opaque, no blur, square corners (visible tabs are lost, splits stay)
 background-opacity=1
@@ -25,5 +25,3 @@ font-size=32
 window-inherit-font-size=false
 font-synthetic-style=false
 font-feature=-calt, -liga
-# Deviation: the spec says `bold-is-bright = true`, which Ghostty 1.2.0 deprecated for `bold-color = bright`
-bold-color=bright
