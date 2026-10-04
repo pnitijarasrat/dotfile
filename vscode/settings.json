@@ -27,5 +27,13 @@
     "editor.lineHeight": 24,
     "editor.fontWeight": "normal",
     "editor.fontLigatures": false,
-    "window.zoomLevel": 0
+    "window.zoomLevel": 0,
+    // The terminal (and the Claude Code panel in it) is Work surface too (#33):
+    // same font as the editor. Its lineHeight multiplies the font's cell height,
+    // which for Fixedsys Excelsior at 24 is 24px.
+    "terminal.integrated.fontFamily": "'Fixedsys Excelsior', Menlo, Thonburi",
+    "terminal.integrated.fontSize": 24,
+    "terminal.integrated.lineHeight": 1,
+    "terminal.integrated.fontWeight": "normal",
+    "terminal.integrated.fontLigatures.enabled": false
 }

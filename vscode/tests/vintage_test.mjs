@@ -1,4 +1,4 @@
-// Checks for the Vintage VSCode theme (#19, #20).
+// Checks for the Vintage VSCode theme (#19, #20, #33).
 // Run: node vscode/tests/vintage_test.mjs
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -180,6 +180,20 @@ test("inline code popups are Work surface with a work_popup_border", () => {
     expect(border, "#808080");
   }
   eq(color("editorSuggestWidget.selectedBackground"), "#000080", "suggest selection");
+});
+
+test("the terminal uses the editor's Work surface font (#33)", () => {
+  for (const key of ["fontFamily", "fontSize", "fontWeight"]) {
+    eq(settings[`terminal.integrated.${key}`], settings[`editor.${key}`], `terminal.integrated.${key}`);
+  }
+  // terminal lineHeight multiplies the font's cell height (1 em for Fixedsys
+  // Excelsior); editor lineHeight is in px.
+  eq(
+    settings["terminal.integrated.lineHeight"] * settings["terminal.integrated.fontSize"],
+    settings["editor.lineHeight"],
+    "terminal line height in px",
+  );
+  eq(settings["terminal.integrated.fontLigatures.enabled"], settings["editor.fontLigatures"], "terminal ligatures");
 });
 
 if (failures.length) {
