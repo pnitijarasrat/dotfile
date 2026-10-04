@@ -1,0 +1,442 @@
+<!doctype html>
+<!--
+  PROTOTYPE, throwaway. Answers issue #5 (part of map #2):
+  "What exact hex values make up the Frame palette and the Work surface palette?"
+
+  Four palette variants on one page, switchable via ?variant=A|B|C|D,
+  the floating bottom bar, or the left/right arrow keys.
+  Open it with: open docs/prototypes/vintage-palette.prototype.html
+
+  Assumption: the question is about color, so the mock layout is held constant on
+  purpose and only the palettes change. That way the variants are comparable.
+  Fonts are not the question here (that's #6). This uses Tahoma plus Fixedsys
+  Excelsior if installed, falling back to Menlo.
+  Source values: docs/research/authentic-retro-colors-fonts.md (#3) and
+  docs/research/existing-retro-themes.md (#4), on their research/* branches.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PROTOTYPE: Vintage theme palettes (#5)</title>
+<style>
+  :root { --ui: Tahoma, "Microsoft Sans Serif", sans-serif; --mono: "Fixedsys Excelsior 3.01", "Fixedsys Excelsior", "PxPlus IBM VGA 8x16", Menlo, monospace; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--desktop); font: 13px var(--ui); color: var(--text); padding: 40px 16px 90px; }
+
+  /* Bevels: Classic DrawEdge recipe, 1 CSS px = 2 device px on Retina */
+  .raised { box-shadow: inset -1px -1px var(--dkShadow), inset 1px 1px var(--highlight), inset -2px -2px var(--shadow), inset 2px 2px var(--light); }
+  .sunken { box-shadow: inset 1px 1px var(--shadow), inset -1px -1px var(--highlight), inset 2px 2px var(--dkShadow), inset -2px -2px var(--light); }
+
+  /* SketchyBar mock */
+  .menubar { position: fixed; top: 0; left: 0; right: 0; height: 28px; background: var(--bar); color: var(--barText); display: flex; align-items: center; gap: 4px; padding: 0 6px; z-index: 5; }
+  .menubar .item { padding: 3px 8px; }
+  .menubar .start { background: var(--start); color: #fff; font-weight: bold; font-style: italic; padding: 3px 12px; }
+  .menubar .spacer { flex: 1; }
+  .menubar .tray { padding: 3px 8px; }
+  .menubar .tray.sunken { background: var(--trayBg); }
+
+  .grid { display: grid; grid-template-columns: 430px 1fr; gap: 16px; align-items: start; max-width: 1500px; margin: 0 auto; }
+  .col { display: flex; flex-direction: column; gap: 16px; }
+
+  .win { background: var(--face); padding: 3px; }
+  .title { background: linear-gradient(90deg, var(--titleL), var(--titleR)); color: var(--titleText); font-weight: bold; padding: 3px 3px 3px 5px; display: flex; align-items: center; justify-content: space-between; }
+  .title.inactive { background: linear-gradient(90deg, var(--inactiveL), var(--inactiveR)); color: var(--inactiveText); }
+  .title .btns { display: flex; gap: 2px; }
+  .title .btn { width: 16px; height: 14px; background: var(--face); color: var(--text); font: bold 10px var(--ui); display: grid; place-items: center; }
+  .menu { display: flex; gap: 2px; padding: 2px 0; }
+  .menu span { padding: 2px 6px; }
+  .menu span:first-letter { text-decoration: underline; }
+  .body { padding: 6px; }
+
+  /* swatches */
+  .sw-group { margin-bottom: 8px; }
+  .sw-group h4 { margin: 4px 0; font-size: 12px; }
+  .sw-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .sw { width: 92px; cursor: pointer; }
+  .sw .chip { height: 34px; }
+  .sw .lbl { font-size: 11px; line-height: 1.2; padding-top: 2px; }
+  .sw .hex { font-family: var(--mono); font-size: 11px; }
+  .well { background: var(--window); padding: 6px; }
+  .work-well { background: var(--w-bg); color: var(--w-fg); padding: 8px; }
+  .work-well .sw .lbl { color: var(--w-fg); }
+
+  /* editor mock (VSCode / Neovim) */
+  .editor { display: grid; grid-template-columns: 44px 170px 1fr; height: 520px; }
+  .activity { background: var(--face); border-right: 1px solid var(--shadow); display: flex; flex-direction: column; gap: 4px; padding: 4px; }
+  .activity div { font-size: 10px; text-align: center; padding: 6px 0; }
+  .activity div.on { background: var(--face); }
+  .sidebar { background: var(--face); padding: 4px; overflow: hidden; }
+  .sidebar .head { font-weight: bold; font-size: 11px; padding: 2px 4px 6px; }
+  .tree { background: var(--window); height: calc(100% - 24px); padding: 4px; }
+  .tree div { padding: 1px 3px; white-space: nowrap; }
+  .tree .sel { background: var(--selection); color: var(--selectionText); }
+  .tree .dim { color: var(--grayText); }
+  .pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+  .tabs { display: flex; background: var(--face); padding: 3px 3px 0; gap: 2px; }
+  .tab { padding: 4px 12px; background: var(--face); }
+  .tab.on { font-weight: bold; }
+  .tab.off { color: var(--grayText); }
+  .code { flex: 1; min-height: 0; background: var(--w-bg); color: var(--w-fg); font: 15px/1.45 var(--mono); overflow: hidden; padding: 6px 0; }
+  .code .ln { display: flex; white-space: pre; }
+  .code .ln .nr { width: 44px; text-align: right; padding-right: 12px; color: var(--w-lineNr); flex-shrink: 0; }
+  .code .ln.cur { background: var(--w-cursorLine); }
+  .code .ln.cur .nr { color: var(--w-fg); }
+  .cur-block { background: var(--w-cursor); color: var(--w-cursorText); }
+  .selx { background: var(--w-selBg); color: var(--w-selFg) !important; }
+  .selx * { color: var(--w-selFg) !important; }
+  .c { color: var(--s-comment); font-style: italic; }
+  .k { color: var(--s-keyword); }
+  .s { color: var(--s-string); }
+  .n { color: var(--s-number); }
+  .f { color: var(--s-function); }
+  .t { color: var(--s-type); }
+  .b { color: var(--s-constant); }
+  .o { color: var(--s-operator); }
+  .err { text-decoration: underline wavy var(--s-error); }
+  .wrn { text-decoration: underline wavy var(--s-warn); }
+  .diag-e { color: var(--s-error); }
+  .diag-w { color: var(--s-warn); }
+  .status { display: flex; background: var(--face); gap: 2px; padding: 2px; font-size: 12px; }
+  .status > span { padding: 2px 8px; }
+  .status .mode { background: var(--titleL); color: var(--titleText); font-weight: bold; }
+  .status .grow { flex: 1; }
+
+  /* terminal mock (Ghostty) */
+  .term { background: var(--w-bg); color: var(--w-fg); font: 15px/1.45 var(--mono); padding: 10px 12px; white-space: pre; overflow: hidden; }
+  .bold { font-weight: bold; }
+  .ansi-row { display: flex; gap: 0; margin-top: 4px; }
+  .ansi-row span { width: 44px; text-align: center; }
+
+  /* chart mock (TC2000 reference) */
+  .chart { background: var(--w-bg); display: block; width: 100%; }
+
+  /* state dump */
+  pre.state { background: var(--window); color: var(--text); font: 12px/1.35 var(--mono); padding: 8px; margin: 0; max-height: 360px; overflow: auto; }
+  .pushbtn { background: var(--face); border: 0; padding: 5px 16px; font: 13px var(--ui); color: var(--text); cursor: pointer; }
+  .pushbtn:active { box-shadow: inset 1px 1px var(--dkShadow), inset -1px -1px var(--highlight), inset 2px 2px var(--shadow), inset -2px -2px var(--light); }
+  .note { font-size: 12px; padding: 4px 2px; }
+
+  /* Prototype switcher: deliberately NOT part of the design (rounded, blurred shadow, system font) */
+  #proto-switcher { position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%); z-index: 99; display: flex; align-items: center; gap: 4px; background: #111; color: #fff; border-radius: 999px; padding: 6px; box-shadow: 0 6px 24px rgba(0,0,0,.45); font: 600 14px -apple-system, system-ui, sans-serif; }
+  #proto-switcher button { background: #333; color: #fff; border: 0; border-radius: 999px; width: 34px; height: 34px; font-size: 16px; cursor: pointer; }
+  #proto-switcher button:hover { background: #555; }
+  #proto-switcher .label { padding: 0 14px; min-width: 300px; text-align: center; }
+  #proto-switcher .tag { font-size: 10px; letter-spacing: .08em; opacity: .55; display: block; }
+  #toast { position: fixed; top: 40px; right: 16px; background: #111; color: #fff; font: 13px system-ui; padding: 6px 12px; border-radius: 6px; opacity: 0; transition: opacity .2s; z-index: 100; }
+</style>
+</head>
+<body>
+
+<div class="menubar" id="menubar"></div>
+
+<div class="grid">
+  <div class="col">
+    <div class="win raised">
+      <div class="title"><span>Frame palette</span><span class="btns"><span class="btn raised">_</span><span class="btn raised">x</span></span></div>
+      <div class="body"><div id="frame-swatches"></div>
+        <div class="note">Inactive title bar:</div>
+        <div class="title inactive"><span>Untitled - Notepad</span><span class="btns"><span class="btn raised">x</span></span></div>
+        <div class="note" style="display:flex;gap:6px;align-items:center;margin-top:6px">
+          <button class="pushbtn raised">OK</button><button class="pushbtn raised">Cancel</button>
+          <span class="sunken" style="background:var(--window);padding:4px 6px;flex:1">sunken field</span>
+          <span style="color:var(--grayText);text-shadow:1px 1px var(--highlight)">Disabled</span>
+        </div>
+        <div class="note"><span style="background:var(--tooltip);color:#000;border:1px solid #000;padding:1px 4px">Tooltip text</span></div>
+      </div>
+    </div>
+
+    <div class="win raised">
+      <div class="title"><span>Work surface palette</span><span class="btns"><span class="btn raised">x</span></span></div>
+      <div class="body"><div class="work-well sunken" id="work-swatches"></div></div>
+    </div>
+  </div>
+
+  <div class="col">
+    <div class="win raised">
+      <div class="title"><span>options.lua - .config - Visual Studio Code</span><span class="btns"><span class="btn raised">_</span><span class="btn raised">&#9633;</span><span class="btn raised">x</span></span></div>
+      <div class="menu"><span>File</span><span>Edit</span><span>Selection</span><span>View</span><span>Go</span><span>Help</span></div>
+      <div class="editor">
+        <div class="activity"><div class="on sunken">EXPL</div><div>FIND</div><div>GIT</div><div>DBG</div><div>EXT</div></div>
+        <div class="sidebar"><div class="head">EXPLORER</div>
+          <div class="tree sunken">
+            <div>- .config</div>
+            <div>&nbsp;&nbsp;+ borders</div>
+            <div>&nbsp;&nbsp;+ ghostty</div>
+            <div>&nbsp;&nbsp;- nvim</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;- lua/config</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;autocmds.lua</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;keymaps.lua</div>
+            <div class="sel">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;options.lua</div>
+            <div>&nbsp;&nbsp;+ raycast</div>
+            <div>&nbsp;&nbsp;+ sketchybar</div>
+            <div>&nbsp;&nbsp;&nbsp;&nbsp;starship.toml</div>
+            <div class="dim">&nbsp;&nbsp;&nbsp;&nbsp;.DS_Store</div>
+          </div>
+        </div>
+        <div class="pane">
+          <div class="tabs"><span class="tab on raised">options.lua</span><span class="tab off">keymaps.lua</span><span class="tab off">config (ghostty)</span></div>
+          <div class="code" id="code"></div>
+          <div class="status"><span class="mode">NORMAL</span><span class="sunken">main</span><span class="sunken"><span class="diag-e">E1</span> <span class="diag-w">W1</span></span><span class="grow"></span><span class="sunken">Ln 9, Col 18</span><span class="sunken">UTF-8</span><span class="sunken">Lua</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+      <div class="win raised">
+        <div class="title"><span>terminal</span><span class="btns"><span class="btn raised">x</span></span></div>
+        <div class="term sunken" id="term"></div>
+      </div>
+      <div class="win raised">
+        <div class="title inactive"><span>TC2000 - SPY Daily (reference)</span><span class="btns"><span class="btn raised">x</span></span></div>
+        <div class="sunken" style="padding:2px;background:var(--w-bg)"><svg class="chart" id="chart" viewBox="0 0 520 360"></svg></div>
+      </div>
+    </div>
+
+    <div class="win raised">
+      <div class="title"><span id="state-title">State</span><span class="btns"><span class="btn raised">x</span></span></div>
+      <div class="body">
+        <div class="note" id="variant-notes"></div>
+        <pre class="state sunken" id="state"></pre>
+        <div style="padding-top:6px;display:flex;gap:6px"><button class="pushbtn raised" id="copy-json">Copy JSON</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="proto-switcher">
+  <button id="prev" title="Previous (left arrow)">&larr;</button>
+  <div class="label"><span class="tag">PROTOTYPE VARIANT</span><span id="vlabel"></span></div>
+  <button id="next" title="Next (right arrow)">&rarr;</button>
+</div>
+<div id="toast"></div>
+
+<script>
+// ---- Variants: the only thing that changes ----------------------------------
+const VGA = ["#000000","#800000","#008000","#808000","#000080","#800080","#008080","#C0C0C0",
+             "#808080","#FF0000","#00FF00","#FFFF00","#0000FF","#FF00FF","#00FFFF","#FFFFFF"];
+const CGA = ["#000000","#AA0000","#00AA00","#AA5500","#0000AA","#AA00AA","#00AAAA","#AAAAAA",
+             "#555555","#FF5555","#55FF55","#FFFF55","#5555FF","#FF55FF","#55FFFF","#FFFFFF"];
+const IBM5153 = ["#000000","#C40000","#00C400","#C47E00","#0000C4","#C400C4","#00C4C4","#C4C4C4",
+                 "#4E4E4E","#DC4E4E","#4EDC4E","#F3F34E","#4E4EDC","#F34EF3","#4EF3F3","#FFFFFF"];
+const NT_FLAT = ["#000000","#FF0000","#00FF00","#FFFF00","#0000FF","#FF00FF","#00FFFF","#C0C0C0",
+                 "#808080","#FF0000","#00FF00","#FFFF00","#0000FF","#FF00FF","#00FFFF","#FFFFFF"];
+
+const classic98 = {
+  face:"#C0C0C0", highlight:"#FFFFFF", light:"#E0E0E0", shadow:"#808080", dkShadow:"#000000",
+  titleL:"#000080", titleR:"#1084D0", titleText:"#FFFFFF",
+  inactiveL:"#808080", inactiveR:"#B5B5B5", inactiveText:"#C0C0C0",
+  text:"#000000", grayText:"#808080", window:"#FFFFFF",
+  selection:"#000080", selectionText:"#FFFFFF", tooltip:"#FFFFE1", desktop:"#008080",
+  bar:"#C0C0C0", barText:"#000000", trayBg:"#C0C0C0", start:"#C0C0C0",
+};
+
+const VARIANTS = {
+  A: {
+    name: "Win98 + VGA",
+    notes: "Win98 Classic Frame. Work surface uses the pure VGA/Windows console 16 colors, closest to TC2000 screenshots. Selection uses the Classic navy so the Frame and Work surface share one highlight.",
+    frame: { ...classic98 },
+    work: {
+      bg:"#000000", fg:"#C0C0C0", cursorLine:"#1C1C1C", lineNr:"#808080", grid:"#5A5A5A",
+      cursor:"#00FF00", cursorText:"#000000", selBg:"#000080", selFg:"#FFFFFF", ansi: VGA,
+      syntax:{ comment:"#808080", keyword:"#FFFF00", string:"#00FF00", number:"#FF00FF", function:"#00FFFF",
+               type:"#FFFFFF", constant:"#FF00FF", operator:"#C0C0C0", error:"#FF0000", warn:"#FFFF00" },
+    },
+  },
+  B: {
+    name: "Win2000 + CGA",
+    notes: "Win2000 cream Frame (#D4D0C8) with the 2000 navy-to-sky title. Work surface uses the softer IBM CGA/EGA set (#AA/#55), the same as Ghostty's built-in CGA theme. Brown #AA5500 is used for constants.",
+    frame: {
+      face:"#D4D0C8", highlight:"#FFFFFF", light:"#D4D0C8", shadow:"#808080", dkShadow:"#404040",
+      titleL:"#0A246A", titleR:"#A6CAF0", titleText:"#FFFFFF",
+      inactiveL:"#808080", inactiveR:"#C0C0C0", inactiveText:"#D4D0C8",
+      text:"#000000", grayText:"#808080", window:"#FFFFFF",
+      selection:"#0A246A", selectionText:"#FFFFFF", tooltip:"#FFFFE1", desktop:"#3A6EA5",
+      bar:"#D4D0C8", barText:"#000000", trayBg:"#D4D0C8", start:"#D4D0C8",
+    },
+    work: {
+      bg:"#000000", fg:"#AAAAAA", cursorLine:"#1A1A1A", lineNr:"#555555", grid:"#555555",
+      cursor:"#AAAAAA", cursorText:"#000000", selBg:"#0A246A", selFg:"#FFFFFF", ansi: CGA,
+      syntax:{ comment:"#00AAAA", keyword:"#FFFF55", string:"#55FF55", number:"#FF55FF", function:"#55FFFF",
+               type:"#FFFFFF", constant:"#AA5500", operator:"#AAAAAA", error:"#FF5555", warn:"#FFFF55" },
+    },
+  },
+  C: {
+    name: "XP Luna + TC2000 literal",
+    notes: "XP Luna Blue Frame: #ECE9D8 body, #316AC5 selection, menu bar as a Luna taskbar with a green start label. Work surface follows TC2000 meanings: green = added/string, red = error, yellow = type/neutral, magenta = numbers (TSV), cyan = keywords (accent), white = labels, orange = constants (chat text). ANSI normal = bright, as in tinted base16-windows-nt.",
+    frame: {
+      face:"#ECE9D8", highlight:"#FFFFFF", light:"#F1EFE2", shadow:"#ACA899", dkShadow:"#716F64",
+      titleL:"#0054E3", titleR:"#3D95FF", titleText:"#FFFFFF",
+      inactiveL:"#7A96DF", inactiveR:"#9DB9EB", inactiveText:"#D8E4F8",
+      text:"#000000", grayText:"#ACA899", window:"#FFFFFF",
+      selection:"#316AC5", selectionText:"#FFFFFF", tooltip:"#FFFFE1", desktop:"#004E98",
+      bar:"#245EDC", barText:"#FFFFFF", trayBg:"#0D8DEA", start:"#4A9949",
+    },
+    work: {
+      bg:"#000000", fg:"#FFFFFF", cursorLine:"#1A1A1A", lineNr:"#848484", grid:"#848484",
+      cursor:"#FFFF00", cursorText:"#000000", selBg:"#316AC5", selFg:"#FFFFFF", ansi: NT_FLAT,
+      syntax:{ comment:"#848484", keyword:"#00FFFF", string:"#00FF00", number:"#FF00FF", function:"#FFFFFF",
+               type:"#FFFF00", constant:"#FF8000", operator:"#D6D6CE", error:"#FF0000", warn:"#FFFF00" },
+    },
+  },
+  D: {
+    name: "Win95 flat + soft 5153",
+    notes: "Win98 greys with a flat Win95 navy title (no gradient). Work surface uses the softened IBM 5153 palette (#C4/#4E), which is easier on the eyes at 28pt but further from TC2000.",
+    frame: { ...classic98, titleR:"#000080", inactiveR:"#808080" },
+    work: {
+      bg:"#000000", fg:"#C4C4C4", cursorLine:"#161616", lineNr:"#7E7E7E", grid:"#4E4E4E",
+      cursor:"#4EDC4E", cursorText:"#000000", selBg:"#000080", selFg:"#FFFFFF", ansi: IBM5153,
+      syntax:{ comment:"#7E7E7E", keyword:"#F3F34E", string:"#4EDC4E", number:"#F34EF3", function:"#4EF3F3",
+               type:"#FFFFFF", constant:"#C47E00", operator:"#C4C4C4", error:"#DC4E4E", warn:"#F3F34E" },
+    },
+  },
+};
+const KEYS = Object.keys(VARIANTS);
+
+// ---- Static content ----------------------------------------------------------
+const CODE = [
+  `<span class="c">-- Options are automatically loaded before lazy.nvim startup</span>`,
+  `<span class="k">local</span> opt <span class="o">=</span> vim.opt`,
+  ``,
+  `opt.<span class="t">relativenumber</span> <span class="o">=</span> <span class="b">true</span>`,
+  `opt.<span class="t">scrolloff</span> <span class="o">=</span> <span class="n">8</span>`,
+  `opt.<span class="t">guicursor</span> <span class="o">=</span> <span class="s">"n-v-c:block"</span>`,
+  ``,
+  `<span class="k">local function</span> <span class="f">set_frame</span>(group, fg, bg)`,
+  `  vim.api.<span class="f">nvim_set_hl</span>(<span class="n">0</span>, group, { fg <span class="o">=</span> fg, bg <span class="o">=</span> <span class="cur-block">b</span>g })`,
+  `<span class="k">end</span>`,
+  ``,
+  `<span class="selx"><span class="k">for</span> _, g <span class="k">in</span> <span class="f">ipairs</span>({ <span class="s">"StatusLine"</span>, <span class="s">"TabLine"</span> }) <span class="k">do</span></span>`,
+  `<span class="selx">  <span class="f">set_frame</span>(g, <span class="s">"#000000"</span>, <span class="s">"#C0C0C0"</span>)</span>`,
+  `<span class="k">end</span>`,
+  ``,
+  `<span class="k">if</span> <span class="err">vim.g.neovide</span> <span class="k">then</span> <span class="diag-e">  E: undefined field 'neovide'</span>`,
+  `  opt.<span class="t">linespace</span> <span class="o">=</span> <span class="wrn">-1</span> <span class="diag-w">  W: negative linespace</span>`,
+  `<span class="k">end</span>`,
+  `<span class="c">-- TODO: lualine theme table for the Frame</span>`,
+];
+
+const a = (i, t) => `<span style="color:var(--a${i})">${t}</span>`;
+const ab = (i, t) => `<span class="bold" style="color:var(--a${i})">${t}</span>`;
+const TERM = [
+  `${ab(14,"~/.config")} on ${ab(13,"git main")} ${a(9,"[?1 !1]")}`,
+  `${ab(10,">")} git status -s`,
+  ` ${a(1,"M")} ghostty/config`,
+  `${a(1,"??")} CONTEXT.md`,
+  `${ab(10,">")} ls`,
+  `${ab(4,"borders")}  ${ab(4,"docs")}  ${ab(4,"ghostty")}  ${ab(4,"nvim")}`,
+  `README.md  ${a(2,"setup.sh")}  starship.toml`,
+  `${ab(10,">")} make test`,
+  `${a(10,"PASS")} palette.spec   ${a(8,"(12ms)")}`,
+  `${a(9,"FAIL")} bevels.spec    ${a(8,"(4ms)")}`,
+  `${a(11,"WARN")} 2 deprecated keys`,
+  `${a(3,"note:")} ${a(6,"see")} ${a(5,"docs/adr")}`,
+  `${ab(10,">")} <span class="cur-block"> </span>`,
+].join("\n");
+
+// ---- Render ------------------------------------------------------------------
+function setVars(v) {
+  const r = document.documentElement.style;
+  for (const [k, val] of Object.entries(v.frame)) r.setProperty(`--${k}`, val);
+  for (const [k, val] of Object.entries(v.work)) if (typeof val === "string") r.setProperty(`--w-${k}`, val);
+  for (const [k, val] of Object.entries(v.work.syntax)) r.setProperty(`--s-${k}`, val);
+  v.work.ansi.forEach((c, i) => r.setProperty(`--a${i}`, c));
+}
+
+const sw = (role, hex) => `<div class="sw" data-hex="${hex}"><div class="chip sunken" style="background:${hex}"></div><div class="lbl">${role}<br><span class="hex">${hex}</span></div></div>`;
+const group = (title, entries) => `<div class="sw-group"><h4>${title}</h4><div class="sw-row">${entries.map(([r, h]) => sw(r, h)).join("")}</div></div>`;
+
+function renderSwatches(v) {
+  const f = v.frame;
+  document.getElementById("frame-swatches").innerHTML = `<div class="well sunken">` +
+    group("Face and 3D edges", [["face", f.face], ["highlight", f.highlight], ["3D light", f.light], ["shadow", f.shadow], ["dark shadow", f.dkShadow]]) +
+    group("Title and selection", [["title left", f.titleL], ["title right", f.titleR], ["title text", f.titleText], ["selection", f.selection], ["selection text", f.selectionText]]) +
+    group("Text and surfaces", [["text", f.text], ["gray text", f.grayText], ["window", f.window], ["tooltip", f.tooltip], ["desktop", f.desktop]]) +
+    group("Menu bar (SketchyBar)", [["bar", f.bar], ["bar text", f.barText], ["tray", f.trayBg], ["start", f.start]]) +
+    `</div>`;
+  const w = v.work, s = w.syntax;
+  const names = ["black","red","green","yellow","blue","magenta","cyan","white"];
+  document.getElementById("work-swatches").innerHTML =
+    group("Base", [["background", w.bg], ["foreground", w.fg], ["cursor", w.cursor], ["cursor line", w.cursorLine], ["selection", w.selBg], ["line nr", w.lineNr], ["grid", w.grid]]) +
+    group("ANSI 0-7", w.ansi.slice(0, 8).map((h, i) => [`${i} ${names[i]}`, h])) +
+    group("ANSI 8-15 (bright)", w.ansi.slice(8).map((h, i) => [`${i + 8} br ${names[i]}`, h])) +
+    group("Syntax roles", Object.entries(s));
+}
+
+function renderChart(v) {
+  const w = v.work, W = 520, H = 360, priceH = 230, n = 52;
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  let p = 100, bars = [];
+  for (let i = 0; i < n; i++) { const o = p, c = p + (rnd() - 0.47) * 4; bars.push({ o, c, h: Math.max(o, c) + rnd() * 2, l: Math.min(o, c) - rnd() * 2, bop: (rnd() - 0.5) * 2 }); p = c; }
+  const hi = Math.max(...bars.map(b => b.h)), lo = Math.min(...bars.map(b => b.l));
+  const y = val => 10 + (hi - val) / (hi - lo) * (priceH - 20), dx = (W - 60) / n;
+  let s = "";
+  for (let g = 0; g <= 5; g++) { const gy = 10 + g * (priceH - 20) / 5; s += `<line x1="0" x2="${W - 56}" y1="${gy}" y2="${gy}" stroke="${w.grid}" stroke-dasharray="2 3"/><text x="${W - 50}" y="${gy + 4}" fill="${w.fg}" font-size="11" font-family="Menlo">${(hi - g * (hi - lo) / 5).toFixed(1)}</text>`; }
+  const bopColor = b => Math.abs(b.bop) < 0.25 ? w.ansi[11] : b.bop > 0 ? w.ansi[10] : w.ansi[9];
+  bars.forEach((b, i) => { const x = 6 + i * dx, col = bopColor(b);
+    s += `<line x1="${x}" x2="${x}" y1="${y(b.h)}" y2="${y(b.l)}" stroke="${col}" stroke-width="1.5"/><line x1="${x - 3}" x2="${x}" y1="${y(b.o)}" y2="${y(b.o)}" stroke="${col}" stroke-width="1.5"/><line x1="${x}" x2="${x + 3}" y1="${y(b.c)}" y2="${y(b.c)}" stroke="${col}" stroke-width="1.5"/>`; });
+  // MoneyStream (yellow) and moving average (red)
+  let ms = "", ma = "";
+  bars.forEach((b, i) => { const x = 6 + i * dx; ms += `${i ? "L" : "M"}${x},${y(b.c + 3 + Math.sin(i / 5) * 2)}`;
+    const avg = bars.slice(Math.max(0, i - 9), i + 1).reduce((t, q) => t + q.c, 0) / Math.min(i + 1, 10); ma += `${i ? "L" : "M"}${x},${y(avg)}`; });
+  s += `<path d="${ms}" fill="none" stroke="${w.ansi[11]}" stroke-width="1.2"/><path d="${ma}" fill="none" stroke="${w.ansi[9]}" stroke-width="1.2"/>`;
+  const last = bars[n - 1];
+  s += `<rect x="${W - 54}" y="${y(last.c) - 8}" width="50" height="16" fill="${w.ansi[15]}"/><text x="${W - 50}" y="${y(last.c) + 4}" font-size="11" font-family="Menlo" fill="#000">${last.c.toFixed(2)}</text>`;
+  // pane separator + BOP histogram + TSV line
+  s += `<rect x="0" y="${priceH}" width="${W}" height="6" fill="#D6D6CE"/>`;
+  const mid = priceH + 6 + 62;
+  s += `<line x1="0" x2="${W - 56}" y1="${mid}" y2="${mid}" stroke="${w.grid}"/>`;
+  let tsv = "";
+  bars.forEach((b, i) => { const x = 6 + i * dx, hgt = b.bop * 50;
+    s += `<rect x="${x - 3}" y="${Math.min(mid, mid - hgt)}" width="6" height="${Math.abs(hgt)}" fill="${bopColor(b)}"/>`;
+    tsv += `${i ? "L" : "M"}${x},${mid - Math.sin(i / 4) * 35}`; });
+  s += `<path d="${tsv}" fill="none" stroke="${w.ansi[13]}" stroke-width="1.2"/>`;
+  s += `<text x="4" y="${priceH + 20}" font-size="11" font-family="Menlo" fill="${w.ansi[15]}">BOP</text><text x="34" y="${priceH + 20}" font-size="11" font-family="Menlo" fill="${w.ansi[13]}">TSV 28</text><text x="4" y="22" font-size="11" font-family="Menlo" fill="${w.ansi[14]}">SPY</text><text x="34" y="22" font-size="11" font-family="Menlo" fill="${w.ansi[11]}">MS</text>`;
+  document.getElementById("chart").innerHTML = s;
+}
+
+function render(key) {
+  const v = VARIANTS[key];
+  setVars(v);
+  renderSwatches(v);
+  renderChart(v);
+  const f = v.frame;
+  document.getElementById("menubar").innerHTML =
+    (f.start !== f.bar ? `<span class="start">start</span>` : `<span class="item bold">Ghostty</span>`) +
+    `<span class="item">File</span><span class="item">Edit</span><span class="item">View</span><span class="item">Window</span><span class="spacer"></span>` +
+    `<span class="tray sunken">CPU 12%</span><span class="tray sunken">BAT 87%</span><span class="tray sunken">Sun 4 Oct 14:32</span>`;
+  document.getElementById("code").innerHTML = CODE.map((l, i) => `<div class="ln${i === 8 ? " cur" : ""}"><span class="nr">${i + 1}</span><span>${l || " "}</span></div>`).join("");
+  document.getElementById("term").innerHTML = TERM + `\n\n` +
+    `<div class="ansi-row">${v.work.ansi.slice(0, 8).map((c, i) => `<span style="background:${c};color:${i === 0 || i === 4 ? "#fff" : "#000"}">${i}</span>`).join("")}</div>` +
+    `<div class="ansi-row">${v.work.ansi.slice(8).map((c, i) => `<span style="background:${c};color:${i === 0 ? "#fff" : "#000"}">${i + 8}</span>`).join("")}</div>` +
+    `<div class="ansi-row">${v.work.ansi.map((c, i) => `<span style="color:${c};width:22px">Aa</span>`).join("")}</div>`;
+  document.getElementById("vlabel").textContent = `${key} (${v.name})`;
+  document.getElementById("state-title").textContent = `State: variant ${key} (${v.name})`;
+  document.getElementById("variant-notes").textContent = v.notes;
+  document.getElementById("state").textContent = JSON.stringify({ variant: key, name: v.name, frame: v.frame, work: v.work }, null, 2);
+  document.title = `PROTOTYPE ${key}: ${v.name} (#5)`;
+}
+
+// ---- Switcher ----------------------------------------------------------------
+let current = new URLSearchParams(location.search).get("variant");
+if (!KEYS.includes(current)) current = "A";
+function go(delta) {
+  current = KEYS[(KEYS.indexOf(current) + delta + KEYS.length) % KEYS.length];
+  const u = new URL(location.href); u.searchParams.set("variant", current); history.replaceState(null, "", u);
+  render(current);
+}
+document.getElementById("prev").onclick = () => go(-1);
+document.getElementById("next").onclick = () => go(1);
+document.addEventListener("keydown", e => {
+  if (e.target.closest("input, textarea, [contenteditable]")) return;
+  if (e.key === "ArrowLeft") go(-1);
+  if (e.key === "ArrowRight") go(1);
+});
+
+function toast(msg) { const t = document.getElementById("toast"); t.textContent = msg; t.style.opacity = 1; clearTimeout(toast.h); toast.h = setTimeout(() => t.style.opacity = 0, 1200); }
+document.addEventListener("click", e => { const s = e.target.closest(".sw"); if (s) navigator.clipboard.writeText(s.dataset.hex).then(() => toast(`Copied ${s.dataset.hex}`)); });
+document.getElementById("copy-json").onclick = () => navigator.clipboard.writeText(document.getElementById("state").textContent).then(() => toast("Copied palette JSON"));
+
+render(current);
+</script>
+</body>
+</html>
