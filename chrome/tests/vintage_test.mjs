@@ -1,4 +1,4 @@
-// Checks for the Chrome Vintage theme (#37).
+// Checks for the Chrome Vintage theme (#37, #38).
 // Run: node chrome/tests/vintage_test.mjs
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -61,7 +61,33 @@ const keyRoles = {
   bookmark_text: "frame_text",
   omnibox_background: "frame_window",
   omnibox_text: "frame_text",
+  // New Tab page: the Classic desktop.
+  ntp_background: "frame_desktop",
+  ntp_text: "frame_desktop_text",
+  ntp_link: "frame_desktop_text",
+  // Incognito is magenta whether or not the window is active (see Deviations).
+  frame_incognito: "frame_data_magenta",
+  frame_incognito_inactive: "frame_data_magenta",
+  background_tab_incognito: "frame_data_magenta",
+  background_tab_incognito_inactive: "frame_data_magenta",
+  tab_background_text_incognito: "frame_title_text",
+  tab_background_text_incognito_inactive: "frame_title_inactive_text",
 };
+
+// WCAG contrast ratio of two hex colors; 4.5 is readable body text.
+const luminance = (color) =>
+  [1, 3, 5]
+    .map((i) => parseInt(color.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+function readable(text, background) {
+  const ratio = contrast(hex(colors[text]), hex(colors[background]));
+  if (ratio < 4.5) throw new Error(`${text} on ${background} is ${ratio.toFixed(2)}:1, under 4.5:1`);
+}
 
 test("is an MV3 theme named Vintage", () => {
   eq(manifest.manifest_version, 3, "manifest_version");
@@ -104,6 +130,36 @@ test("inactive window: grey tab strip with grey tab titles", () => {
 test("omnibox is white with black text", () => {
   eq(hex(colors.omnibox_background), "#FFFFFF", "omnibox_background");
   eq(hex(colors.omnibox_text), "#000000", "omnibox_text");
+});
+
+test("New Tab page is the flat teal Classic desktop with readable text and links", () => {
+  eq(hex(colors.ntp_background), "#008080", "ntp_background");
+  readable("ntp_text", "ntp_background");
+  readable("ntp_link", "ntp_background");
+});
+
+test("incognito tab strip and frame are magenta with readable tab text; toolbar stays grey", () => {
+  for (const key of ["frame_incognito", "frame_incognito_inactive", "background_tab_incognito", "background_tab_incognito_inactive"]) {
+    eq(hex(colors[key]), "#800080", key);
+  }
+  readable("tab_background_text_incognito", "frame_incognito");
+  readable("tab_background_text_incognito_inactive", "frame_incognito_inactive");
+  // Chrome has no incognito toolbar key: incognito shares the toolbar.
+  eq(hex(colors.toolbar), "#C0C0C0", "toolbar");
+});
+
+test("incognito deviation is recorded in the spec", () => {
+  if (!/^\| Chrome \| incognito tab strip and frame \|/m.test(read("docs/theme-spec.md"))) {
+    throw new Error("no Chrome incognito row in the spec's Deviations table");
+  }
+});
+
+test("spec notes the teal New Tab page in the Chrome row and under Open", () => {
+  const spec = read("docs/theme-spec.md");
+  const row = spec.match(/^\| \*\*Chrome\*\* \|.*$/m)?.[0] ?? "";
+  if (!row.includes("New Tab page") || !row.includes("`frame_desktop`")) throw new Error("Chrome row doesn't note the teal New Tab page");
+  const open = spec.split("## Open")[1]?.split("\n## ")[0] ?? "";
+  if (!open.includes("Chrome")) throw new Error("Open doesn't note Chrome's teal New Tab page");
 });
 
 test("spec has a Chrome row in Per tool", () => {

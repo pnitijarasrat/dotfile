@@ -34,6 +34,7 @@ Win95 Classic greys with a flat navy title bar (no gradient). Used by menu bars,
 | `frame_selection_text` | `#FFFFFF` | selected item text |
 | `frame_tooltip` | `#FFFFE1` | tooltips |
 | `frame_desktop` | `#008080` | desktop (teal) |
+| `frame_desktop_text` | `#FFFFFF` | text on the desktop (icon labels) |
 
 ## Work surface palette
 
@@ -142,7 +143,7 @@ Neovim's statusline belongs to the Frame, but it's drawn by the terminal, so it 
 | **SketchyBar** | [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11) | custom XP taskbar | shared `sketchybar/color.sh` (Frame role-name variables) | docked edge to edge at the bottom (`topmost=window`); raised Start button, spaces as taskbar buttons, front app as a pressed task button, sunken tray; `blur_radius=0`, `corner_radius=0` on bar and popups; 16px pixel icons instead of Nerd Font glyphs | **built** |
 | **JankyBorders** | [#15](https://github.com/pnitijarasrat/dotfile/issues/15) | custom: active `frame_face`, inactive `frame_shadow` | shared: `bordersrc` sources `$HOME/.config/sketchybar/color.sh` | `style=square`, width 4 | **built** |
 | **Raycast** | [#21](https://github.com/pnitijarasrat/dotfile/issues/21) | custom light theme "Vintage" (`appearance: light`): background and backgroundSecondary `frame_face` (flat, no gradient), text `frame_text`, selection `frame_selection`, data slots use Frame data colors, `loader` is `frame_selection` (Win95 progress-bar navy) | hand-written strict JSON; raw hex (no comments allowed) | none possible (see [Known exceptions](#known-exceptions)) | **built**; import into Raycast not yet checked |
-| **Chrome** | [#37](https://github.com/pnitijarasrat/dotfile/issues/37) | custom local theme extension "Vintage" (MV3), loaded once with Load unpacked; the whole window is Frame (web pages can't be themed). On macOS the tab strip is the title bar: `frame` and `background_tab` `frame_title`, `tab_background_text` `frame_title_text`; inactive window `frame_inactive` and `background_tab_inactive` `frame_title_inactive`, `tab_background_text_inactive` `frame_title_inactive_text`. Active tab and toolbar `frame_face`; `tab_text`, `toolbar_text`, `toolbar_button_icon`, `bookmark_text` `frame_text`; omnibox `frame_window` with `frame_text` | hand-written strict JSON; Chrome only takes `[r, g, b]` arrays, so no hex and no role comments: the key-to-role mapping is this row and `chrome/tests/vintage_test.mjs` | colors only: no `images`, `tints` or `properties` (opaque, no gradients). New Tab page and Incognito are left for a follow-up ticket | **built** (#37) |
+| **Chrome** | [#37](https://github.com/pnitijarasrat/dotfile/issues/37), [#38](https://github.com/pnitijarasrat/dotfile/issues/38) | custom local theme extension "Vintage" (MV3), loaded once with Load unpacked; the whole window is Frame (web pages can't be themed). On macOS the tab strip is the title bar: `frame` and `background_tab` `frame_title`, `tab_background_text` `frame_title_text`; inactive window `frame_inactive` and `background_tab_inactive` `frame_title_inactive`, `tab_background_text_inactive` `frame_title_inactive_text`. Active tab and toolbar `frame_face`; `tab_text`, `toolbar_text`, `toolbar_button_icon`, `bookmark_text` `frame_text`; omnibox `frame_window` with `frame_text`. New Tab page is the Classic desktop: flat `frame_desktop` teal (`ntp_background`) with `frame_desktop_text` text and links ([#38](https://github.com/pnitijarasrat/dotfile/issues/38)). Incognito tab strip and frame are `frame_data_magenta` whether active or not, background tab text `frame_title_text` (inactive `frame_title_inactive_text`); the toolbar stays `frame_face` (see [Deviations](#deviations)) | hand-written strict JSON; Chrome only takes `[r, g, b]` arrays, so no hex and no role comments: the key-to-role mapping is this row and `chrome/tests/vintage_test.mjs` | colors only: no `images`, `tints` or `properties` (opaque, no gradients; the New Tab page has no background image) | **built** (#37, #38) |
 | **Starship** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep | none: named ANSI colors, inherited from Ghostty | `➤` → `>` for success and error (not in Fixedsys Excelsior); vim mode stays `<` | **built** |
 | **ccstatusline** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep | none: named ANSI colors, inherited from Ghostty | `colorLevel: 1` (see [Deviations](#deviations)) | **built** |
 | **ranger** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep default scheme | none: ANSI colors, inherited from Ghostty | none (bold blue directories become `ansi_12` because bold is bright) | **built** |
@@ -167,6 +168,7 @@ Every place where a tool departs from this spec gets **both** a row here **and**
 | VSCode | links | `ansi_12` on both Frame and Work surface | `textLink.foreground` is one color for links on Frame grey (sidebar) and on `work_bg` (hover, settings); no Frame data color reads on both (#20) |
 | Raycast | purple data slot | `frame_data_magenta` `#800080` (same as the magenta slot) | Raycast has separate purple and magenta slots, but the Frame data colors have no purple; magenta is the nearest. No inline comment: the file is strict JSON (#21) |
 | Neovim | `winborder = "single"` | set only on Neovim 0.11+; on 0.10 the hover, signature help and diagnostic floats get `border = "single"` directly, and blink.cmp sets it per popup | `winborder` doesn't exist before 0.11, and the installed Neovim is 0.10.0. Same result (#16) |
+| Chrome | incognito tab strip and frame | `frame_data_magenta` `#800080`, active and inactive (inactive only dims the tab text to `frame_title_inactive_text`) | Win95 has no private window; magenta makes incognito windows stand out at a glance. No inline comment: the file is strict JSON (#38) |
 
 ## Known exceptions
 
@@ -174,14 +176,14 @@ These don't follow Purist fidelity, and that's accepted. They aren't deviations,
 
 - **Raycast**: corners, blur and font can't be changed.
 - **VSCode**: its own widgets keep rounded corners. Squaring them needs the custom-CSS extension (see [Open](#open)).
-- **Chrome**: tabs, the omnibox and toolbar buttons keep their rounded shapes, and the tab strip, toolbar and bookmarks use the macOS system font; a theme can set neither. The Material refresh also derives its own tints from the theme colors (tab hover, toolbar button hover and pressed states, separators, the omnibox hover and its dropdown), which aren't spec roles. The macOS traffic-light buttons keep their system colors.
+- **Chrome**: tabs, the omnibox and toolbar buttons keep their rounded shapes, and the tab strip, toolbar and bookmarks use the macOS system font; a theme can set neither. The Material refresh also derives its own tints from the theme colors (tab hover, toolbar button hover and pressed states, separators, the omnibox hover and its dropdown), which aren't spec roles. The macOS traffic-light buttons keep their system colors. On the New Tab page, the Google logo, search box, shortcut tiles and Customize Chrome button are drawn by Chrome, rounded and in its own colors; only the background, text and links come from the theme.
 - **litecli**: SQL highlighting comes from Pygments `native`, which isn't exactly 5153.
 
 ## Open
 
 Not yet decided. Tracked in map [#2](https://github.com/pnitijarasrat/dotfile/issues/2). Update this section once each is settled.
 
-- **Wallpaper and macOS accent color**: a Bliss image, or a flat `frame_desktop` teal Classic desktop? Accent and highlight color are also undecided.
+- **Wallpaper and macOS accent color**: a Bliss image, or a flat `frame_desktop` teal Classic desktop? Chrome's New Tab page already shows the flat teal Classic desktop (#38); the macOS wallpaper, accent and highlight color are still undecided.
 - **Faking 3D bevels** where tools allow it (JankyBorders, Raycast, SketchyBar items beyond the taskbar). This includes the **VSCode custom-CSS extension**, which would also set the VSCode chrome font to Microsoft Sans Serif and square its widgets.
 
 ## Out of scope
