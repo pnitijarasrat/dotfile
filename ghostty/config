@@ -1,13 +1,29 @@
 # ~/.config/ghostty/config
 
 title="terminal"
-theme=GitHub Dark Dimmed
 window-padding-x=8
 window-padding-y=8
 cursor-style=block
 cursor-style-blink=false
 shell-integration-features = no-cursor
-background-opacity=0.85
-background-blur-radius=20
-font-size=28
+
+# Vintage theme: Work surface (docs/theme-spec.md)
+theme=vintage
+# work_grid
+split-divider-color=#4E4E4E
+
+# Purist fidelity: opaque, no blur, square corners (visible tabs are lost, splits stay)
+background-opacity=1
+background-blur=false
+window-decoration=none
+
+# Fixedsys Excelsior, falling back to Menlo, then Thonburi
+font-family="Fixedsys Excelsior"
+font-family="Menlo"
+font-family="Thonburi"
+font-size=32
 window-inherit-font-size=false
+font-synthetic-style=false
+font-feature=-calt, -liga
+# Deviation: the spec says `bold-is-bright = true`, which Ghostty 1.2.0 deprecated for `bold-color = bright`
+bold-color=bright

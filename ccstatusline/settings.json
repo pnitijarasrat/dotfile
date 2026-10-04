@@ -40,7 +40,7 @@
   ],
   "flexMode": "full",
   "compactThreshold": 60,
-  "colorLevel": 2,
+  "colorLevel": 1,
   "defaultPaddingSide": "both",
   "inheritSeparatorColors": false,
   "globalBold": false,
