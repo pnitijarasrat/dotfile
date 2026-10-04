@@ -1,0 +1,28 @@
+# Grayscale custom theme
+background = #1b1d1f
+foreground = #ebebed
+
+cursor-color = #f7f8f9
+cursor-text = #1b1d1f
+selection-background = #454c53
+selection-foreground = #f7f8f9
+
+# Normal colors (0-7)
+palette = 0=#1b1d1f
+palette = 1=#b06a6a
+palette = 2=#7a9b7a
+palette = 3=#c9b26b
+palette = 4=#6f8fae
+palette = 5=#a687b0
+palette = 6=#6ba3a3
+palette = 7=#c9cdd2
+
+# Bright colors (8-15)
+palette = 8=#72787f
+palette = 9=#d18f8f
+palette = 10=#9fc49f
+palette = 11=#e0c98f
+palette = 12=#94b3d6
+palette = 13=#c9a8d1
+palette = 14=#8fc9c9
+palette = 15=#f7f8f9

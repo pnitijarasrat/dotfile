@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.raycast.com/schemas/theme.json",
+  "name": "GitHub Dark Dimmed",
+  "appearance": "dark",
+  "colors": {
+    "background": "#22272E",
+    "text": "#ADBAC7",
+    "selection": "#539BF5",
+    "loading": "#C69026",
+    "red": "#F47067",
+    "orange": "#CC6B2C",
+    "yellow": "#C69026",
+    "green": "#57AB5A",
+    "blue": "#539BF5",
+    "purple": "#B083F0",
+    "magenta": "#B083F0"
+  }
+}
