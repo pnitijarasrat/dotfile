@@ -168,6 +168,11 @@ Every place where a tool departs from this spec gets **both** a row here **and**
 | VSCode | links | `ansi_12` on both Frame and Work surface | `textLink.foreground` is one color for links on Frame grey (sidebar) and on `work_bg` (hover, settings); no Frame data color reads on both (#20) |
 | Raycast | purple data slot | `frame_data_magenta` `#800080` (same as the magenta slot) | Raycast has separate purple and magenta slots, but the Frame data colors have no purple; magenta is the nearest. No inline comment: the file is strict JSON (#21) |
 | Neovim | `winborder = "single"` | set only on Neovim 0.11+; on 0.10 the hover, signature help and diagnostic floats get `border = "single"` directly, and blink.cmp sets it per popup | `winborder` doesn't exist before 0.11, and the installed Neovim is 0.10.0. Same result (#16) |
+| life-tracker | attention text (the float's warning and skipped-dates rows, the Habits page's unsaved note) | `frame_data_red` (not `frame_data_yellow`) | yellow on `frame_face` reads at about 2.3:1, under 4.5:1 (life-tracker #247, #248) |
+| life-tracker | a partial habit day | `frame_data_orange` (not `frame_data_yellow`) | yellow on `frame_window` reads at about 4.2:1, and a partial day shows its amount as text (life-tracker #248) |
+| life-tracker | the Habits page's hints and stats, and read-only text in the float and the Habits side pane | `frame_text` (not `frame_gray_text`, the web-theme hand-off's role for secondary text) | grey reads at 3.95:1 on `frame_window` and 2.17:1 on `frame_face`; grey stays for what is disabled (life-tracker #248) |
+| life-tracker | the tabline | the active title bar: `frame_title`, the current page `frame_selection` / `frame_selection_text`, other pages `frame_title_inactive_text`, focus `frame_title_text` (not a `frame_face` tab control, focus `frame_text`) | the tabline is the app's title bar; black focus would vanish on navy (life-tracker #243) |
+| life-tracker | a group's rail in the to-do pane | the group's own colour, from its record | no spec role names a group; life-tracker #249 re-picks the palette (life-tracker #244) |
 
 ## Known exceptions
 
