@@ -41,10 +41,12 @@ const colors = theme.colors ?? {};
 // Every Raycast color slot, with the spec role it takes.
 const slotRoles = {
   background: "frame_face",
+  // Same grey: a flat face, no gradient.
+  backgroundSecondary: "frame_face",
   text: "frame_text",
   selection: "frame_selection",
   // Win95 progress bars fill with the selection navy.
-  loading: "frame_selection",
+  loader: "frame_selection",
   red: "frame_data_red",
   orange: "frame_data_orange",
   yellow: "frame_data_yellow",
@@ -57,6 +59,7 @@ const slotRoles = {
 
 test("is a light theme named Vintage", () => {
   eq(theme.$schema, "https://www.raycast.com/schemas/theme.json", "$schema");
+  eq(theme.version, "1", "version");
   eq(theme.name, "Vintage", "name");
   eq(theme.appearance, "light", "appearance");
 });
