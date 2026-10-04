@@ -21,11 +21,20 @@
     "totalTypeScript.hideBasicTips": false,
 
     // Work surface font (docs/theme-spec.md). Fixedsys Excelsior is only crisp
-    // at fontSize 24 with zoomLevel 0; any other zoom makes it soft.
+    // when fontSize x 1.2^zoomLevel is a multiple of 8. Zoom 1 brings the
+    // chrome (13) to ~15.6 and 13.333 brings code to 16, so all panes match (#34).
     "editor.fontFamily": "'Fixedsys Excelsior', Menlo, Thonburi",
-    "editor.fontSize": 24,
-    "editor.lineHeight": 24,
+    "editor.fontSize": 13.333,
+    "editor.lineHeight": 13.333,
     "editor.fontWeight": "normal",
     "editor.fontLigatures": false,
-    "window.zoomLevel": 0
+    "window.zoomLevel": 1,
+    // The terminal (and the Claude Code panel in it) is Work surface too (#33):
+    // same font as the editor. Its lineHeight multiplies the font's cell height,
+    // which for Fixedsys Excelsior is exactly 1 em.
+    "terminal.integrated.fontFamily": "'Fixedsys Excelsior', Menlo, Thonburi",
+    "terminal.integrated.fontSize": 13.333,
+    "terminal.integrated.lineHeight": 1,
+    "terminal.integrated.fontWeight": "normal",
+    "terminal.integrated.fontLigatures.enabled": false
 }
