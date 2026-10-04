@@ -84,7 +84,7 @@ const contrast = (a, b) => {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 };
-function readable(text, background) {
+function expectReadable(text, background) {
   const ratio = contrast(hex(colors[text]), hex(colors[background]));
   if (ratio < 4.5) throw new Error(`${text} on ${background} is ${ratio.toFixed(2)}:1, under 4.5:1`);
 }
@@ -134,16 +134,16 @@ test("omnibox is white with black text", () => {
 
 test("New Tab page is the flat teal Classic desktop with readable text and links", () => {
   eq(hex(colors.ntp_background), "#008080", "ntp_background");
-  readable("ntp_text", "ntp_background");
-  readable("ntp_link", "ntp_background");
+  expectReadable("ntp_text", "ntp_background");
+  expectReadable("ntp_link", "ntp_background");
 });
 
 test("incognito tab strip and frame are magenta with readable tab text; toolbar stays grey", () => {
   for (const key of ["frame_incognito", "frame_incognito_inactive", "background_tab_incognito", "background_tab_incognito_inactive"]) {
     eq(hex(colors[key]), "#800080", key);
   }
-  readable("tab_background_text_incognito", "frame_incognito");
-  readable("tab_background_text_incognito_inactive", "frame_incognito_inactive");
+  expectReadable("tab_background_text_incognito", "frame_incognito");
+  expectReadable("tab_background_text_incognito_inactive", "frame_incognito_inactive");
   // Chrome has no incognito toolbar key: incognito shares the toolbar.
   eq(hex(colors.toolbar), "#C0C0C0", "toolbar");
 });
@@ -159,7 +159,7 @@ test("spec notes the teal New Tab page in the Chrome row and under Open", () => 
   const row = spec.match(/^\| \*\*Chrome\*\* \|.*$/m)?.[0] ?? "";
   if (!row.includes("New Tab page") || !row.includes("`frame_desktop`")) throw new Error("Chrome row doesn't note the teal New Tab page");
   const open = spec.split("## Open")[1]?.split("\n## ")[0] ?? "";
-  if (!open.includes("Chrome")) throw new Error("Open doesn't note Chrome's teal New Tab page");
+  if (!(open.includes("Chrome") && open.includes("New Tab page"))) throw new Error("Open doesn't note Chrome's teal New Tab page");
 });
 
 test("spec has a Chrome row in Per tool", () => {
