@@ -64,14 +64,14 @@ add_row() {
 
 add_header() {
   ARGS+=(--add item "wifi_hdr_$1" popup.$POPUP \
-    --set "wifi_hdr_$1" label="$2" label.color="$DARK" label.font="Tahoma:Bold:10.0" \
+    --set "wifi_hdr_$1" label="$2" label.color="$frame_gray_text" label.font="Tahoma:Bold:10.0" \
                          icon.drawing=off padding_left=10)
 }
 
 # --- Connected network ---
 if [ -n "$CURRENT_SSID" ]; then
   add_header connected "CONNECTED"
-  add_row "current" "$CURRENT_SSID" "" "$NAVY" "$WHITE" ""
+  add_row "current" "$CURRENT_SSID" "" "$frame_selection" "$frame_selection_text" ""
 fi
 
 # --- Personal hotspots (iPhone/iPad/iPod broadcasting a Personal Hotspot) ---
@@ -90,7 +90,7 @@ while IFS=$'\t' read -r SSID SECURITY; do
   fi
   SECURED="false"
   echo "$SECURITY" | grep -qvi "none" && SECURED="true"
-  add_row "hotspot_$INDEX" "$SSID" "" "$GREY" "$BLACK" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' '$SECURED'"
+  add_row "hotspot_$INDEX" "$SSID" "" "$frame_face" "$frame_text" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' '$SECURED'"
   INDEX=$((INDEX + 1))
 done <<< "$NETWORKS"
 
@@ -110,7 +110,7 @@ while IFS=$'\t' read -r SSID SECURITY; do
     fi
     LOCK=""
     echo "$SECURITY" | grep -qvi "none" && LOCK="$ICONS/lock.png"
-    add_row "known_$INDEX" "$SSID" "$LOCK" "$GREY" "$BLACK" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' 'true'"
+    add_row "known_$INDEX" "$SSID" "$LOCK" "$frame_face" "$frame_text" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' 'true'"
     INDEX=$((INDEX + 1))
   fi
 done <<< "$NETWORKS"
@@ -118,7 +118,7 @@ done <<< "$NETWORKS"
 # --- Footer: hand off to the native Wi-Fi settings pane instead of listing
 #     every unknown network in range ---
 add_header settings ""
-add_row "open_settings" "Open Wi-Fi Settings…" "" "$GREY" "$BLACK" \
+add_row "open_settings" "Open Wi-Fi Settings…" "" "$frame_face" "$frame_text" \
   "open 'x-apple.systempreferences:com.apple.Wi-Fi-Settings.extension'; sketchybar --set wifi popup.drawing=off; echo off >/tmp/sketchybar_wifi_popup_state"
 
 sketchybar "${ARGS[@]}"

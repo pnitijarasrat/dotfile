@@ -6,7 +6,7 @@ source "$CONFIG_DIR/bevel.sh"
 # as the raised line along the top edge. yabai's bottom_padding leaves room,
 # and topmost=window stops window shadows from darkening the bar.
 sketchybar --bar position=bottom height=30 margin=0 y_offset=0 corner_radius=0 blur_radius=0 \
-                 color="$GREY" border_color="$WHITE" border_width=1 padding_left=2 padding_right=2 \
+                 color="$frame_face" border_color="$frame_highlight" border_width=1 padding_left=2 padding_right=2 \
                  topmost=window
 
 default=(
@@ -14,8 +14,8 @@ default=(
   padding_right=2
   icon.font="$FONT"
   label.font="$FONT"
-  icon.color="$BLACK"
-  label.color="$BLACK"
+  icon.color="$frame_text"
+  label.color="$frame_text"
   icon.padding_left=0
   icon.padding_right=0
   label.padding_left=4
@@ -49,7 +49,7 @@ do
 done
 
 sketchybar --add item front_app left \
-           --set front_app "${SUNKEN[@]}" background.color="$PRESSED" \
+           --set front_app "${SUNKEN[@]}" background.color="$frame_light" \
                            icon.drawing=off label.font="$BOLD" label.width=180 \
                            label.padding_left=8 padding_left=8 \
                            script="$PLUGIN_DIR/front_app.sh" \
@@ -70,8 +70,8 @@ sketchybar --add item clock right \
            --add item wifi right \
            --set wifi "${PIXEL[@]}" label.drawing=off update_freq=5 script="$PLUGIN_DIR/wifi.sh" \
              click_script="$PLUGIN_DIR/wifi_menu.sh" \
-             popup.background.color="$GREY" \
-             popup.background.border_color="$BLACK" \
+             popup.background.color="$frame_face" \
+             popup.background.border_color="$frame_dark_shadow" \
              popup.background.border_width=1 \
              popup.background.corner_radius=0 \
              popup.blur_radius=0 \
