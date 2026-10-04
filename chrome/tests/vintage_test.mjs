@@ -1,4 +1,4 @@
-// Checks for the Chrome Vintage theme (#37).
+// Checks for the Chrome Vintage theme (#37, #38).
 // Run: node chrome/tests/vintage_test.mjs
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
@@ -61,7 +61,26 @@ const keyRoles = {
   bookmark_text: "frame_text",
   omnibox_background: "frame_window",
   omnibox_text: "frame_text",
+  // New Tab page: the Classic desktop.
+  ntp_background: "frame_desktop",
+  ntp_text: "frame_desktop_text",
+  ntp_link: "frame_desktop_text",
 };
+
+// WCAG contrast ratio of two hex colors; 4.5 is readable body text.
+const luminance = (color) =>
+  [1, 3, 5]
+    .map((i) => parseInt(color.slice(i, i + 2), 16) / 255)
+    .map((c) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4))
+    .reduce((sum, c, i) => sum + c * [0.2126, 0.7152, 0.0722][i], 0);
+const contrast = (a, b) => {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+};
+function expectReadable(text, background) {
+  const ratio = contrast(hex(colors[text]), hex(colors[background]));
+  if (ratio < 4.5) throw new Error(`${text} on ${background} is ${ratio.toFixed(2)}:1, under 4.5:1`);
+}
 
 test("is an MV3 theme named Vintage", () => {
   eq(manifest.manifest_version, 3, "manifest_version");
@@ -104,6 +123,30 @@ test("inactive window: grey tab strip with grey tab titles", () => {
 test("omnibox is white with black text", () => {
   eq(hex(colors.omnibox_background), "#FFFFFF", "omnibox_background");
   eq(hex(colors.omnibox_text), "#000000", "omnibox_text");
+});
+
+test("New Tab page is the flat teal Classic desktop with readable text and links", () => {
+  eq(hex(colors.ntp_background), "#008080", "ntp_background");
+  expectReadable("ntp_text", "ntp_background");
+  expectReadable("ntp_link", "ntp_background");
+});
+
+test("no incognito keys: Chrome ignores themes in Incognito windows", () => {
+  const set = Object.keys(colors).filter((key) => key.includes("incognito"));
+  if (set.length) throw new Error(`sets ${set.join(", ")}, which Chrome ignores`);
+});
+
+test("spec lists Incognito under Known exceptions", () => {
+  const known = read("docs/theme-spec.md").split("## Known exceptions")[1]?.split("\n## ")[0] ?? "";
+  if (!/Chrome.*Incognito/.test(known)) throw new Error("Known exceptions doesn't say Chrome ignores the theme in Incognito");
+});
+
+test("spec notes the teal New Tab page in the Chrome row and under Open", () => {
+  const spec = read("docs/theme-spec.md");
+  const row = spec.match(/^\| \*\*Chrome\*\* \|.*$/m)?.[0] ?? "";
+  if (!row.includes("New Tab page") || !row.includes("`frame_desktop`")) throw new Error("Chrome row doesn't note the teal New Tab page");
+  const open = spec.split("## Open")[1]?.split("\n## ")[0] ?? "";
+  if (!(open.includes("Chrome") && open.includes("New Tab page"))) throw new Error("Open doesn't note Chrome's teal New Tab page");
 });
 
 test("spec has a Chrome row in Per tool", () => {
