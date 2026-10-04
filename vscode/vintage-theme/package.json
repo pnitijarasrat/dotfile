@@ -13,7 +13,7 @@
     "themes": [
       {
         "label": "Vintage",
-        "uiTheme": "vs-dark",
+        "uiTheme": "vs",
         "path": "./themes/vintage-color-theme.json"
       }
     ]
