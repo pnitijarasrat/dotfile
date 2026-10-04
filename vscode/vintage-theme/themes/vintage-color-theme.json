@@ -6,26 +6,23 @@
 // VSCode's widgets keep their rounded corners (a Known exception in the spec).
 {
   "name": "Vintage",
-  "type": "dark",
+  "type": "light",
   "semanticHighlighting": true,
   // Semantic tokens fall back to the TextMate rules below, except that
   // TS/JS mark every const local readonly (variable.other.constant), which
   // would paint ordinary locals syntax_constant.
   "semanticTokenColors": {
-    "variable.readonly": "#C4C4C4" // work_fg
+    "variable.readonly": "#000080" // work_fg
   },
   "colors": {
-    // Base. VSCode draws settings, welcome and other editor-area pages with
-    // the global foreground on editor.background, so it stays work_fg; every
-    // Frame part below sets its own black text.
-    "foreground": "#C4C4C4", // work_fg
+    // Base. The global foreground is frame_text: it reads on both Frame grey
+    // and work_bg (settings, welcome and other editor-area pages, and the
+    // panel's lists). Editor text sets its own work_fg.
+    "foreground": "#000000", // frame_text
     "descriptionForeground": "#808080", // frame_gray_text
     "disabledForeground": "#808080", // frame_gray_text
     "errorForeground": "#800000", // frame_data_red
-    // Deviation: icons are frame_gray_text, not frame_text. One color serves
-    // icons on Frame grey and on work_bg (panel, settings), and black vanishes
-    // on work_bg.
-    "icon.foreground": "#808080", // frame_gray_text
+    "icon.foreground": "#000000", // frame_text
     "focusBorder": "#000000", // frame_text (Win95 focus rectangle)
     "selection.background": "#000080", // frame_selection
     "widget.border": "#808080", // frame_shadow
@@ -35,11 +32,10 @@
     "progressBar.background": "#000080", // frame_selection
     "badge.background": "#000080", // frame_selection
     "badge.foreground": "#FFFFFF", // frame_selection_text
-    // Deviation: links are ansi_12, a Work surface bright, even on Frame grey.
-    // They show on both Frame grey (sidebar) and work_bg (hover, settings),
-    // and no Frame data color reads on both.
-    "textLink.foreground": "#4E4EDC", // ansi_12
-    "textLink.activeForeground": "#4E4EDC", // ansi_12
+    // Links are ansi_12 on both Frame grey (sidebar) and work_bg (hover,
+    // settings): it reads on both.
+    "textLink.foreground": "#0000FF", // ansi_12
+    "textLink.activeForeground": "#0000FF", // ansi_12
 
     // Title bar (window.titleBarStyle "custom" in settings.json)
     "titleBar.activeBackground": "#000080", // frame_title
@@ -136,24 +132,24 @@
     "breadcrumb.activeSelectionForeground": "#000080", // frame_data_blue
     "breadcrumbPicker.background": "#C0C0C0", // frame_face
 
-    // Panel. Deviation: the panel body is work_bg, not frame_face. Its lists
-    // (problems, terminal tabs) draw in the global foreground, which must stay
-    // work_fg for editor-area pages, and VSCode has no panel.foreground. The
-    // panel mostly holds the terminal, a Work surface.
-    "panel.background": "#000000", // work_bg
+    // Panel. Deviation: the panel body is work_bg, not frame_face. It mostly
+    // holds the terminal, a Work surface. Its lists (problems, terminal tabs)
+    // draw in the global foreground, frame_text, which reads on work_bg too;
+    // VSCode has no panel.foreground.
+    "panel.background": "#FFFFFF", // work_bg
     "panel.border": "#808080", // frame_shadow
-    "panelTitle.activeForeground": "#C4C4C4", // work_fg
-    "panelTitle.inactiveForeground": "#7E7E7E", // work_line_number
+    "panelTitle.activeForeground": "#000080", // work_fg
+    "panelTitle.inactiveForeground": "#808080", // work_line_number
     "panelTitle.activeBorder": "#000080", // frame_selection
     "panelSectionHeader.background": "#C0C0C0", // frame_face
     "panelSectionHeader.foreground": "#000000", // frame_text
     "panelSectionHeader.border": "#808080", // frame_shadow
     "panelSection.border": "#808080", // frame_shadow
     "panelInput.border": "#808080", // frame_shadow
-    "outputView.background": "#000000", // work_bg
-    "problemsErrorIcon.foreground": "#DC4E4E", // syntax_error
-    "problemsWarningIcon.foreground": "#F3F34E", // syntax_warning
-    "problemsInfoIcon.foreground": "#4EF3F3", // syntax_function
+    "outputView.background": "#FFFFFF", // work_bg
+    "problemsErrorIcon.foreground": "#800000", // syntax_error
+    "problemsWarningIcon.foreground": "#808000", // syntax_warning
+    "problemsInfoIcon.foreground": "#008080", // syntax_function
 
     // Scrollbars (opaque). The thumb is frame_shadow rather than frame_face:
     // without bevels a frame_face thumb vanishes on the Frame grey sidebar.
@@ -269,82 +265,96 @@
 
     // Inline code popups are Work surface: suggest, hover, parameter hints
     // (drawn with the hover colors) and peek.
-    "editorSuggestWidget.background": "#000000", // work_bg
-    "editorSuggestWidget.foreground": "#C4C4C4", // work_fg
+    "editorSuggestWidget.background": "#FFFFFF", // work_bg
+    "editorSuggestWidget.foreground": "#000080", // work_fg
     "editorSuggestWidget.border": "#808080", // work_popup_border
     "editorSuggestWidget.selectedBackground": "#000080", // work_selection
     "editorSuggestWidget.selectedForeground": "#FFFFFF", // work_selection_text
     "editorSuggestWidget.selectedIconForeground": "#FFFFFF", // work_selection_text
-    "editorSuggestWidget.highlightForeground": "#F3F34E", // syntax_keyword
-    "editorSuggestWidget.focusHighlightForeground": "#F3F34E", // syntax_keyword
-    "editorSuggestWidgetStatus.foreground": "#7E7E7E", // work_line_number
-    "editorHoverWidget.background": "#000000", // work_bg
-    "editorHoverWidget.foreground": "#C4C4C4", // work_fg
+    "editorSuggestWidget.highlightForeground": "#808000", // syntax_keyword
+    // Deviation: matched letters on the selected row are ansi_11, not a
+    // syntax role; no syntax role reads on work_selection navy.
+    "editorSuggestWidget.focusHighlightForeground": "#FFFF00", // ansi_11
+    "editorSuggestWidgetStatus.foreground": "#808080", // work_line_number
+    "editorHoverWidget.background": "#FFFFFF", // work_bg
+    "editorHoverWidget.foreground": "#000080", // work_fg
     "editorHoverWidget.border": "#808080", // work_popup_border
-    "editorHoverWidget.statusBarBackground": "#000000", // work_bg
-    "editorHoverWidget.highlightForeground": "#F3F34E", // syntax_keyword
-    "editorInlayHint.parameterForeground": "#7E7E7E", // work_line_number
-    "editorInlayHint.parameterBackground": "#000000", // work_bg
-    "editorInlayHint.typeForeground": "#7E7E7E", // work_line_number
-    "editorInlayHint.typeBackground": "#000000", // work_bg
+    "editorHoverWidget.statusBarBackground": "#FFFFFF", // work_bg
+    "editorHoverWidget.highlightForeground": "#808000", // syntax_keyword
+    "editorInlayHint.parameterForeground": "#808080", // work_line_number
+    "editorInlayHint.parameterBackground": "#FFFFFF", // work_bg
+    "editorInlayHint.typeForeground": "#808080", // work_line_number
+    "editorInlayHint.typeBackground": "#FFFFFF", // work_bg
+    // F8 diagnostics: VSCode colors the border by severity by default.
+    "editorMarkerNavigation.background": "#FFFFFF", // work_bg
+    "editorMarkerNavigationError.background": "#808080", // work_popup_border
+    "editorMarkerNavigationError.headerBackground": "#FFFFFF", // work_bg
+    "editorMarkerNavigationWarning.background": "#808080", // work_popup_border
+    "editorMarkerNavigationWarning.headerBackground": "#FFFFFF", // work_bg
+    "editorMarkerNavigationInfo.background": "#808080", // work_popup_border
+    "editorMarkerNavigationInfo.headerBackground": "#FFFFFF", // work_bg
     "peekView.border": "#808080", // work_popup_border
-    "peekViewEditor.background": "#000000", // work_bg
-    "peekViewEditorGutter.background": "#000000", // work_bg
-    "peekViewEditorStickyScroll.background": "#000000", // work_bg
-    "peekViewResult.background": "#000000", // work_bg
-    "peekViewResult.fileForeground": "#C4C4C4", // work_fg
-    "peekViewResult.lineForeground": "#C4C4C4", // work_fg
+    "peekViewEditor.background": "#FFFFFF", // work_bg
+    "peekViewEditorGutter.background": "#FFFFFF", // work_bg
+    "peekViewEditorStickyScroll.background": "#FFFFFF", // work_bg
+    "peekViewResult.background": "#FFFFFF", // work_bg
+    "peekViewResult.fileForeground": "#000080", // work_fg
+    "peekViewResult.lineForeground": "#000080", // work_fg
     "peekViewResult.selectionBackground": "#000080", // work_selection
     "peekViewResult.selectionForeground": "#FFFFFF", // work_selection_text
-    "peekViewEditor.matchHighlightBackground": "#000080", // work_selection
-    "peekViewResult.matchHighlightBackground": "#000080", // work_selection
-    "peekViewTitle.background": "#000000", // work_bg
-    "peekViewTitleLabel.foreground": "#C4C4C4", // work_fg
-    "peekViewTitleDescription.foreground": "#7E7E7E", // work_line_number
+    // Deviation: match highlights keep their text colors, so they're ansi_11
+    // like the selection, not work_selection.
+    "peekViewEditor.matchHighlightBackground": "#FFFF00", // ansi_11
+    "peekViewResult.matchHighlightBackground": "#FFFF00", // ansi_11
+    "peekViewTitle.background": "#FFFFFF", // work_bg
+    "peekViewTitleLabel.foreground": "#000080", // work_fg
+    "peekViewTitleDescription.foreground": "#808080", // work_line_number
 
     // Editor
-    "editor.background": "#000000", // work_bg
-    "editor.foreground": "#C4C4C4", // work_fg
-    "editorCursor.foreground": "#4EDC4E", // work_cursor
-    "editorCursor.background": "#000000", // work_cursor_text
-    "editor.lineHighlightBackground": "#161616", // work_cursorline
-    "editor.lineHighlightBorder": "#161616", // work_cursorline (no outline)
-    "editor.selectionBackground": "#000080", // work_selection
-    // Deviation: no work_selection_text. VSCode only honors
-    // editor.selectionForeground in high-contrast themes, so selected text
-    // keeps its token colors on work_selection.
-    "editor.inactiveSelectionBackground": "#000080", // work_selection
-    "editorGutter.background": "#000000", // work_bg
-    "editorLineNumber.foreground": "#7E7E7E", // work_line_number
-    "editorLineNumber.activeForeground": "#7E7E7E", // work_line_number
-    "editorRuler.foreground": "#4E4E4E", // work_grid
-    "editorIndentGuide.background1": "#4E4E4E", // work_grid
-    "editorIndentGuide.activeBackground1": "#4E4E4E", // work_grid
-    "editorError.foreground": "#DC4E4E", // syntax_error
-    "editorWarning.foreground": "#F3F34E", // syntax_warning
+    "editor.background": "#FFFFFF", // work_bg
+    "editor.foreground": "#000080", // work_fg
+    "editorCursor.foreground": "#000000", // work_cursor
+    "editorCursor.background": "#FFFFFF", // work_cursor_text
+    "editor.lineHighlightBackground": "#FFFFE1", // work_cursorline
+    "editor.lineHighlightBorder": "#FFFFE1", // work_cursorline (no outline)
+    // Deviation: the selection is ansi_11 (frame_light when the editor isn't
+    // focused, as in Frame lists), not work_selection with
+    // work_selection_text. VSCode only honors editor.selectionForeground in
+    // high-contrast themes, so selected text keeps its token colors, and the
+    // dark syntax colors vanish on navy. Bright yellow is K-95's highlight.
+    "editor.selectionBackground": "#FFFF00", // ansi_11
+    "editor.inactiveSelectionBackground": "#E0E0E0", // frame_light
+    "editorGutter.background": "#FFFFFF", // work_bg
+    "editorLineNumber.foreground": "#808080", // work_line_number
+    "editorLineNumber.activeForeground": "#808080", // work_line_number
+    "editorRuler.foreground": "#C0C0C0", // work_grid
+    "editorIndentGuide.background1": "#C0C0C0", // work_grid
+    "editorIndentGuide.activeBackground1": "#C0C0C0", // work_grid
+    "editorError.foreground": "#800000", // syntax_error
+    "editorWarning.foreground": "#808000", // syntax_warning
 
-    // Integrated terminal: IBM 5153 ANSI
-    "terminal.background": "#000000", // work_bg
-    "terminal.foreground": "#C4C4C4", // work_fg
-    "terminalCursor.foreground": "#4EDC4E", // work_cursor
-    "terminalCursor.background": "#000000", // work_cursor_text
+    // Integrated terminal: Windows VGA ANSI
+    "terminal.background": "#FFFFFF", // work_bg
+    "terminal.foreground": "#000080", // work_fg
+    "terminalCursor.foreground": "#000000", // work_cursor
+    "terminalCursor.background": "#FFFFFF", // work_cursor_text
     "terminal.selectionBackground": "#000080", // work_selection
     "terminal.selectionForeground": "#FFFFFF", // work_selection_text
     "terminal.ansiBlack": "#000000", // ansi_0
-    "terminal.ansiRed": "#C40000", // ansi_1
-    "terminal.ansiGreen": "#00C400", // ansi_2
-    "terminal.ansiYellow": "#C47E00", // ansi_3
-    "terminal.ansiBlue": "#0000C4", // ansi_4
-    "terminal.ansiMagenta": "#C400C4", // ansi_5
-    "terminal.ansiCyan": "#00C4C4", // ansi_6
-    "terminal.ansiWhite": "#C4C4C4", // ansi_7
-    "terminal.ansiBrightBlack": "#4E4E4E", // ansi_8
-    "terminal.ansiBrightRed": "#DC4E4E", // ansi_9
-    "terminal.ansiBrightGreen": "#4EDC4E", // ansi_10
-    "terminal.ansiBrightYellow": "#F3F34E", // ansi_11
-    "terminal.ansiBrightBlue": "#4E4EDC", // ansi_12
-    "terminal.ansiBrightMagenta": "#F34EF3", // ansi_13
-    "terminal.ansiBrightCyan": "#4EF3F3", // ansi_14
+    "terminal.ansiRed": "#800000", // ansi_1
+    "terminal.ansiGreen": "#008000", // ansi_2
+    "terminal.ansiYellow": "#808000", // ansi_3
+    "terminal.ansiBlue": "#000080", // ansi_4
+    "terminal.ansiMagenta": "#800080", // ansi_5
+    "terminal.ansiCyan": "#008080", // ansi_6
+    "terminal.ansiWhite": "#C0C0C0", // ansi_7
+    "terminal.ansiBrightBlack": "#808080", // ansi_8
+    "terminal.ansiBrightRed": "#FF0000", // ansi_9
+    "terminal.ansiBrightGreen": "#00FF00", // ansi_10
+    "terminal.ansiBrightYellow": "#FFFF00", // ansi_11
+    "terminal.ansiBrightBlue": "#0000FF", // ansi_12
+    "terminal.ansiBrightMagenta": "#FF00FF", // ansi_13
+    "terminal.ansiBrightCyan": "#00FFFF", // ansi_14
     "terminal.ansiBrightWhite": "#FFFFFF" // ansi_15
   },
   // Nothing is italic or bold: every rule sets fontStyle "" so emphasis
@@ -352,14 +362,14 @@
   "tokenColors": [
     {
       "settings": {
-        "foreground": "#C4C4C4", // work_fg
+        "foreground": "#000080", // work_fg
         "fontStyle": ""
       }
     },
     {
       "name": "syntax_comment",
       "scope": ["comment", "punctuation.definition.comment"],
-      "settings": { "foreground": "#7E7E7E", "fontStyle": "" } // syntax_comment
+      "settings": { "foreground": "#808080", "fontStyle": "" } // syntax_comment
     },
     {
       "name": "syntax_keyword",
@@ -371,7 +381,7 @@
         "variable.language",
         "markup.heading"
       ],
-      "settings": { "foreground": "#F3F34E", "fontStyle": "" } // syntax_keyword
+      "settings": { "foreground": "#808000", "fontStyle": "" } // syntax_keyword
     },
     {
       "name": "syntax_string",
@@ -382,12 +392,12 @@
         "markup.fenced_code",
         "markup.inserted"
       ],
-      "settings": { "foreground": "#4EDC4E", "fontStyle": "" } // syntax_string
+      "settings": { "foreground": "#008000", "fontStyle": "" } // syntax_string
     },
     {
       "name": "syntax_number",
       "scope": ["constant.numeric"],
-      "settings": { "foreground": "#F34EF3", "fontStyle": "" } // syntax_number
+      "settings": { "foreground": "#800080", "fontStyle": "" } // syntax_number
     },
     {
       "name": "syntax_function",
@@ -396,7 +406,7 @@
         "support.function",
         "entity.name.tag"
       ],
-      "settings": { "foreground": "#4EF3F3", "fontStyle": "" } // syntax_function
+      "settings": { "foreground": "#008080", "fontStyle": "" } // syntax_function
     },
     {
       "name": "syntax_type",
@@ -410,7 +420,7 @@
         "storage.type.primitive",
         "storage.type.built-in"
       ],
-      "settings": { "foreground": "#FFFFFF", "fontStyle": "" } // syntax_type
+      "settings": { "foreground": "#000000", "fontStyle": "" } // syntax_type
     },
     {
       "name": "syntax_constant",
@@ -421,22 +431,22 @@
         "variable.other.enummember",
         "entity.other.attribute-name"
       ],
-      "settings": { "foreground": "#C47E00", "fontStyle": "" } // syntax_constant
+      "settings": { "foreground": "#804000", "fontStyle": "" } // syntax_constant
     },
     {
       "name": "syntax_operator",
       "scope": ["keyword.operator", "punctuation"],
-      "settings": { "foreground": "#C4C4C4", "fontStyle": "" } // syntax_operator
+      "settings": { "foreground": "#000080", "fontStyle": "" } // syntax_operator
     },
     {
       "name": "syntax_error",
       "scope": ["invalid", "markup.deleted"],
-      "settings": { "foreground": "#DC4E4E", "fontStyle": "" } // syntax_error
+      "settings": { "foreground": "#800000", "fontStyle": "" } // syntax_error
     },
     {
       "name": "syntax_warning",
       "scope": ["invalid.deprecated", "markup.changed"],
-      "settings": { "foreground": "#F3F34E", "fontStyle": "" } // syntax_warning
+      "settings": { "foreground": "#808000", "fontStyle": "" } // syntax_warning
     },
     {
       "name": "no emphasis",
