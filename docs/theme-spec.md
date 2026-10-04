@@ -157,6 +157,7 @@ Every place where a tool departs from this spec gets **both** a row here **and**
 | SketchyBar | Wi-Fi popup section headers | Tahoma Bold **10**, `frame_gray_text` | smaller section headings inside the popup, set when built in #11 |
 | Ghostty | bold is bright | `bold-color = bright` (not `bold-is-bright = true`) | same behavior; Ghostty 1.2.0 deprecated `bold-is-bright` for `bold-color` (#13) |
 | ccstatusline | color level | `colorLevel: 1` (was 2) | at level 2 named colors are sent as 256-color codes (`38;5;30`), which bypass Ghostty's palette; level 1 sends the 16 ANSI codes. No inline comment: the file is strict JSON (#13) |
+| VSCode | selection text | selected text keeps its token colors on `work_selection` (not `work_selection_text`) | VSCode only applies `editor.selectionForeground` in high-contrast themes (#19) |
 
 ## Known exceptions
 

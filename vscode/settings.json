@@ -1,7 +1,7 @@
 {
     "claudeCode.preferredLocation": "panel",
-    // Placeholder until the Vintage theme extension lands (#19).
-    "workbench.colorTheme": "GitHub Dark Dimmed",
+    // Local extension in vscode/vintage-theme (#19).
+    "workbench.colorTheme": "Vintage",
     "terminal.integrated.mouseWheelScrollSensitivity": 3,
     "terminal.integrated.gpuAcceleration": "off",
     "explorer.confirmDragAndDrop": false,

@@ -1,0 +1,21 @@
+{
+  "name": "vintage",
+  "displayName": "Vintage",
+  "description": "Vintage theme: Win95 Classic Frame around TC2000-style Work surfaces (docs/theme-spec.md)",
+  "version": "0.0.1",
+  "publisher": "pnitijarasrat",
+  "private": true,
+  "engines": {
+    "vscode": "^1.70.0"
+  },
+  "categories": ["Themes"],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Vintage",
+        "uiTheme": "vs-dark",
+        "path": "./themes/vintage-color-theme.json"
+      }
+    ]
+  }
+}
