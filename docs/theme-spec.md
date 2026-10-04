@@ -101,8 +101,8 @@ Win95 dark VGA. Use these wherever red, green, yellow and so on appear on Frame 
 | Font | **Fixedsys Excelsior** (kika build, CC0), committed to the repo and installed into `~/Library/Fonts` ([#12](https://github.com/pnitijarasrat/dotfile/issues/12)) |
 | Fallback | Fixedsys Excelsior → **Menlo** → **Thonburi**, written out in both Ghostty and VSCode |
 | Ghostty | `font-size = 32` (pixel-exact: 4 screen px per font px on 2× Retina) |
-| VSCode editor | `editor.fontSize: 24`, `editor.lineHeight: 24`, `window.zoomLevel: 0`. Any other zoom level makes the font soft. |
-| VSCode terminal | same font and size as the editor: `terminal.integrated.fontFamily` as above, `fontSize: 24`, `lineHeight: 1`. The terminal multiplies the font's cell height, which for Fixedsys Excelsior at 24 is exactly 24px (ascent + descent = 1 em), so rows match the editor ([#33](https://github.com/pnitijarasrat/dotfile/issues/33)) |
+| VSCode editor | `editor.fontSize: 13.333`, `editor.lineHeight: 13.333`, `window.zoomLevel: 1` ([#34](https://github.com/pnitijarasrat/dotfile/issues/34)). Zoom 1 scales everything by 1.2, so code renders at 16 (2 screen px per font px on 2× Retina) and the chrome's system font (13) at about 15.6: every pane is the same size. Fixedsys Excelsior's em is 16 font px, so it's only crisp when fontSize × 1.2^zoomLevel is a multiple of 8; 24 at zoom 1 (57.6 screen px) is soft. |
+| VSCode terminal | same font and size as the editor: `terminal.integrated.fontFamily` as above, `fontSize: 13.333`, `lineHeight: 1`. The terminal multiplies the font's cell height, which for Fixedsys Excelsior is exactly 1 em (ascent + descent), so rows match the editor ([#33](https://github.com/pnitijarasrat/dotfile/issues/33)) |
 | Italics | none; synthetic italic off |
 | Bold | bold is bright (`bold-is-bright = true`); synthetic bold off; VSCode `editor.fontWeight` and `terminal.integrated.fontWeight` normal |
 | Ligatures | off (`font-feature = -calt, -liga` in Ghostty; `editor.fontLigatures: false` and `terminal.integrated.fontLigatures.enabled: false` in VSCode) |

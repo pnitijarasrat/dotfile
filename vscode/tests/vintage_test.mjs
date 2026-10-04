@@ -1,4 +1,4 @@
-// Checks for the Vintage VSCode theme (#19, #20, #33).
+// Checks for the Vintage VSCode theme (#19, #20, #33, #34).
 // Run: node vscode/tests/vintage_test.mjs
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -194,6 +194,16 @@ test("the terminal uses the editor's Work surface font (#33)", () => {
     "terminal line height in px",
   );
   eq(settings["terminal.integrated.fontLigatures.enabled"], settings["editor.fontLigatures"], "terminal ligatures");
+});
+
+test("the Work surface font lands on whole Fixedsys pixels (#34)", () => {
+  // Fixedsys Excelsior's em is 16 font px; on 2x Retina each font px must
+  // cover a whole number of screen px. Zoom scales by 1.2 per level.
+  const fontPx = (settings["editor.fontSize"] * 1.2 ** settings["window.zoomLevel"] * 2) / 16;
+  if (Math.abs(fontPx - Math.round(fontPx)) > 0.01) {
+    throw new Error(`${fontPx.toFixed(3)} screen px per font px is not whole`);
+  }
+  eq(settings["window.zoomLevel"], 1, "window.zoomLevel (chrome grows to match the code)");
 });
 
 if (failures.length) {
