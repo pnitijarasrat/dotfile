@@ -1,0 +1,11 @@
+#!/bin/bash
+
+options=(
+  style=round
+  width=4.0
+  hidpi=on
+  active_color=0xff539bf5 # github dark dimmed blue
+  inactive_color=0xff1c2128 # github dark dimmed canvas inset
+)
+
+borders "${options[@]}"

@@ -1,0 +1,105 @@
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+source "$CONFIG_DIR/color.sh"
+
+sketchybar --bar position=top height=30 blur_radius=30 border_color="$FG" color="$BG0" border_width=1 corner_radius=10 margin=6 y_offset=6 padding_left=14 padding_right=14
+
+FONT="JetBrains Mono"
+
+SEPARATOR=(
+  icon="|"
+  icon.color="$GREY0"
+  icon.font="$FONT:Bold:14.0"
+  label.drawing=off
+  padding_left=8
+  padding_right=8
+)
+
+default=(
+  padding_left=4
+  padding_right=4
+  icon.font="Hack Nerd Font:Bold:14.0"
+  label.font="$FONT:Bold:14.0"
+  icon.color="$FG"
+  icon.highlight_color="$BG0"
+  label.color="$FG"
+  icon.padding_left=4
+  icon.padding_right=4
+  label.padding_left=4
+  label.padding_right=4
+)
+sketchybar --default "${default[@]}"
+
+##### adding left items #####
+sketchybar --add item apple left \
+           --set apple icon.font="Hack Nerd Font:Bold:20.0" \
+                       icon.color="$FG" \
+                       icon.padding_left=0 icon.padding_right=0 border_width=1 \
+                       padding_left=10 padding_right=0 \
+                       script="$PLUGIN_DIR/apple.sh"
+
+sketchybar --add item sepy left \
+           --set sepy padding_left=0 icon.padding_left=0 "${SEPARATOR[@]}"
+
+SPACE_ICONS=("1" "2" "3" "4" "5" "6" "7" "8" "9" "0")
+for i in "${!SPACE_ICONS[@]}"
+do
+  sid="$(($i+1))"
+  space=(
+    space="$sid"
+    icon="${SPACE_ICONS[i]}"
+    icon.padding_left=6
+    icon.padding_right=6
+    background.color="$BG4"
+    background.corner_radius=5
+    background.height=18
+    label.drawing=off
+    script="$PLUGIN_DIR/space.sh"
+    click_script="yabai -m space --focus $sid"
+  )
+  sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}"
+done
+
+sketchybar --add item sepx left \
+           --set sepx "${SEPARATOR[@]}" \
+           --add item weather left \
+           --set weather update_freq=600 script="$PLUGIN_DIR/weather.sh" \
+           --add item weather.cond left \
+           --set weather.cond icon.drawing=on label.drawing=off
+
+sketchybar --add item front_app center \
+           --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
+           --subscribe front_app front_app_switched
+
+##### adding right items #####
+sketchybar --add item clock right \
+           --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
+           --add item sep1 right \
+           --set sep1 "${SEPARATOR[@]}" \
+           --add item volume right \
+           --set volume script="$PLUGIN_DIR/volume.sh" \
+           --subscribe volume volume_change \
+           --add item sep2 right \
+           --set sep2 "${SEPARATOR[@]}" \
+           --add item battery right \
+           --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+           --subscribe battery system_woke power_source_change \
+           --add item sep3 right \
+           --set sep3 "${SEPARATOR[@]}" \
+           --add item language right \
+           --set language update_freq=1 icon.drawing=off script="$PLUGIN_DIR/language.sh" \
+           --add item sep4 right \
+           --set sep4 "${SEPARATOR[@]}" \
+           --add item wifi right \
+           --set wifi script="$PLUGIN_DIR/wifi.sh" update_freq=5 \
+             padding_right=0 icon.padding_right=0 \
+             click_script="$PLUGIN_DIR/wifi_menu.sh" \
+             popup.background.color="$BG1" \
+             popup.background.border_color="$FG" \
+             popup.background.border_width=1 \
+             popup.background.corner_radius=10 \
+             popup.blur_radius=30 \
+             popup.y_offset=6 \
+           --add item wifi_scanner right \
+           --set wifi_scanner drawing=off update_freq=20 script="$PLUGIN_DIR/wifi_scan.sh"
+
+sketchybar --update
