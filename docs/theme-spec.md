@@ -2,7 +2,7 @@
 
 The locked **Theme spec** for the **Vintage theme**: a Windows 95 Classic **Frame** around TC2000-style **Work surfaces** in soft IBM 5153 colors. Vocabulary follows `CONTEXT.md`.
 
-This is the hand-off document for re-theming. To theme one tool, read this file and that tool's ticket. Where an earlier decision was later changed, this file gives only the final value. If the built SketchyBar code and an issue disagree, this file follows the code.
+This is the hand-off document for re-theming. To theme one tool, read this file and that tool's ticket. To theme a web app, follow `docs/web-theme.md`. Where an earlier decision was later changed, this file gives only the final value. If the built SketchyBar code and an issue disagree, this file follows the code.
 
 Sources: palettes [#5](https://github.com/pnitijarasrat/dotfile/issues/5), fonts [#6](https://github.com/pnitijarasrat/dotfile/issues/6), per-tool decisions and popups [#7](https://github.com/pnitijarasrat/dotfile/issues/7), role names and palette sources [#8](https://github.com/pnitijarasrat/dotfile/issues/8), SketchyBar taskbar [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11). Map: [#2](https://github.com/pnitijarasrat/dotfile/issues/2).
 
