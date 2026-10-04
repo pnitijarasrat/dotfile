@@ -28,6 +28,6 @@ Check the theme against `docs/theme-spec.md` (palette, and the color keys the in
 
 ## Raycast
 
-The launcher theme is "Vintage", in `raycast/vintage.rctheme.json` (#21). Raycast keeps its own copy of imported themes, so import the file into Raycast (Settings → Appearance) and select **Vintage**. Re-import it after changing the file.
+The launcher theme is "Vintage", in `raycast/vintage.rctheme.json` (#21). Raycast keeps its own copy of imported themes and can't read the file directly. Run `node raycast/import.mjs` to open the theme in Raycast (the same `raycast://theme` link as "Add to Raycast" on themes.ray.so), add it, then select **Vintage** in Settings → Appearance. Re-run it after changing the file. Custom themes need Raycast Pro.
 
 Check the theme against `docs/theme-spec.md` with `node raycast/tests/vintage_test.mjs`.
