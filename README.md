@@ -23,3 +23,5 @@ The color theme is a local extension, "Vintage", in `vscode/vintage-theme` (#19)
 ```sh
 ln -sfn ~/.config/vscode/vintage-theme ~/.vscode/extensions/pnitijarasrat.vintage
 ```
+
+Check the theme against `docs/theme-spec.md` (palette, and the color keys the installed VSCode knows) with `node vscode/tests/vintage_test.mjs`.

@@ -1,8 +1,9 @@
 // Vintage theme for VSCode (docs/theme-spec.md).
-// Work surface half (#19): editor, terminal and token colors.
-// The Frame workbench comes in #20, along with the inline code popups
-// (Work surface, but scoped to that ticket).
+// The workbench is Frame (#20): Win95 grey chrome, a navy title bar, and
+// menus and pickers. The editor, terminal, token colors (#19) and inline
+// code popups (#20) are Work surface.
 // Raw hex with spec role names in comments.
+// VSCode's widgets keep their rounded corners (a Known exception in the spec).
 {
   "name": "Vintage",
   "type": "dark",
@@ -14,6 +15,293 @@
     "variable.readonly": "#C4C4C4" // work_fg
   },
   "colors": {
+    // Base. VSCode draws settings, welcome and other editor-area pages with
+    // the global foreground on editor.background, so it stays work_fg; every
+    // Frame part below sets its own black text.
+    "foreground": "#C4C4C4", // work_fg
+    "descriptionForeground": "#808080", // frame_gray_text
+    "disabledForeground": "#808080", // frame_gray_text
+    "errorForeground": "#800000", // frame_data_red
+    // Deviation: icons are frame_gray_text, not frame_text. One color serves
+    // icons on Frame grey and on work_bg (panel, settings), and black vanishes
+    // on work_bg.
+    "icon.foreground": "#808080", // frame_gray_text
+    "focusBorder": "#000000", // frame_text (Win95 focus rectangle)
+    "selection.background": "#000080", // frame_selection
+    "widget.border": "#808080", // frame_shadow
+    "widget.shadow": "#00000000", // no shadow (Purist fidelity)
+    "scrollbar.shadow": "#00000000", // no shadow (Purist fidelity)
+    "sash.hoverBorder": "#000080", // frame_selection
+    "progressBar.background": "#000080", // frame_selection
+    "badge.background": "#000080", // frame_selection
+    "badge.foreground": "#FFFFFF", // frame_selection_text
+    // Deviation: links are ansi_12, a Work surface bright, even on Frame grey.
+    // They show on both Frame grey (sidebar) and work_bg (hover, settings),
+    // and no Frame data color reads on both.
+    "textLink.foreground": "#4E4EDC", // ansi_12
+    "textLink.activeForeground": "#4E4EDC", // ansi_12
+
+    // Title bar (window.titleBarStyle "custom" in settings.json)
+    "titleBar.activeBackground": "#000080", // frame_title
+    "titleBar.activeForeground": "#FFFFFF", // frame_title_text
+    "titleBar.inactiveBackground": "#808080", // frame_title_inactive
+    "titleBar.inactiveForeground": "#C0C0C0", // frame_title_inactive_text
+    "commandCenter.background": "#FFFFFF", // frame_window
+    "commandCenter.foreground": "#000000", // frame_text
+    "commandCenter.activeBackground": "#E0E0E0", // frame_light
+    "commandCenter.activeForeground": "#000000", // frame_text
+    "commandCenter.border": "#808080", // frame_shadow
+    "commandCenter.activeBorder": "#808080", // frame_shadow
+    "commandCenter.inactiveForeground": "#808080", // frame_gray_text
+    "commandCenter.inactiveBorder": "#808080", // frame_shadow
+
+    // Activity bar
+    "activityBar.background": "#C0C0C0", // frame_face
+    "activityBar.foreground": "#000000", // frame_text
+    "activityBar.inactiveForeground": "#808080", // frame_gray_text
+    "activityBar.activeBorder": "#000080", // frame_selection
+    "activityBar.activeBackground": "#E0E0E0", // frame_light (pushed in)
+    "activityBar.border": "#808080", // frame_shadow
+    "activityBarBadge.background": "#000080", // frame_selection
+    "activityBarBadge.foreground": "#FFFFFF", // frame_selection_text
+
+    // Sidebar
+    "sideBar.background": "#C0C0C0", // frame_face
+    "sideBar.foreground": "#000000", // frame_text
+    "sideBar.border": "#808080", // frame_shadow
+    "sideBarTitle.background": "#C0C0C0", // frame_face
+    "sideBarTitle.foreground": "#000000", // frame_text
+    "sideBarSectionHeader.background": "#C0C0C0", // frame_face
+    "sideBarSectionHeader.foreground": "#000000", // frame_text
+    "sideBarSectionHeader.border": "#808080", // frame_shadow
+    "sideBarStickyScroll.background": "#C0C0C0", // frame_face
+
+    // Lists and trees (sidebar, pickers, notifications)
+    "list.activeSelectionBackground": "#000080", // frame_selection
+    "list.activeSelectionForeground": "#FFFFFF", // frame_selection_text
+    "list.activeSelectionIconForeground": "#FFFFFF", // frame_selection_text
+    "list.inactiveSelectionBackground": "#E0E0E0", // frame_light
+    "list.inactiveSelectionForeground": "#000000", // frame_text
+    "list.inactiveSelectionIconForeground": "#000000", // frame_text
+    "list.hoverBackground": "#E0E0E0", // frame_light
+    "list.hoverForeground": "#000000", // frame_text
+    "list.focusOutline": "#000000", // frame_text
+    "list.inactiveFocusOutline": "#808080", // frame_shadow
+    "list.highlightForeground": "#000080", // frame_data_blue
+    "list.focusHighlightForeground": "#FFFFFF", // frame_selection_text
+    "list.errorForeground": "#800000", // frame_data_red
+    "list.warningForeground": "#808000", // frame_data_yellow
+    "list.invalidItemForeground": "#808080", // frame_gray_text
+    "list.deemphasizedForeground": "#808080", // frame_gray_text
+    "list.dropBackground": "#E0E0E0", // frame_light
+    "tree.indentGuidesStroke": "#808080", // frame_shadow
+    "tree.inactiveIndentGuidesStroke": "#808080", // frame_shadow
+
+    // Git decorations show on Frame grey (explorer, tabs, quick open)
+    "gitDecoration.addedResourceForeground": "#008000", // frame_data_green
+    "gitDecoration.untrackedResourceForeground": "#008000", // frame_data_green
+    "gitDecoration.modifiedResourceForeground": "#808000", // frame_data_yellow
+    "gitDecoration.renamedResourceForeground": "#008080", // frame_data_cyan
+    "gitDecoration.deletedResourceForeground": "#800000", // frame_data_red
+    "gitDecoration.conflictingResourceForeground": "#800080", // frame_data_magenta
+    "gitDecoration.ignoredResourceForeground": "#808080", // frame_gray_text
+    "gitDecoration.submoduleResourceForeground": "#000080", // frame_data_blue
+
+    // Tabs. The active tab is a pushed-in button with a navy top edge, like
+    // the front app's task button in SketchyBar.
+    "editorGroupHeader.tabsBackground": "#C0C0C0", // frame_face
+    "editorGroupHeader.tabsBorder": "#808080", // frame_shadow
+    "editorGroupHeader.noTabsBackground": "#C0C0C0", // frame_face
+    "editorGroup.border": "#808080", // frame_shadow
+    "tab.border": "#808080", // frame_shadow
+    "tab.activeBackground": "#E0E0E0", // frame_light
+    "tab.activeForeground": "#000000", // frame_text
+    "tab.activeBorderTop": "#000080", // frame_selection
+    "tab.inactiveBackground": "#C0C0C0", // frame_face
+    "tab.inactiveForeground": "#000000", // frame_text
+    "tab.hoverBackground": "#E0E0E0", // frame_light
+    "tab.hoverForeground": "#000000", // frame_text
+    "tab.unfocusedActiveBackground": "#E0E0E0", // frame_light
+    "tab.unfocusedActiveForeground": "#000000", // frame_text
+    "tab.unfocusedActiveBorderTop": "#808080", // frame_shadow
+    "tab.unfocusedInactiveBackground": "#C0C0C0", // frame_face
+    "tab.unfocusedInactiveForeground": "#000000", // frame_text
+    "tab.unfocusedHoverBackground": "#E0E0E0", // frame_light
+    "tab.unfocusedHoverForeground": "#000000", // frame_text
+    "tab.activeModifiedBorder": "#000080", // frame_selection
+    "tab.inactiveModifiedBorder": "#808080", // frame_shadow
+    "breadcrumb.background": "#C0C0C0", // frame_face
+    "breadcrumb.foreground": "#000000", // frame_text
+    "breadcrumb.focusForeground": "#000000", // frame_text
+    "breadcrumb.activeSelectionForeground": "#000080", // frame_data_blue
+    "breadcrumbPicker.background": "#C0C0C0", // frame_face
+
+    // Panel. Deviation: the panel body is work_bg, not frame_face. Its lists
+    // (problems, terminal tabs) draw in the global foreground, which must stay
+    // work_fg for editor-area pages, and VSCode has no panel.foreground. The
+    // panel mostly holds the terminal, a Work surface.
+    "panel.background": "#000000", // work_bg
+    "panel.border": "#808080", // frame_shadow
+    "panelTitle.activeForeground": "#C4C4C4", // work_fg
+    "panelTitle.inactiveForeground": "#7E7E7E", // work_line_number
+    "panelTitle.activeBorder": "#000080", // frame_selection
+    "panelSectionHeader.background": "#C0C0C0", // frame_face
+    "panelSectionHeader.foreground": "#000000", // frame_text
+    "panelSectionHeader.border": "#808080", // frame_shadow
+    "panelSection.border": "#808080", // frame_shadow
+    "panelInput.border": "#808080", // frame_shadow
+    "outputView.background": "#000000", // work_bg
+    "problemsErrorIcon.foreground": "#DC4E4E", // syntax_error
+    "problemsWarningIcon.foreground": "#F3F34E", // syntax_warning
+    "problemsInfoIcon.foreground": "#4EF3F3", // syntax_function
+
+    // Scrollbars (opaque). The thumb is frame_shadow rather than frame_face:
+    // without bevels a frame_face thumb vanishes on the Frame grey sidebar.
+    "scrollbarSlider.background": "#808080", // frame_shadow
+    "scrollbarSlider.hoverBackground": "#808080", // frame_shadow
+    "scrollbarSlider.activeBackground": "#000080", // frame_selection
+
+    // Status bar. Status data uses the Frame data colors. Deviation: the
+    // problems counter stays frame_text; VSCode has no color key for it.
+    "statusBar.background": "#C0C0C0", // frame_face
+    "statusBar.foreground": "#000000", // frame_text
+    "statusBar.border": "#808080", // frame_shadow
+    "statusBar.noFolderBackground": "#C0C0C0", // frame_face
+    "statusBar.noFolderForeground": "#000000", // frame_text
+    "statusBar.debuggingBackground": "#C0C0C0", // frame_face
+    "statusBar.debuggingForeground": "#804000", // frame_data_orange
+    "statusBar.focusBorder": "#000000", // frame_text
+    "statusBarItem.hoverBackground": "#E0E0E0", // frame_light
+    "statusBarItem.hoverForeground": "#000000", // frame_text
+    "statusBarItem.activeBackground": "#E0E0E0", // frame_light
+    "statusBarItem.focusBorder": "#000000", // frame_text
+    "statusBarItem.compactHoverBackground": "#E0E0E0", // frame_light
+    "statusBarItem.prominentBackground": "#C0C0C0", // frame_face
+    "statusBarItem.prominentForeground": "#000000", // frame_text
+    "statusBarItem.prominentHoverBackground": "#E0E0E0", // frame_light
+    "statusBarItem.remoteBackground": "#000080", // frame_selection
+    "statusBarItem.remoteForeground": "#FFFFFF", // frame_selection_text
+    "statusBarItem.remoteHoverBackground": "#000080", // frame_selection
+    "statusBarItem.offlineBackground": "#C0C0C0", // frame_face
+    "statusBarItem.offlineForeground": "#800000", // frame_data_red
+    "statusBarItem.errorBackground": "#C0C0C0", // frame_face
+    "statusBarItem.errorForeground": "#800000", // frame_data_red
+    "statusBarItem.errorHoverBackground": "#E0E0E0", // frame_light
+    "statusBarItem.warningBackground": "#C0C0C0", // frame_face
+    "statusBarItem.warningForeground": "#808000", // frame_data_yellow
+    "statusBarItem.warningHoverBackground": "#E0E0E0", // frame_light
+
+    // Inputs, dropdowns, buttons: Win95 edit fields and push buttons
+    "input.background": "#FFFFFF", // frame_window
+    "input.foreground": "#000000", // frame_text
+    "input.border": "#808080", // frame_shadow
+    "input.placeholderForeground": "#808080", // frame_gray_text
+    "inputOption.activeBackground": "#000080", // frame_selection
+    "inputOption.activeForeground": "#FFFFFF", // frame_selection_text
+    "inputOption.activeBorder": "#000080", // frame_selection
+    "inputValidation.errorBackground": "#FFFFE1", // frame_tooltip
+    "inputValidation.errorForeground": "#000000", // frame_text
+    "inputValidation.errorBorder": "#800000", // frame_data_red
+    "inputValidation.warningBackground": "#FFFFE1", // frame_tooltip
+    "inputValidation.warningForeground": "#000000", // frame_text
+    "inputValidation.warningBorder": "#808000", // frame_data_yellow
+    "inputValidation.infoBackground": "#FFFFE1", // frame_tooltip
+    "inputValidation.infoForeground": "#000000", // frame_text
+    "inputValidation.infoBorder": "#000080", // frame_data_blue
+    "dropdown.background": "#FFFFFF", // frame_window
+    "dropdown.listBackground": "#FFFFFF", // frame_window
+    "dropdown.foreground": "#000000", // frame_text
+    "dropdown.border": "#808080", // frame_shadow
+    "checkbox.background": "#FFFFFF", // frame_window
+    "checkbox.foreground": "#000000", // frame_text
+    "checkbox.border": "#808080", // frame_shadow
+    "button.background": "#C0C0C0", // frame_face
+    "button.foreground": "#000000", // frame_text
+    "button.border": "#000000", // frame_dark_shadow
+    "button.hoverBackground": "#E0E0E0", // frame_light
+    "button.separator": "#808080", // frame_shadow
+    "button.secondaryBackground": "#C0C0C0", // frame_face
+    "button.secondaryForeground": "#000000", // frame_text
+    "button.secondaryHoverBackground": "#E0E0E0", // frame_light
+    "keybindingLabel.background": "#C0C0C0", // frame_face
+    "keybindingLabel.foreground": "#000000", // frame_text
+    "keybindingLabel.border": "#808080", // frame_shadow
+    "keybindingLabel.bottomBorder": "#808080", // frame_shadow
+
+    // Command palette and quick open
+    "quickInput.background": "#C0C0C0", // frame_face
+    "quickInput.foreground": "#000000", // frame_text
+    "quickInputTitle.background": "#C0C0C0", // frame_face
+    "quickInputList.focusBackground": "#000080", // frame_selection
+    "quickInputList.focusForeground": "#FFFFFF", // frame_selection_text
+    "quickInputList.focusIconForeground": "#FFFFFF", // frame_selection_text
+    "pickerGroup.foreground": "#808080", // frame_gray_text
+    "pickerGroup.border": "#808080", // frame_shadow
+
+    // Context menus (window.menuStyle "custom" in settings.json)
+    "menu.background": "#C0C0C0", // frame_face
+    "menu.foreground": "#000000", // frame_text
+    "menu.selectionBackground": "#000080", // frame_selection
+    "menu.selectionForeground": "#FFFFFF", // frame_selection_text
+    "menu.separatorBackground": "#808080", // frame_shadow
+    "menu.border": "#808080", // frame_shadow
+
+    // Notifications
+    "notifications.background": "#C0C0C0", // frame_face
+    "notifications.foreground": "#000000", // frame_text
+    "notifications.border": "#808080", // frame_shadow
+    "notificationCenter.border": "#808080", // frame_shadow
+    "notificationToast.border": "#808080", // frame_shadow
+    "notificationCenterHeader.background": "#C0C0C0", // frame_face
+    "notificationCenterHeader.foreground": "#000000", // frame_text
+    "notificationLink.foreground": "#000080", // frame_data_blue
+    "notificationsErrorIcon.foreground": "#800000", // frame_data_red
+    "notificationsWarningIcon.foreground": "#808000", // frame_data_yellow
+    "notificationsInfoIcon.foreground": "#000080", // frame_data_blue
+
+    // Editor widgets that are not code (find, rename) are Frame dialogs
+    "editorWidget.background": "#C0C0C0", // frame_face
+    "editorWidget.foreground": "#000000", // frame_text
+    "editorWidget.border": "#808080", // frame_shadow
+    "editorWidget.resizeBorder": "#808080", // frame_shadow
+    "debugToolBar.background": "#C0C0C0", // frame_face
+    "debugToolBar.border": "#808080", // frame_shadow
+
+    // Inline code popups are Work surface: suggest, hover, parameter hints
+    // (drawn with the hover colors) and peek.
+    "editorSuggestWidget.background": "#000000", // work_bg
+    "editorSuggestWidget.foreground": "#C4C4C4", // work_fg
+    "editorSuggestWidget.border": "#808080", // work_popup_border
+    "editorSuggestWidget.selectedBackground": "#000080", // work_selection
+    "editorSuggestWidget.selectedForeground": "#FFFFFF", // work_selection_text
+    "editorSuggestWidget.selectedIconForeground": "#FFFFFF", // work_selection_text
+    "editorSuggestWidget.highlightForeground": "#F3F34E", // syntax_keyword
+    "editorSuggestWidget.focusHighlightForeground": "#F3F34E", // syntax_keyword
+    "editorSuggestWidgetStatus.foreground": "#7E7E7E", // work_line_number
+    "editorHoverWidget.background": "#000000", // work_bg
+    "editorHoverWidget.foreground": "#C4C4C4", // work_fg
+    "editorHoverWidget.border": "#808080", // work_popup_border
+    "editorHoverWidget.statusBarBackground": "#000000", // work_bg
+    "editorHoverWidget.highlightForeground": "#F3F34E", // syntax_keyword
+    "editorInlayHint.parameterForeground": "#7E7E7E", // work_line_number
+    "editorInlayHint.parameterBackground": "#000000", // work_bg
+    "editorInlayHint.typeForeground": "#7E7E7E", // work_line_number
+    "editorInlayHint.typeBackground": "#000000", // work_bg
+    "peekView.border": "#808080", // work_popup_border
+    "peekViewEditor.background": "#000000", // work_bg
+    "peekViewEditorGutter.background": "#000000", // work_bg
+    "peekViewEditorStickyScroll.background": "#000000", // work_bg
+    "peekViewResult.background": "#000000", // work_bg
+    "peekViewResult.fileForeground": "#C4C4C4", // work_fg
+    "peekViewResult.lineForeground": "#C4C4C4", // work_fg
+    "peekViewResult.selectionBackground": "#000080", // work_selection
+    "peekViewResult.selectionForeground": "#FFFFFF", // work_selection_text
+    "peekViewEditor.matchHighlightBackground": "#000080", // work_selection
+    "peekViewResult.matchHighlightBackground": "#000080", // work_selection
+    "peekViewTitle.background": "#000000", // work_bg
+    "peekViewTitleLabel.foreground": "#C4C4C4", // work_fg
+    "peekViewTitleDescription.foreground": "#7E7E7E", // work_line_number
+
     // Editor
     "editor.background": "#000000", // work_bg
     "editor.foreground": "#C4C4C4", // work_fg
