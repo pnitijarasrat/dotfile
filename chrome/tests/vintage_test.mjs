@@ -65,13 +65,6 @@ const keyRoles = {
   ntp_background: "frame_desktop",
   ntp_text: "frame_desktop_text",
   ntp_link: "frame_desktop_text",
-  // Incognito is magenta whether or not the window is active (see Deviations).
-  frame_incognito: "frame_data_magenta",
-  frame_incognito_inactive: "frame_data_magenta",
-  background_tab_incognito: "frame_data_magenta",
-  background_tab_incognito_inactive: "frame_data_magenta",
-  tab_background_text_incognito: "frame_title_text",
-  tab_background_text_incognito_inactive: "frame_title_inactive_text",
 };
 
 // WCAG contrast ratio of two hex colors; 4.5 is readable body text.
@@ -138,20 +131,14 @@ test("New Tab page is the flat teal Classic desktop with readable text and links
   expectReadable("ntp_link", "ntp_background");
 });
 
-test("incognito tab strip and frame are magenta with readable tab text; toolbar stays grey", () => {
-  for (const key of ["frame_incognito", "frame_incognito_inactive", "background_tab_incognito", "background_tab_incognito_inactive"]) {
-    eq(hex(colors[key]), "#800080", key);
-  }
-  expectReadable("tab_background_text_incognito", "frame_incognito");
-  expectReadable("tab_background_text_incognito_inactive", "frame_incognito_inactive");
-  // Chrome has no incognito toolbar key: incognito shares the toolbar.
-  eq(hex(colors.toolbar), "#C0C0C0", "toolbar");
+test("no incognito keys: Chrome ignores themes in Incognito windows", () => {
+  const set = Object.keys(colors).filter((key) => key.includes("incognito"));
+  if (set.length) throw new Error(`sets ${set.join(", ")}, which Chrome ignores`);
 });
 
-test("incognito deviation is recorded in the spec", () => {
-  if (!/^\| Chrome \| incognito tab strip and frame \|/m.test(read("docs/theme-spec.md"))) {
-    throw new Error("no Chrome incognito row in the spec's Deviations table");
-  }
+test("spec lists Incognito under Known exceptions", () => {
+  const known = read("docs/theme-spec.md").split("## Known exceptions")[1]?.split("\n## ")[0] ?? "";
+  if (!/Chrome.*Incognito/.test(known)) throw new Error("Known exceptions doesn't say Chrome ignores the theme in Incognito");
 });
 
 test("spec notes the teal New Tab page in the Chrome row and under Open", () => {
