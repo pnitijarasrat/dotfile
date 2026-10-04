@@ -1,7 +1,7 @@
 // Checks for the Chrome Vintage theme (#37).
 // Run: node chrome/tests/vintage_test.mjs
-import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { existsSync, readFileSync, realpathSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -95,8 +95,10 @@ test("active window: navy tab strip with white tab titles, grey tab and toolbar 
   }
 });
 
-test("inactive window: grey tab strip", () => {
+test("inactive window: grey tab strip with grey tab titles", () => {
   eq(hex(colors.frame_inactive), "#808080", "frame_inactive");
+  eq(hex(colors.background_tab_inactive), "#808080", "background_tab_inactive");
+  eq(hex(colors.tab_background_text_inactive), "#C0C0C0", "tab_background_text_inactive");
 });
 
 test("omnibox is white with black text", () => {
@@ -112,15 +114,14 @@ test("spec has a Chrome row in Per tool", () => {
 
 // The theme keys Chrome knows are NUL-terminated strings in the installed
 // Chrome framework. Skip if absent.
-const versions = "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions";
-const framework = `${versions}/Current/Google Chrome Framework`;
+const current = "/Applications/Google Chrome.app/Contents/Frameworks/Google Chrome Framework.framework/Versions/Current";
+const framework = `${current}/Google Chrome Framework`;
 if (existsSync(framework)) {
   test("every color key is one Chrome knows", () => {
     const bin = readFileSync(framework);
     const unknown = Object.keys(colors).filter((key) => bin.indexOf(`\0${key}\0`) === -1);
     if (unknown.length) {
-      const installed = readdirSync(versions).filter((v) => v !== "Current");
-      throw new Error(`unknown keys in Chrome ${installed.at(-1)}: ${unknown.join(", ")}`);
+      throw new Error(`unknown keys in Chrome ${basename(realpathSync(current))}: ${unknown.join(", ")}`);
     }
   });
 }

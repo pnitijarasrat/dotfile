@@ -34,6 +34,6 @@ Check the theme against `docs/theme-spec.md` with `node raycast/tests/vintage_te
 
 ## Chrome
 
-The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37). Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme`. Chrome doesn't list themes in `chrome://extensions`, so there is no reload button: after changing `manifest.json`, run **Load unpacked** on the same folder again and the new colors replace the old ones. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
+The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37). Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme` (the file picker hides `.config`; press Cmd+Shift+. to show it, or Cmd+Shift+G to type the path). To reload after changing `manifest.json`, run **Load unpacked** on the same folder again. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
 
 Check the theme against `docs/theme-spec.md` (palette, and the color keys the installed Chrome knows) with `node chrome/tests/vintage_test.mjs`.
