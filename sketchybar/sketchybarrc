@@ -1,3 +1,10 @@
+# PROTOTYPE (issue #9): when a variant is picked with
+# prototype-xp-taskbar/switch.sh, run it instead of this file.
+PROTO_VARIANT=$(cat /tmp/sketchybar_proto_variant 2>/dev/null)
+case "$PROTO_VARIANT" in
+  A|B|C) exec "$CONFIG_DIR/prototype-xp-taskbar/variant_$(echo "$PROTO_VARIANT" | tr ABC abc).sh" ;;
+esac
+
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/color.sh"
 
