@@ -1,11 +1,18 @@
 // Vintage theme for VSCode (docs/theme-spec.md).
 // Work surface half (#19): editor, terminal and token colors.
-// The Frame workbench and inline code popups come in #20.
+// The Frame workbench comes in #20, along with the inline code popups
+// (Work surface, but scoped to that ticket).
 // Raw hex with spec role names in comments.
 {
   "name": "Vintage",
   "type": "dark",
   "semanticHighlighting": true,
+  // Semantic tokens fall back to the TextMate rules below, except that
+  // TS/JS mark every const local readonly (variable.other.constant), which
+  // would paint ordinary locals syntax_constant.
+  "semanticTokenColors": {
+    "variable.readonly": "#C4C4C4" // work_fg
+  },
   "colors": {
     // Editor
     "editor.background": "#000000", // work_bg
@@ -15,9 +22,9 @@
     "editor.lineHighlightBackground": "#161616", // work_cursorline
     "editor.lineHighlightBorder": "#161616", // work_cursorline (no outline)
     "editor.selectionBackground": "#000080", // work_selection
-    // Deviation: VSCode only honors selectionForeground in high-contrast
-    // themes, so selected text keeps its token colors on work_selection.
-    "editor.selectionForeground": "#FFFFFF", // work_selection_text
+    // Deviation: no work_selection_text. VSCode only honors
+    // editor.selectionForeground in high-contrast themes, so selected text
+    // keeps its token colors on work_selection.
     "editor.inactiveSelectionBackground": "#000080", // work_selection
     "editorGutter.background": "#000000", // work_bg
     "editorLineNumber.foreground": "#7E7E7E", // work_line_number
@@ -63,17 +70,16 @@
     },
     {
       "name": "syntax_comment",
-      "scope": ["comment", "punctuation.definition.comment", "string.comment"],
+      "scope": ["comment", "punctuation.definition.comment"],
       "settings": { "foreground": "#7E7E7E", "fontStyle": "" } // syntax_comment
     },
     {
       "name": "syntax_keyword",
       "scope": [
         "keyword",
-        "keyword.control",
+        "keyword.operator.new",
+        "keyword.operator.expression",
         "storage",
-        "storage.type",
-        "storage.modifier",
         "variable.language",
         "markup.heading"
       ],
@@ -85,7 +91,8 @@
         "string",
         "punctuation.definition.string",
         "markup.inline.raw",
-        "markup.fenced_code"
+        "markup.fenced_code",
+        "markup.inserted"
       ],
       "settings": { "foreground": "#4EDC4E", "fontStyle": "" } // syntax_string
     },
@@ -99,7 +106,6 @@
       "scope": [
         "entity.name.function",
         "support.function",
-        "meta.function-call entity.name.function",
         "entity.name.tag"
       ],
       "settings": { "foreground": "#4EF3F3", "fontStyle": "" } // syntax_function
@@ -122,8 +128,6 @@
       "name": "syntax_constant",
       "scope": [
         "constant",
-        "constant.language",
-        "constant.character",
         "support.constant",
         "variable.other.constant",
         "variable.other.enummember",
@@ -138,7 +142,7 @@
     },
     {
       "name": "syntax_error",
-      "scope": ["invalid", "invalid.illegal", "markup.deleted"],
+      "scope": ["invalid", "markup.deleted"],
       "settings": { "foreground": "#DC4E4E", "fontStyle": "" } // syntax_error
     },
     {

@@ -4,6 +4,9 @@
     "workbench.colorTheme": "Vintage",
     "terminal.integrated.mouseWheelScrollSensitivity": 3,
     "terminal.integrated.gpuAcceleration": "off",
+    // Show the theme's IBM 5153 ANSI colors as-is; the default ratio (4.5)
+    // lightens the dark ones (ansi_1, ansi_4, ansi_8) on work_bg.
+    "terminal.integrated.minimumContrastRatio": 1,
     "explorer.confirmDragAndDrop": false,
     "editor.formatOnSave": true,
     "git.confirmSync": false,
