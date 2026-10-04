@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Vintage theme Frame palette (JankyBorders is to share it, per #8). Variable names
+# Vintage theme Frame palette, shared with JankyBorders (borders/bordersrc). Variable names
 # are the Theme spec's role names (#8); one hex can play several roles.
 export frame_face="0xffc0c0c0"
 export frame_highlight="0xffffffff"   # outer top-left bevel
