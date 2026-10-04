@@ -1,24 +1,21 @@
 #!/bin/sh
 
 source "$CONFIG_DIR/color.sh"
-# The volume_change event supplies a $INFO variable in which the current volume
-# percentage is passed to the script.
+# volume_change passes the new volume in $INFO; on load, read it directly.
 
 if [ "$SENDER" = "volume_change" ]; then
   VOLUME="$INFO"
-
-  case "$VOLUME" in
-  [6-9][0-9] | 100)
-    ICON="󰕾" ICON_COLOR="$FG"
-    ;;
-  [3-5][0-9])
-    ICON="󰖀" ICON_COLOR="$FG"
-    ;;
-  [1-9] | [1-2][0-9])
-    ICON="󰕿" ICON_COLOR="$FG"
-    ;;
-  *) ICON="󰖁" ICON_COLOR="$RED" ;;
-  esac
-
-  sketchybar --set "$NAME" icon="$ICON" label="$VOLUME%" icon.color="$ICON_COLOR"
+else
+  VOLUME="$(osascript -e 'output volume of (get volume settings)')"
 fi
+if [ "$(osascript -e 'output muted of (get volume settings)')" = "true" ]; then
+  VOLUME=0
+fi
+
+case "$VOLUME" in
+[4-9][0-9] | 100) ICON="volume" ;;
+0) ICON="volume_mute" ;;
+*) ICON="volume_low" ;;
+esac
+
+sketchybar --set "$NAME" icon.background.image="$ICONS/$ICON.png"

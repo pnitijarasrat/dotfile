@@ -1,23 +1,23 @@
 #!/bin/sh
 
-# GitHub Dark Dimmed palette, shared by sketchybar and borders.
-# Structural (background scale, dimmest to brightest)
-export BG0="0xff1c2128"
-export BG1="0xff22272e"
-export BG2="0xff2d333b"
-export BG3="0xff373e47"
-export BG4="0xff444c56"
-export BG5="0xff545d68"
-export FG="0xffadbac7"
-export GREY0="0xff636e7b"
-export GREY1="0xff768390"
-export GREY2="0xff909dab"
+# Vintage theme Frame palette (Win95/XP chrome).
+export GREY="0xffc0c0c0"
+export DARK="0xff808080"
+export WHITE="0xffffffff"
+export BLACK="0xff000000"
+export NAVY="0xff000080"   # selection
+export PRESSED="0xffefefef" # face of a pushed-in button
 
-# Semantic accents
-export RED="0xfff47067"
-export ORANGE="0xffcc6b2c"
-export YELLOW="0xffc69026"
-export GREEN="0xff57ab5a"
-export AQUA="0xff39c5cf"
-export BLUE="0xff539bf5"
-export PURPLE="0xffb083f0"
+# Frame data colors: data on grey, where Work surface brights are unreadable.
+export RED="0xff800000"
+export GREEN="0xff008000"
+export YELLOW="0xff808000"
+export BLUE="0xff000080"
+export MAGENTA="0xff800080"
+export CYAN="0xff008080"
+export ORANGE="0xff804000"
+
+export FONT="Microsoft Sans Serif:Regular:14.0"
+# Microsoft Sans Serif ships no bold, so bold text (Start, task button) uses Tahoma.
+export BOLD="Tahoma:Bold:13.0"
+export ICONS="$CONFIG_DIR/icons"
