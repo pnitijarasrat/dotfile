@@ -46,8 +46,8 @@ function parse(text) {
 }
 
 const theme = parse(read("ghostty/themes/vintage"));
-const config = parse(read("ghostty/config"));
 const configText = read("ghostty/config");
+const config = parse(configText);
 
 function role(name) {
   if (!roles[name]) throw new Error(`role ${name} is not in the spec`);
@@ -70,7 +70,7 @@ test("theme sets the light Work surface and the Windows VGA ANSI colors", () => 
   keyRoles.forEach(([key, name], i) => {
     const entry = theme[i];
     eq(entry.key, key, `line ${i + 1} key`);
-    const expected = key === "palette" ? `${name.slice(5)}=${role(name)}` : role(name);
+    const expected = key === "palette" ? `${name.replace("ansi_", "")}=${role(name)}` : role(name);
     eq(entry.value, expected, `${key} (${name})`);
   });
 });
@@ -86,9 +86,6 @@ test("split divider is work_grid", () => {
 });
 
 test("bold is not bright and synthetic bold stays off", () => {
-  for (const key of ["bold-color", "bold-is-bright"]) {
-    if (config.some((e) => e.key === key)) throw new Error(`${key} is set`);
-  }
   if (/bold-is-bright|bold-color/.test(configText)) throw new Error("config still mentions bright bold");
   eq(config.find((e) => e.key === "font-synthetic-style")?.value, "false", "font-synthetic-style");
 });
