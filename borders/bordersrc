@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# Frame palette shared with SketchyBar (role names from docs/theme-spec.md)
+source "$HOME/.config/sketchybar/color.sh"
+
 options=(
-  style=round
+  style=square
   width=4.0
   hidpi=on
-  active_color=0xff539bf5 # github dark dimmed blue
-  inactive_color=0xff1c2128 # github dark dimmed canvas inset
+  active_color="$frame_face"
+  inactive_color="$frame_shadow"
 )
 
 borders "${options[@]}"
