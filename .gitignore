@@ -3,3 +3,6 @@ gh/hosts.yml
 
 # Claude Code per-machine permissions
 **/.claude/settings.local.json
+
+# Chrome writes this into an unpacked theme folder when it loads it
+chrome/vintage-theme/Cached Theme.pak
