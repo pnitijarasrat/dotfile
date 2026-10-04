@@ -5,7 +5,7 @@ Personal macOS configuration for the tools in `~/.config` (plus VSCode, symlinke
 ## Language
 
 **Vintage theme**:
-The single look shared across every themed tool: a Windows Classic/XP **Frame** around TC2000-style **Work surfaces**.
+The single look shared across every themed tool: a Windows Classic/XP **Frame** around light, K-95-style **Work surfaces**.
 _Avoid_: retro theme, skin
 
 **Frame**:
@@ -13,11 +13,11 @@ The chrome surrounding work: menu bar (SketchyBar), window borders, launcher (Ra
 _Avoid_: UI, shell
 
 **Work surface**:
-Where text and code are read and edited: terminal, editors, TUI apps, and inline popups that show code (completion, hover, signature help, diagnostics). Dark canvas with bright TC2000-style data colors.
+Where text and code are read and edited: terminal, editors, TUI apps, and inline popups that show code (completion, hover, signature help, diagnostics). Light, K-95-style canvas (navy text on white, as in Kermit 95 on Windows) with Windows VGA data colors. Always light: no dark variant.
 _Avoid_: editor theme, canvas
 
 **Frame data colors**:
-The darker set of data colors (Win95 dark VGA) used when red/green/yellow etc. appear on the **Frame** grey, where the **Work surface** brights are unreadable.
+The darker set of data colors (Win95 dark VGA) used when red/green/yellow etc. appear on the **Frame** grey.
 _Avoid_: dark palette, light-mode colors
 
 **Theme spec**:

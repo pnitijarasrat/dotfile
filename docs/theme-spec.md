@@ -1,10 +1,10 @@
 # Theme spec: Vintage theme
 
-The locked **Theme spec** for the **Vintage theme**: a Windows 95 Classic **Frame** around TC2000-style **Work surfaces** in soft IBM 5153 colors. Vocabulary follows `CONTEXT.md`.
+The locked **Theme spec** for the **Vintage theme**: a Windows 95 Classic **Frame** around light, K-95-style **Work surfaces** in Windows VGA colors. Vocabulary follows `CONTEXT.md`.
 
 This is the hand-off document for re-theming. To theme one tool, read this file and that tool's ticket. To theme a web app, follow `docs/web-theme.md`. Where an earlier decision was later changed, this file gives only the final value. If the built SketchyBar code and an issue disagree, this file follows the code.
 
-Sources: palettes [#5](https://github.com/pnitijarasrat/dotfile/issues/5), fonts [#6](https://github.com/pnitijarasrat/dotfile/issues/6), per-tool decisions and popups [#7](https://github.com/pnitijarasrat/dotfile/issues/7), role names and palette sources [#8](https://github.com/pnitijarasrat/dotfile/issues/8), SketchyBar taskbar [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11). Map: [#2](https://github.com/pnitijarasrat/dotfile/issues/2).
+Sources: palettes [#5](https://github.com/pnitijarasrat/dotfile/issues/5), light Work surface [#43](https://github.com/pnitijarasrat/dotfile/issues/43) / `docs/adr/0001-light-k95-work-surface.md`, fonts [#6](https://github.com/pnitijarasrat/dotfile/issues/6), per-tool decisions and popups [#7](https://github.com/pnitijarasrat/dotfile/issues/7), role names and palette sources [#8](https://github.com/pnitijarasrat/dotfile/issues/8), SketchyBar taskbar [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11). Map: [#2](https://github.com/pnitijarasrat/dotfile/issues/2).
 
 ## Role names
 
@@ -38,50 +38,50 @@ Win95 Classic greys with a flat navy title bar (no gradient). Used by menu bars,
 
 ## Work surface palette
 
-Soft IBM 5153 on black. Used by terminals, editors, TUI apps and inline code popups.
+A light, K-95-style canvas: navy text on white with Windows VGA colors, as in Kermit 95 on Windows. Used by terminals, editors, TUI apps and inline code popups. It's always light: there's no dark variant, and it doesn't follow macOS appearance.
 
 | Role | Hex | Use |
 |---|---|---|
-| `work_bg` | `#000000` | background |
-| `work_fg` | `#C4C4C4` | foreground |
-| `work_cursor` | `#4EDC4E` | cursor |
-| `work_cursor_text` | `#000000` | text under the cursor |
-| `work_cursorline` | `#161616` | current line |
+| `work_bg` | `#FFFFFF` | background |
+| `work_fg` | `#000080` | foreground |
+| `work_cursor` | `#000000` | cursor |
+| `work_cursor_text` | `#FFFFFF` | text under the cursor |
+| `work_cursorline` | `#FFFFE1` | current line |
 | `work_selection` | `#000080` | selection background |
 | `work_selection_text` | `#FFFFFF` | selection text |
-| `work_line_number` | `#7E7E7E` | line numbers |
-| `work_grid` | `#4E4E4E` | TC2000 gridlines, rulers, split lines |
+| `work_line_number` | `#808080` | line numbers |
+| `work_grid` | `#C0C0C0` | gridlines, rulers, split lines |
 | `work_popup_border` | `#808080` | 1px border of inline code popups |
 
-### ANSI (IBM 5153)
+### ANSI (Windows VGA)
 
 | | black | red | green | yellow | blue | magenta | cyan | white |
 |---|---|---|---|---|---|---|---|---|
-| normal | `ansi_0` `#000000` | `ansi_1` `#C40000` | `ansi_2` `#00C400` | `ansi_3` `#C47E00` | `ansi_4` `#0000C4` | `ansi_5` `#C400C4` | `ansi_6` `#00C4C4` | `ansi_7` `#C4C4C4` |
-| bright | `ansi_8` `#4E4E4E` | `ansi_9` `#DC4E4E` | `ansi_10` `#4EDC4E` | `ansi_11` `#F3F34E` | `ansi_12` `#4E4EDC` | `ansi_13` `#F34EF3` | `ansi_14` `#4EF3F3` | `ansi_15` `#FFFFFF` |
+| normal | `ansi_0` `#000000` | `ansi_1` `#800000` | `ansi_2` `#008000` | `ansi_3` `#808000` | `ansi_4` `#000080` | `ansi_5` `#800080` | `ansi_6` `#008080` | `ansi_7` `#C0C0C0` |
+| bright | `ansi_8` `#808080` | `ansi_9` `#FF0000` | `ansi_10` `#00FF00` | `ansi_11` `#FFFF00` | `ansi_12` `#0000FF` | `ansi_13` `#FF00FF` | `ansi_14` `#00FFFF` | `ansi_15` `#FFFFFF` |
 
-`ansi_4` is hard to read on black (for example, `ls` directories). Because bold is bright, bold blue is drawn as `ansi_12`, which is readable. A tool may still override `ansi_4`, but only as a recorded deviation (see [Deviations](#deviations)).
+Bright yellow, green, cyan and white can't be read as text on white, so the brights mostly show up as backgrounds (K-95's yellow-on-blue bar). Bold isn't bright (see [Fonts](#fonts)).
 
 ### Syntax roles
 
 | Role | Hex |
 |---|---|
-| `syntax_comment` | `#7E7E7E` (**not** italic) |
-| `syntax_keyword` | `#F3F34E` |
-| `syntax_string` | `#4EDC4E` |
-| `syntax_number` | `#F34EF3` |
-| `syntax_function` | `#4EF3F3` |
-| `syntax_type` | `#FFFFFF` |
-| `syntax_constant` | `#C47E00` |
-| `syntax_operator` | `#C4C4C4` |
-| `syntax_error` | `#DC4E4E` |
-| `syntax_warning` | `#F3F34E` |
+| `syntax_comment` | `#808080` (**not** italic) |
+| `syntax_keyword` | `#808000` |
+| `syntax_string` | `#008000` |
+| `syntax_number` | `#800080` |
+| `syntax_function` | `#008080` |
+| `syntax_type` | `#000000` |
+| `syntax_constant` | `#804000` |
+| `syntax_operator` | `#000080` |
+| `syntax_error` | `#800000` |
+| `syntax_warning` | `#808000` |
 
-Nothing is italic, including comments. Emphasis comes from color only.
+Syntax roles use dark VGA shades (plus `#804000` for constants, the same as `frame_data_orange`), which read on white. Nothing is italic, including comments. Emphasis comes from color only.
 
 ## Frame data colors
 
-Win95 dark VGA. Use these wherever red, green, yellow and so on appear on Frame grey, because the Work surface brights can't be read there. Examples: status bar diagnostics in Neovim and VSCode, Raycast data slots, SketchyBar.
+Win95 dark VGA. Use these wherever red, green, yellow and so on appear on Frame grey. Examples: status bar diagnostics in Neovim and VSCode, Raycast data slots, SketchyBar.
 
 | Role | Hex |
 |---|---|
@@ -105,7 +105,7 @@ Win95 dark VGA. Use these wherever red, green, yellow and so on appear on Frame 
 | VSCode editor | `editor.fontSize: 13.333`, `editor.lineHeight: 13.333`, `window.zoomLevel: 1` ([#34](https://github.com/pnitijarasrat/dotfile/issues/34)). Zoom 1 scales everything by 1.2, so code renders at 16 (2 screen px per font px on 2× Retina) and the chrome's system font (13) at about 15.6: every pane is the same size. Fixedsys Excelsior's em is 16 font px, so it's only crisp when fontSize × 1.2^zoomLevel is a multiple of 8; 24 at zoom 1 (57.6 screen px) is soft. |
 | VSCode terminal | same font and size as the editor: `terminal.integrated.fontFamily` as above, `fontSize: 13.333`, `lineHeight: 1`. The terminal multiplies the font's cell height, which for Fixedsys Excelsior is exactly 1 em (ascent + descent), so rows match the editor ([#33](https://github.com/pnitijarasrat/dotfile/issues/33)) |
 | Italics | none; synthetic italic off |
-| Bold | bold is bright (`bold-is-bright = true`); synthetic bold off; VSCode `editor.fontWeight` and `terminal.integrated.fontWeight` normal |
+| Bold | bold is **not** bright (Ghostty `bold-color` unset); synthetic bold off, so bold text looks the same as normal text; VSCode `editor.fontWeight` and `terminal.integrated.fontWeight` normal |
 | Ligatures | off (`font-feature = -calt, -liga` in Ghostty; `editor.fontLigatures: false` and `terminal.integrated.fontLigatures.enabled: false` in VSCode) |
 
 Neovim's statusline belongs to the Frame, but it's drawn by the terminal, so it uses the Work surface font.
@@ -137,17 +137,17 @@ Neovim's statusline belongs to the Frame, but it's drawn by the terminal, so it 
 
 | Tool | Ticket | Approach | Palette source | Non-color changes | Status |
 |---|---|---|---|---|---|
-| **Ghostty** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | custom `vintage` theme: `work_*` + `ansi_0`–`ansi_15` | hand-written; raw hex, each line commented with its role name | `background-opacity = 1`, no blur, `window-decoration = none` (square corners; visible tabs are lost, splits stay); fonts as above | **built** |
-| **Neovim** (LazyVim) | [#16](https://github.com/pnitijarasrat/dotfile/issues/16), [#17](https://github.com/pnitijarasrat/dotfile/issues/17) | custom colorscheme `vintage`: Work surface roles on standard groups (Treesitter/LSP link to them), plus groups for plugins in use (snacks, telescope, which-key, oil, org) | hand-written; starts with a `local p = { work_bg = "#000000", ... }` role table | native statusline (lualine is disabled) and tab line are Frame grey with Frame data colors; `winborder = "single"` and square borders in snacks, telescope, which-key; delete `github.lua`, `tokyonight.lua` and the transparent groups | Work surface **built** (#16); Frame to do |
-| **VSCode** | [#18](https://github.com/pnitijarasrat/dotfile/issues/18), [#19](https://github.com/pnitijarasrat/dotfile/issues/19), [#20](https://github.com/pnitijarasrat/dotfile/issues/20), [#33](https://github.com/pnitijarasrat/dotfile/issues/33) | custom local theme extension "Vintage", symlinked into `~/.vscode/extensions`; workbench is Frame, token colors are Work surface | hand-written JSONC; raw hex with role-name comments | `settings.json` tracked in the repo and symlinked; `window.titleBarStyle: custom` with title bar active `frame_title`/`frame_title_text`, inactive `frame_title_inactive`/`frame_title_inactive_text`; `window.menuStyle: custom` so context menus are Frame; `workbench.experimental.modernUI: false` (the modern UI floats rounded parts and ignores the active tab color); status bar data in Frame data colors; fonts as above | **built** (#19, #20) |
+| **Ghostty** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | custom `vintage` theme: `work_*` + `ansi_0`–`ansi_15` | hand-written; raw hex, each line commented with its role name | `background-opacity = 1`, no blur, `window-decoration = none` (square corners; visible tabs are lost, splits stay); fonts as above | Work surface **to do again**: light Work surface [#44](https://github.com/pnitijarasrat/dotfile/issues/44) |
+| **Neovim** (LazyVim) | [#16](https://github.com/pnitijarasrat/dotfile/issues/16), [#17](https://github.com/pnitijarasrat/dotfile/issues/17), [#45](https://github.com/pnitijarasrat/dotfile/issues/45) | custom colorscheme `vintage`: Work surface roles on standard groups (Treesitter/LSP link to them), plus groups for plugins in use (snacks, telescope, which-key, oil, org). `MatchParen` is `work_fg` on `work_grid` (white text can't be read on `work_grid`) | hand-written; starts with a `local p = { work_bg = "#FFFFFF", ... }` role table | native statusline (lualine is disabled) and tab line are Frame grey with Frame data colors; `winborder = "single"` and square borders in snacks, telescope, which-key; delete `github.lua`, `tokyonight.lua` and the transparent groups | Work surface **to do again**: light Work surface [#45](https://github.com/pnitijarasrat/dotfile/issues/45); Frame to do |
+| **VSCode** | [#18](https://github.com/pnitijarasrat/dotfile/issues/18), [#19](https://github.com/pnitijarasrat/dotfile/issues/19), [#20](https://github.com/pnitijarasrat/dotfile/issues/20), [#33](https://github.com/pnitijarasrat/dotfile/issues/33), [#46](https://github.com/pnitijarasrat/dotfile/issues/46) | custom local theme extension "Vintage", symlinked into `~/.vscode/extensions`; workbench is Frame, token colors are Work surface | hand-written JSONC; raw hex with role-name comments | `settings.json` tracked in the repo and symlinked; `window.titleBarStyle: custom` with title bar active `frame_title`/`frame_title_text`, inactive `frame_title_inactive`/`frame_title_inactive_text`; `window.menuStyle: custom` so context menus are Frame; `workbench.experimental.modernUI: false` (the modern UI floats rounded parts and ignores the active tab color); status bar data in Frame data colors; fonts as above | Frame **built** (#20); Work surface **to do again**: light Work surface [#46](https://github.com/pnitijarasrat/dotfile/issues/46) |
 | **SketchyBar** | [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11) | custom XP taskbar | shared `sketchybar/color.sh` (Frame role-name variables) | docked edge to edge at the bottom (`topmost=window`); raised Start button, spaces as taskbar buttons, front app as a pressed task button, sunken tray; `blur_radius=0`, `corner_radius=0` on bar and popups; 16px pixel icons instead of Nerd Font glyphs | **built** |
 | **JankyBorders** | [#15](https://github.com/pnitijarasrat/dotfile/issues/15) | custom: active `frame_face`, inactive `frame_shadow` | shared: `bordersrc` sources `$HOME/.config/sketchybar/color.sh` | `style=square`, width 4 | **built** |
 | **Raycast** | [#21](https://github.com/pnitijarasrat/dotfile/issues/21) | custom light theme "Vintage" (`appearance: light`): background and backgroundSecondary `frame_face` (flat, no gradient), text `frame_text`, selection `frame_selection`, data slots use Frame data colors, `loader` is `frame_selection` (Win95 progress-bar navy) | hand-written strict JSON; raw hex (no comments allowed) | none possible (see [Known exceptions](#known-exceptions)) | **built**; import into Raycast not yet checked |
 | **Chrome** | [#37](https://github.com/pnitijarasrat/dotfile/issues/37), [#38](https://github.com/pnitijarasrat/dotfile/issues/38) | custom local theme extension "Vintage" (MV3), loaded once with Load unpacked; the whole window is Frame (web pages can't be themed). On macOS the tab strip is the title bar: `frame` and `background_tab` `frame_title`, `tab_background_text` `frame_title_text`; inactive window `frame_inactive` and `background_tab_inactive` `frame_title_inactive`, `tab_background_text_inactive` `frame_title_inactive_text`. Active tab and toolbar `frame_face`; `tab_text`, `toolbar_text`, `toolbar_button_icon`, `bookmark_text` `frame_text`; omnibox `frame_window` with `frame_text`. New Tab page is the Classic desktop: flat `frame_desktop` teal (`ntp_background`) with `frame_desktop_text` text and links ([#38](https://github.com/pnitijarasrat/dotfile/issues/38)). Incognito windows aren't themed (see [Known exceptions](#known-exceptions)) | hand-written strict JSON; Chrome only takes `[r, g, b]` arrays, so no hex and no role comments: the key-to-role mapping is this row and `chrome/tests/vintage_test.mjs` | colors only: no `images`, `tints` or `properties` (opaque, no gradients; the New Tab page has no background image) | **built** (#37, #38) |
 | **Starship** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep | none: named ANSI colors, inherited from Ghostty | `➤` → `>` for success and error (not in Fixedsys Excelsior); vim mode stays `<` | **built** |
 | **ccstatusline** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep | none: named ANSI colors, inherited from Ghostty | `colorLevel: 1` (see [Deviations](#deviations)) | **built** |
-| **ranger** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep default scheme | none: ANSI colors, inherited from Ghostty | none (bold blue directories become `ansi_12` because bold is bright) | **built** |
-| **litecli** | [#14](https://github.com/pnitijarasrat/dotfile/issues/14) | small rewrite | none: `[colors]` uses prompt_toolkit ANSI names (`ansigreen`, `bg:ansiblue`, ...), `syntax_style = native` | none | to do |
+| **ranger** | [#13](https://github.com/pnitijarasrat/dotfile/issues/13) | keep default scheme | none: ANSI colors, inherited from Ghostty | none | **built** |
+| **litecli** | [#14](https://github.com/pnitijarasrat/dotfile/issues/14) | small rewrite | none: `[colors]` uses prompt_toolkit ANSI names (`ansigreen`, `bg:ansiblue`, ...), `syntax_style = native`, which is a dark Pygments style: needs a light one for the light Work surface | none | to do |
 
 Starship, ccstatusline, ranger and litecli take no hex values. They follow the palette by inheriting Ghostty's ANSI colors.
 
@@ -159,13 +159,10 @@ Every place where a tool departs from this spec gets **both** a row here **and**
 |---|---|---|---|
 | SketchyBar | Frame bold font for Start and the task button | Tahoma Bold **13** (not 14) | Microsoft Sans Serif has no bold (#9); size 13 set when built in #11 |
 | SketchyBar | Wi-Fi popup section headers | Tahoma Bold **10**, `frame_gray_text` | smaller section headings inside the popup, set when built in #11 |
-| Ghostty | bold is bright | `bold-color = bright` (not `bold-is-bright = true`) | same behavior; Ghostty 1.2.0 deprecated `bold-is-bright` for `bold-color` (#13) |
 | ccstatusline | color level | `colorLevel: 1` (was 2) | at level 2 named colors are sent as 256-color codes (`38;5;30`), which bypass Ghostty's palette; level 1 sends the 16 ANSI codes. No inline comment: the file is strict JSON (#13) |
 | VSCode | selection text | selected text keeps its token colors on `work_selection` (not `work_selection_text`) | VSCode only applies `editor.selectionForeground` in high-contrast themes (#19) |
-| VSCode | panel body | `work_bg` with `work_fg` titles (not `frame_face`) | the panel's lists (problems, terminal tabs) use the global `foreground`, which must stay `work_fg` because settings and other editor-area pages draw it on `work_bg`; VSCode has no `panel.foreground`. The panel mostly holds the terminal (#20) |
+| VSCode | panel body | `work_bg` with `work_fg` titles (not `frame_face`) | the panel's lists (problems, terminal tabs) use the global `foreground`, which is `frame_text` (it reads on both Frame grey and the white `work_bg`); editor text stays `work_fg`. VSCode has no `panel.foreground`. The panel mostly holds the terminal (#20, #46) |
 | VSCode | status bar problems counter | `frame_text` (not Frame data colors) | VSCode has no color key for it; Frame data colors apply to the items VSCode marks as error or warning (#20) |
-| VSCode | icons | `frame_gray_text` (not `frame_text`) on Frame | `icon.foreground` is one color for icons on Frame grey and on `work_bg` (panel, settings), where black vanishes (#20) |
-| VSCode | links | `ansi_12` on both Frame and Work surface | `textLink.foreground` is one color for links on Frame grey (sidebar) and on `work_bg` (hover, settings); no Frame data color reads on both (#20) |
 | Raycast | purple data slot | `frame_data_magenta` `#800080` (same as the magenta slot) | Raycast has separate purple and magenta slots, but the Frame data colors have no purple; magenta is the nearest. No inline comment: the file is strict JSON (#21) |
 | Neovim | `winborder = "single"` | set only on Neovim 0.11+; on 0.10 the hover, signature help and diagnostic floats get `border = "single"` directly, and blink.cmp sets it per popup | `winborder` doesn't exist before 0.11, and the installed Neovim is 0.10.0. Same result (#16) |
 
@@ -176,7 +173,7 @@ These don't follow Purist fidelity, and that's accepted. They aren't deviations,
 - **Raycast**: corners, blur and font can't be changed.
 - **VSCode**: its own widgets keep rounded corners. Squaring them needs the custom-CSS extension (see [Open](#open)).
 - **Chrome**: tabs, the omnibox and toolbar buttons keep their rounded shapes, and the tab strip, toolbar and bookmarks use the macOS system font; a theme can set neither. The Material refresh also derives its own tints from the theme colors (tab hover, toolbar button hover and pressed states, separators, the omnibox hover and its dropdown), which aren't spec roles. The macOS traffic-light buttons keep their system colors. On the New Tab page, the Google logo, search box, shortcut tiles and Customize Chrome button are drawn by Chrome, rounded and in its own colors; only the background, text and links come from the theme. Incognito windows ignore the theme entirely and keep Chrome's own dark colors; Chrome stopped applying themes to Incognito, so the `frame_incognito` keys do nothing (#38).
-- **litecli**: SQL highlighting comes from Pygments `native`, which isn't exactly 5153.
+- **litecli**: SQL highlighting comes from a Pygments style, which isn't exactly the Work surface syntax roles.
 
 ## Open
 
@@ -189,3 +186,4 @@ Not yet decided. Tracked in map [#2](https://github.com/pnitijarasrat/dotfile/is
 
 - iTerm2 and nnn: no longer installed.
 - System-wide macOS window chrome: it can't be themed without disabling SIP or patching system files.
+- K-95's own window chrome (toolbar, scrollbar, status bar): Ghostty can't draw it. Only K-95's colors are adopted.
