@@ -63,6 +63,7 @@ add_row() {
 }
 
 add_header() {
+  # Deviation (Theme spec): Tahoma Bold 10, smaller than the Frame's 14, for section headings.
   ARGS+=(--add item "wifi_hdr_$1" popup.$POPUP \
     --set "wifi_hdr_$1" label="$2" label.color="$frame_gray_text" label.font="Tahoma:Bold:10.0" \
                          icon.drawing=off padding_left=10)
