@@ -2,6 +2,13 @@
     "claudeCode.preferredLocation": "panel",
     // Local extension in vscode/vintage-theme (#19).
     "workbench.colorTheme": "Vintage",
+    // Frame (#20): VSCode draws the title bar, so the theme can make it navy,
+    // and the context menus, so they are Frame grey instead of native macOS.
+    "window.titleBarStyle": "custom",
+    "window.menuStyle": "custom",
+    // The experimental modern UI floats the parts as rounded cards and ignores
+    // tab.activeBackground; the classic layout keeps the Frame flush and square.
+    "workbench.experimental.modernUI": false,
     "terminal.integrated.mouseWheelScrollSensitivity": 3,
     "terminal.integrated.gpuAcceleration": "off",
     // Show the theme's IBM 5153 ANSI colors as-is; the default ratio (4.5)
