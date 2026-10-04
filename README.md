@@ -17,3 +17,9 @@ ln -sf ~/.config/vscode/settings.json settings.json
 ```
 
 The editor font settings follow the Work surface fonts in `docs/theme-spec.md`.
+
+The color theme is a local extension, "Vintage", in `vscode/vintage-theme` (#19). Symlink it into VSCode's extensions folder, then reload VSCode (`Developer: Reload Window`). `settings.json` already selects it with `workbench.colorTheme`:
+
+```sh
+ln -sfn ~/.config/vscode/vintage-theme ~/.vscode/extensions/pnitijarasrat.vintage
+```

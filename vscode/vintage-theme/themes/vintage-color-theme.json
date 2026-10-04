@@ -1,0 +1,166 @@
+// Vintage theme for VSCode (docs/theme-spec.md).
+// Work surface half (#19): editor, terminal and token colors.
+// The Frame workbench comes in #20, along with the inline code popups
+// (Work surface, but scoped to that ticket).
+// Raw hex with spec role names in comments.
+{
+  "name": "Vintage",
+  "type": "dark",
+  "semanticHighlighting": true,
+  // Semantic tokens fall back to the TextMate rules below, except that
+  // TS/JS mark every const local readonly (variable.other.constant), which
+  // would paint ordinary locals syntax_constant.
+  "semanticTokenColors": {
+    "variable.readonly": "#C4C4C4" // work_fg
+  },
+  "colors": {
+    // Editor
+    "editor.background": "#000000", // work_bg
+    "editor.foreground": "#C4C4C4", // work_fg
+    "editorCursor.foreground": "#4EDC4E", // work_cursor
+    "editorCursor.background": "#000000", // work_cursor_text
+    "editor.lineHighlightBackground": "#161616", // work_cursorline
+    "editor.lineHighlightBorder": "#161616", // work_cursorline (no outline)
+    "editor.selectionBackground": "#000080", // work_selection
+    // Deviation: no work_selection_text. VSCode only honors
+    // editor.selectionForeground in high-contrast themes, so selected text
+    // keeps its token colors on work_selection.
+    "editor.inactiveSelectionBackground": "#000080", // work_selection
+    "editorGutter.background": "#000000", // work_bg
+    "editorLineNumber.foreground": "#7E7E7E", // work_line_number
+    "editorLineNumber.activeForeground": "#7E7E7E", // work_line_number
+    "editorRuler.foreground": "#4E4E4E", // work_grid
+    "editorIndentGuide.background1": "#4E4E4E", // work_grid
+    "editorIndentGuide.activeBackground1": "#4E4E4E", // work_grid
+    "editorError.foreground": "#DC4E4E", // syntax_error
+    "editorWarning.foreground": "#F3F34E", // syntax_warning
+
+    // Integrated terminal: IBM 5153 ANSI
+    "terminal.background": "#000000", // work_bg
+    "terminal.foreground": "#C4C4C4", // work_fg
+    "terminalCursor.foreground": "#4EDC4E", // work_cursor
+    "terminalCursor.background": "#000000", // work_cursor_text
+    "terminal.selectionBackground": "#000080", // work_selection
+    "terminal.selectionForeground": "#FFFFFF", // work_selection_text
+    "terminal.ansiBlack": "#000000", // ansi_0
+    "terminal.ansiRed": "#C40000", // ansi_1
+    "terminal.ansiGreen": "#00C400", // ansi_2
+    "terminal.ansiYellow": "#C47E00", // ansi_3
+    "terminal.ansiBlue": "#0000C4", // ansi_4
+    "terminal.ansiMagenta": "#C400C4", // ansi_5
+    "terminal.ansiCyan": "#00C4C4", // ansi_6
+    "terminal.ansiWhite": "#C4C4C4", // ansi_7
+    "terminal.ansiBrightBlack": "#4E4E4E", // ansi_8
+    "terminal.ansiBrightRed": "#DC4E4E", // ansi_9
+    "terminal.ansiBrightGreen": "#4EDC4E", // ansi_10
+    "terminal.ansiBrightYellow": "#F3F34E", // ansi_11
+    "terminal.ansiBrightBlue": "#4E4EDC", // ansi_12
+    "terminal.ansiBrightMagenta": "#F34EF3", // ansi_13
+    "terminal.ansiBrightCyan": "#4EF3F3", // ansi_14
+    "terminal.ansiBrightWhite": "#FFFFFF" // ansi_15
+  },
+  // Nothing is italic or bold: every rule sets fontStyle "" so emphasis
+  // comes from color only.
+  "tokenColors": [
+    {
+      "settings": {
+        "foreground": "#C4C4C4", // work_fg
+        "fontStyle": ""
+      }
+    },
+    {
+      "name": "syntax_comment",
+      "scope": ["comment", "punctuation.definition.comment"],
+      "settings": { "foreground": "#7E7E7E", "fontStyle": "" } // syntax_comment
+    },
+    {
+      "name": "syntax_keyword",
+      "scope": [
+        "keyword",
+        "keyword.operator.new",
+        "keyword.operator.expression",
+        "storage",
+        "variable.language",
+        "markup.heading"
+      ],
+      "settings": { "foreground": "#F3F34E", "fontStyle": "" } // syntax_keyword
+    },
+    {
+      "name": "syntax_string",
+      "scope": [
+        "string",
+        "punctuation.definition.string",
+        "markup.inline.raw",
+        "markup.fenced_code",
+        "markup.inserted"
+      ],
+      "settings": { "foreground": "#4EDC4E", "fontStyle": "" } // syntax_string
+    },
+    {
+      "name": "syntax_number",
+      "scope": ["constant.numeric"],
+      "settings": { "foreground": "#F34EF3", "fontStyle": "" } // syntax_number
+    },
+    {
+      "name": "syntax_function",
+      "scope": [
+        "entity.name.function",
+        "support.function",
+        "entity.name.tag"
+      ],
+      "settings": { "foreground": "#4EF3F3", "fontStyle": "" } // syntax_function
+    },
+    {
+      "name": "syntax_type",
+      "scope": [
+        "entity.name.type",
+        "entity.name.class",
+        "entity.name.namespace",
+        "entity.other.inherited-class",
+        "support.type",
+        "support.class",
+        "storage.type.primitive",
+        "storage.type.built-in"
+      ],
+      "settings": { "foreground": "#FFFFFF", "fontStyle": "" } // syntax_type
+    },
+    {
+      "name": "syntax_constant",
+      "scope": [
+        "constant",
+        "support.constant",
+        "variable.other.constant",
+        "variable.other.enummember",
+        "entity.other.attribute-name"
+      ],
+      "settings": { "foreground": "#C47E00", "fontStyle": "" } // syntax_constant
+    },
+    {
+      "name": "syntax_operator",
+      "scope": ["keyword.operator", "punctuation"],
+      "settings": { "foreground": "#C4C4C4", "fontStyle": "" } // syntax_operator
+    },
+    {
+      "name": "syntax_error",
+      "scope": ["invalid", "markup.deleted"],
+      "settings": { "foreground": "#DC4E4E", "fontStyle": "" } // syntax_error
+    },
+    {
+      "name": "syntax_warning",
+      "scope": ["invalid.deprecated", "markup.changed"],
+      "settings": { "foreground": "#F3F34E", "fontStyle": "" } // syntax_warning
+    },
+    {
+      "name": "no emphasis",
+      "scope": [
+        "markup.bold",
+        "markup.italic",
+        "markup.underline",
+        "markup.strikethrough",
+        "emphasis",
+        "strong"
+      ],
+      "settings": { "fontStyle": "" }
+    }
+  ]
+}
