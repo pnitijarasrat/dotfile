@@ -10,10 +10,8 @@ STATE_FILE="/tmp/sketchybar_wifi_popup_state"
 [ "$(cat "$STATE_FILE" 2>/dev/null)" = "on" ] && exit 0
 
 POPUP="wifi"
-ICON_WIFI_ITEM=""     # nf-fa-wifi
-ICON_LOCK=""          # nf-fa-lock
-ICON_CURRENT=""       # nf-fa-check
-ICON_HOTSPOT="􀉤"       # same glyph as the bar's own hotspot icon
+# Rows carry no glyphs: the connected network is shown as the navy
+# selection, and secured networks get the pixel lock icon.
 
 # Fixed row width instead of measuring rendered text: bounding_rects only
 # reflects the actual on-screen frame, which doesn't exist while the popup
@@ -52,27 +50,28 @@ for name in $(sketchybar --query bar | jq -r '.items[]' | grep '^wifi_' | grep -
 done
 
 add_row() {
-  local id="$1" ssid="$2" icon="$3" bg="$4" click="$5" icon_drawing="on"
-  [ -z "$icon" ] && icon_drawing="off"
+  local id="$1" ssid="$2" image="$3" bg="$4" fg="$5" click="$6" icon_drawing="on"
+  [ -z "$image" ] && icon_drawing="off"
   ARGS+=(--add item "wifi_$id" popup.$POPUP \
     --set "wifi_$id" \
       width=$ROW_WIDTH padding_left=$ROW_PAD padding_right=$ROW_PAD \
-      icon="$icon" icon.drawing="$icon_drawing" icon.color="$FG" icon.font="Hack Nerd Font:Bold:13.0" \
-      label="$ssid" label.color="$FG" label.font="JetBrains Mono:Bold:13.0" \
-      background.color="$bg" background.corner_radius=6 background.height=26 \
+      icon="" icon.width=16 icon.drawing="$icon_drawing" \
+      icon.background.drawing="$icon_drawing" icon.background.image="$image" icon.background.image.scale=0.5 \
+      label="$ssid" label.color="$fg" label.font="$FONT" \
+      background.drawing=on background.color="$bg" background.corner_radius=0 background.height=22 \
       click_script="$click")
 }
 
 add_header() {
   ARGS+=(--add item "wifi_hdr_$1" popup.$POPUP \
-    --set "wifi_hdr_$1" label="$2" label.color="$GREY0" label.font="JetBrains Mono:Bold:10.0" \
+    --set "wifi_hdr_$1" label="$2" label.color="$frame_gray_text" label.font="Tahoma:Bold:10.0" \
                          icon.drawing=off padding_left=10)
 }
 
 # --- Connected network ---
 if [ -n "$CURRENT_SSID" ]; then
   add_header connected "CONNECTED"
-  add_row "current" "$CURRENT_SSID" "$ICON_CURRENT" "$BG3" ""
+  add_row "current" "$CURRENT_SSID" "" "$frame_selection" "$frame_selection_text" ""
 fi
 
 # --- Personal hotspots (iPhone/iPad/iPod broadcasting a Personal Hotspot) ---
@@ -91,7 +90,7 @@ while IFS=$'\t' read -r SSID SECURITY; do
   fi
   SECURED="false"
   echo "$SECURITY" | grep -qvi "none" && SECURED="true"
-  add_row "hotspot_$INDEX" "$SSID" "$ICON_HOTSPOT" "$BG1" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' '$SECURED'"
+  add_row "hotspot_$INDEX" "$SSID" "" "$frame_face" "$frame_text" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' '$SECURED'"
   INDEX=$((INDEX + 1))
 done <<< "$NETWORKS"
 
@@ -109,9 +108,9 @@ while IFS=$'\t' read -r SSID SECURITY; do
       add_header known "KNOWN NETWORKS"
       FIRST_KNOWN=0
     fi
-    ICON="$ICON_WIFI_ITEM"
-    echo "$SECURITY" | grep -qvi "none" && ICON="$ICON_WIFI_ITEM   $ICON_LOCK"
-    add_row "known_$INDEX" "$SSID" "$ICON" "$BG1" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' 'true'"
+    LOCK=""
+    echo "$SECURITY" | grep -qvi "none" && LOCK="$ICONS/lock.png"
+    add_row "known_$INDEX" "$SSID" "$LOCK" "$frame_face" "$frame_text" "$CONFIG_DIR/plugins/wifi_join.sh '$SSID' 'true'"
     INDEX=$((INDEX + 1))
   fi
 done <<< "$NETWORKS"
@@ -119,7 +118,7 @@ done <<< "$NETWORKS"
 # --- Footer: hand off to the native Wi-Fi settings pane instead of listing
 #     every unknown network in range ---
 add_header settings ""
-add_row "open_settings" "Open Wi-Fi Settings…" "" "$BG1" \
+add_row "open_settings" "Open Wi-Fi Settings…" "" "$frame_face" "$frame_text" \
   "open 'x-apple.systempreferences:com.apple.Wi-Fi-Settings.extension'; sketchybar --set wifi popup.drawing=off; echo off >/tmp/sketchybar_wifi_popup_state"
 
 sketchybar "${ARGS[@]}"

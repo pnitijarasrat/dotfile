@@ -1,105 +1,88 @@
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/color.sh"
+source "$CONFIG_DIR/bevel.sh"
 
-sketchybar --bar position=top height=30 blur_radius=30 border_color="$FG" color="$BG0" border_width=1 corner_radius=10 margin=6 y_offset=6 padding_left=14 padding_right=14
-
-FONT="JetBrains Mono"
-
-SEPARATOR=(
-  icon="|"
-  icon.color="$GREY0"
-  icon.font="$FONT:Bold:14.0"
-  label.drawing=off
-  padding_left=8
-  padding_right=8
-)
+# XP-style taskbar: docked edge to edge at the bottom. The white border shows
+# as the raised line along the top edge. yabai's bottom_padding leaves room,
+# and topmost=window stops window shadows from darkening the bar.
+sketchybar --bar position=bottom height=30 margin=0 y_offset=0 corner_radius=0 blur_radius=0 \
+                 color="$frame_face" border_color="$frame_highlight" border_width=1 padding_left=2 padding_right=2 \
+                 topmost=window
 
 default=(
-  padding_left=4
-  padding_right=4
-  icon.font="Hack Nerd Font:Bold:14.0"
-  label.font="$FONT:Bold:14.0"
-  icon.color="$FG"
-  icon.highlight_color="$BG0"
-  label.color="$FG"
-  icon.padding_left=4
-  icon.padding_right=4
+  padding_left=2
+  padding_right=2
+  icon.font="$FONT"
+  label.font="$FONT"
+  icon.color="$frame_text"
+  label.color="$frame_text"
+  icon.padding_left=0
+  icon.padding_right=0
   label.padding_left=4
   label.padding_right=4
+  background.height=22
+  icon.background.image.scale=0.5
 )
 sketchybar --default "${default[@]}"
 
-##### adding left items #####
-sketchybar --add item apple left \
-           --set apple icon.font="Hack Nerd Font:Bold:20.0" \
-                       icon.color="$FG" \
-                       icon.padding_left=0 icon.padding_right=0 border_width=1 \
-                       padding_left=10 padding_right=0 \
-                       script="$PLUGIN_DIR/apple.sh"
+# Pixel icons are 2x PNGs drawn as the icon's background.
+PIXEL=(icon="" icon.width=16 icon.background.drawing=on)
 
-sketchybar --add item sepy left \
-           --set sepy padding_left=0 icon.padding_left=0 "${SEPARATOR[@]}"
+##### left: Start, spaces, task button #####
+sketchybar --add item start left \
+           --set start "${RAISED[@]}" "${PIXEL[@]}" \
+                       icon.background.image="$ICONS/start.png" icon.padding_left=4 \
+                       label="Start" label.font="$BOLD" label.padding_right=6 padding_right=6
 
-SPACE_ICONS=("1" "2" "3" "4" "5" "6" "7" "8" "9" "0")
-for i in "${!SPACE_ICONS[@]}"
+for sid in 1 2 3 4 5 6 7 8 9 10
 do
-  sid="$(($i+1))"
   space=(
     space="$sid"
-    icon="${SPACE_ICONS[i]}"
-    icon.padding_left=6
-    icon.padding_right=6
-    background.color="$BG4"
-    background.corner_radius=5
-    background.height=18
+    icon="$((sid % 10))"
+    icon.width=22
+    icon.align=center
     label.drawing=off
     script="$PLUGIN_DIR/space.sh"
     click_script="yabai -m space --focus $sid"
   )
-  sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}"
+  sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}" "${RAISED[@]}"
 done
 
-sketchybar --add item sepx left \
-           --set sepx "${SEPARATOR[@]}" \
-           --add item weather left \
-           --set weather update_freq=600 script="$PLUGIN_DIR/weather.sh" \
-           --add item weather.cond left \
-           --set weather.cond icon.drawing=on label.drawing=off
-
-sketchybar --add item front_app center \
-           --set front_app icon.drawing=off script="$PLUGIN_DIR/front_app.sh" \
+sketchybar --add item front_app left \
+           --set front_app "${SUNKEN[@]}" background.color="$frame_light" \
+                           icon.drawing=off label.font="$BOLD" label.width=180 \
+                           label.padding_left=8 padding_left=8 \
+                           script="$PLUGIN_DIR/front_app.sh" \
            --subscribe front_app front_app_switched
 
-##### adding right items #####
+##### right: tray #####
 sketchybar --add item clock right \
-           --set clock update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-           --add item sep1 right \
-           --set sep1 "${SEPARATOR[@]}" \
+           --set clock icon.drawing=off update_freq=10 script="$PLUGIN_DIR/clock.sh" \
+                       label.padding_left=6 label.padding_right=8 \
            --add item volume right \
-           --set volume script="$PLUGIN_DIR/volume.sh" \
+           --set volume "${PIXEL[@]}" label.drawing=off script="$PLUGIN_DIR/volume.sh" \
            --subscribe volume volume_change \
-           --add item sep2 right \
-           --set sep2 "${SEPARATOR[@]}" \
            --add item battery right \
-           --set battery update_freq=120 script="$PLUGIN_DIR/battery.sh" \
+           --set battery "${PIXEL[@]}" update_freq=120 script="$PLUGIN_DIR/battery.sh" \
            --subscribe battery system_woke power_source_change \
-           --add item sep3 right \
-           --set sep3 "${SEPARATOR[@]}" \
            --add item language right \
-           --set language update_freq=1 icon.drawing=off script="$PLUGIN_DIR/language.sh" \
-           --add item sep4 right \
-           --set sep4 "${SEPARATOR[@]}" \
+           --set language icon.drawing=off update_freq=1 script="$PLUGIN_DIR/language.sh" \
            --add item wifi right \
-           --set wifi script="$PLUGIN_DIR/wifi.sh" update_freq=5 \
-             padding_right=0 icon.padding_right=0 \
+           --set wifi "${PIXEL[@]}" label.drawing=off update_freq=5 script="$PLUGIN_DIR/wifi.sh" \
              click_script="$PLUGIN_DIR/wifi_menu.sh" \
-             popup.background.color="$BG1" \
-             popup.background.border_color="$FG" \
+             popup.background.color="$frame_face" \
+             popup.background.border_color="$frame_dark_shadow" \
              popup.background.border_width=1 \
-             popup.background.corner_radius=10 \
-             popup.blur_radius=30 \
-             popup.y_offset=6 \
+             popup.background.corner_radius=0 \
+             popup.blur_radius=0 \
+             popup.y_offset=4 \
+             popup.align=right \
            --add item wifi_scanner right \
-           --set wifi_scanner drawing=off update_freq=20 script="$PLUGIN_DIR/wifi_scan.sh"
+           --set wifi_scanner drawing=off update_freq=20 script="$PLUGIN_DIR/wifi_scan.sh" \
+           --add item weather right \
+           --set weather "${PIXEL[@]}" update_freq=600 script="$PLUGIN_DIR/weather.sh" \
+                         icon.padding_left=6 \
+           --add bracket tray weather wifi language battery volume clock \
+           --set tray "${SUNKEN[@]}"
 
 sketchybar --update
