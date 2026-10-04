@@ -1,0 +1,21 @@
+{
+    "claudeCode.preferredLocation": "panel",
+    // Placeholder until the Vintage theme extension lands (#19).
+    "workbench.colorTheme": "GitHub Dark Dimmed",
+    "terminal.integrated.mouseWheelScrollSensitivity": 3,
+    "terminal.integrated.gpuAcceleration": "off",
+    "explorer.confirmDragAndDrop": false,
+    "editor.formatOnSave": true,
+    "git.confirmSync": false,
+    "totalTypeScript.hideAllTips": false,
+    "totalTypeScript.hideBasicTips": false,
+
+    // Work surface font (docs/theme-spec.md). Fixedsys Excelsior is only crisp
+    // at fontSize 24 with zoomLevel 0; any other zoom makes it soft.
+    "editor.fontFamily": "'Fixedsys Excelsior', Menlo, Thonburi",
+    "editor.fontSize": 24,
+    "editor.lineHeight": 24,
+    "editor.fontWeight": "normal",
+    "editor.fontLigatures": false,
+    "window.zoomLevel": 0
+}
