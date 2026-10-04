@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.raycast.com/schemas/theme.json",
+  "name": "Vintage",
+  "appearance": "light",
+  "colors": {
+    "background": "#C0C0C0",
+    "text": "#000000",
+    "selection": "#000080",
+    "loading": "#000080",
+    "red": "#800000",
+    "orange": "#804000",
+    "yellow": "#808000",
+    "green": "#008000",
+    "blue": "#000080",
+    "purple": "#800080",
+    "magenta": "#800080"
+  }
+}
