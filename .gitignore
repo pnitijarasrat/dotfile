@@ -1,0 +1,5 @@
+# GitHub CLI login (may contain an auth token)
+gh/hosts.yml
+
+# Claude Code per-machine permissions
+**/.claude/settings.local.json
