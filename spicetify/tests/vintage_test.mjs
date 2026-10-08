@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57, #58).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -457,11 +457,62 @@ test("focus is a 1px dotted frame_text outline inside the control", () => {
   eq(declsFor("html:not(.no-focus-outline) main:focus::after").outline, "none", "main view focus ring");
 });
 
-test("config selects Vintage with the color scheme and CSS injection on", () => {
+// The top bar (back, forward, Home, search) is the window's title bar.
+const titleBar = ".Root__globalNav";
+const inactiveTitleBar = `html.vintage-window-inactive ${titleBar}`;
+
+test("the top bar is an active title bar", () => {
+  const d = declsFor(titleBar);
+  eq(d["background-color"], "var(--frame_title)", `${titleBar} background-color`);
+  eq(d.color, "var(--frame_title_text)", `${titleBar} color`);
+});
+
+test("the top bar is an inactive title bar when Spotify loses focus", () => {
+  const d = declsFor(inactiveTitleBar);
+  eq(d["background-color"], "var(--frame_title_inactive)", `${inactiveTitleBar} background-color`);
+  eq(d.color, "var(--frame_title_inactive_text)", `${inactiveTitleBar} color`);
+});
+
+test("theme.js marks the window inactive while Spotify doesn't have focus", () => {
+  // Runs theme.js against a stand-in window, then moves focus away and back.
+  let focused = true;
+  const listeners = {};
+  const classes = new Set();
+  const window = { addEventListener: (type, fn) => (listeners[type] ??= []).push(fn) };
+  const document = {
+    hasFocus: () => focused,
+    documentElement: { classList: { toggle: (name, on) => (on ? classes.add(name) : classes.delete(name)) } },
+  };
+  new Function("window", "document", read("spicetify/Themes/Vintage/theme.js"))(window, document);
+  const fire = (type) => (listeners[type] ?? []).forEach((fn) => fn());
+  const inactive = () => classes.has("vintage-window-inactive");
+
+  eq(inactive(), false, "inactive at load, with focus");
+  focused = false;
+  fire("blur");
+  eq(inactive(), true, "inactive after blur");
+  focused = true;
+  fire("focus");
+  eq(inactive(), false, "inactive after focus");
+  // Focus moving into a frame inside the page blurs the window, but the
+  // page still has focus.
+  fire("blur");
+  eq(inactive(), false, "inactive after blur into a frame");
+});
+
+test("the search box is a sunken frame_window edit field", () => {
+  const d = declsFor("[data-top-bar-search]");
+  eq(d["background-color"], "var(--frame_window)", "search box background-color");
+  eq(d.color, "var(--frame_text)", "search box color");
+  eq(d["box-shadow"], "var(--sunken)", "search box box-shadow");
+});
+
+test("config selects Vintage with the color scheme, CSS and theme.js injection on", () => {
   const s = config.Setting ?? {};
   eq(s.current_theme, "Vintage", "current_theme");
   eq(s.color_scheme, "Vintage", "color_scheme");
   eq(s.inject_css, "1", "inject_css");
+  eq(s.inject_theme_js, "1", "inject_theme_js");
   eq(s.replace_colors, "1", "replace_colors");
 });
 

@@ -4,7 +4,8 @@ Spotify in the **Vintage theme** ([#53](https://github.com/pnitijarasrat/dotfile
 
 - `Themes/Vintage/color.ini`: the color scheme. Every slot is a Frame role, commented with its name.
 - `Themes/Vintage/user.css`: role-named tokens (`--frame_face`, ...) plus the `--raised` and `--sunken` bevels, for what the color scheme can't reach.
-- `config-xpui.ini`: selects `Vintage` with the color scheme and CSS injection on. Spicetify also writes its own state here (the `prefs_path` and the `[Backup]` version), so expect a diff after a backup.
+- `Themes/Vintage/theme.js`: marks the window inactive (`html.vintage-window-inactive`) while another app has focus, so the title bar can grey out. CSS has no selector for window focus.
+- `config-xpui.ini`: selects `Vintage` with the color scheme, CSS and theme.js injection on. Spicetify also writes its own state here (the `prefs_path` and the `[Backup]` version), so expect a diff after a backup.
 - `Backup`, `Extracted`, `CustomApps` and `Extensions` are Spicetify's own and are gitignored.
 
 ## Apply
@@ -13,7 +14,7 @@ Spicetify reads its config from `~/.config/spicetify`, which is this folder, so 
 
 ```sh
 spicetify backup apply   # first time: back up the stock Spotify, then patch it
-spicetify apply          # after editing color.ini or user.css
+spicetify apply          # after editing color.ini, user.css or theme.js
 ```
 
 Spotify restarts with the theme.
@@ -32,16 +33,18 @@ To go back to stock Spotify: `spicetify restore`.
 
 ## Check
 
-Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that track lists are sunken white list boxes with a navy selected row and no hover on rows or cards, that menus are raised with a navy hovered item, the tooltips, the Win95 scrollbars and the dotted focus outline, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
+Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that track lists are sunken white list boxes with a navy selected row and no hover on rows or cards, that menus are raised with a navy hovered item, the tooltips, the Win95 scrollbars and the dotted focus outline, that the top bar is a navy title bar that theme.js greys out when Spotify loses focus, with a sunken white search box, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
 
 Then check by eye in the running app (the list grows as #53 lands):
 
 - [ ] Background, sidebar, player bar and cards are `frame_face` grey; no dark surfaces.
 - [ ] Square corners everywhere: cover art, artist photos, cards, buttons, chips, the search box, menus, dialogs and the panels' edges.
-- [ ] No gradients, blur or translucent surfaces: no dark fade under headers or cards, no blurred cover behind Now Playing, no frosted top bar, no drop shadows under menus or cards.
-- [ ] Playlist, album and artist headers, the top bar and the Now Playing view are flat grey, not tinted from the cover, and their text is black.
+- [ ] No gradients, blur or translucent surfaces: no dark fade under headers or cards, no blurred cover behind Now Playing, no frosted page header, no drop shadows under menus or cards.
+- [ ] Playlist, album and artist headers, the sticky page header and the Now Playing view are flat grey, not tinted from the cover, and their text is black.
 - [ ] Cover art and artist photos still show in full color, including the artist header photo.
-- [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover. The search box is a sunken white field.
+- [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover.
+- [ ] The top bar is navy across the whole window while Spotify has focus; click another app and it turns grey, click back and it's navy again. The traffic lights keep their system colors.
+- [ ] The search box in the top bar is a sunken white field with a black icon and grey placeholder; the back, forward, Home and browse buttons are grey push buttons on the bar.
 - [ ] Filter chips (All, Music, Podcasts) are grey push buttons; the selected one is navy with white text.
 - [ ] Connect panel: the "This computer" card is grey, not black.
 - [ ] Seek and volume bars have a light grey track with a navy fill.

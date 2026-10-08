@@ -104,8 +104,10 @@
   --decorative-subdued: var(--frame_selection);
 }
 
-/* Search box: a sunken white Win95 text field. */
-[data-testid=search-input] {
+/* Search box: a sunken white Win95 text field. The top bar's box has no
+   test id in the shipped app; Spotify marks it data-top-bar-search. */
+[data-testid=search-input],
+[data-top-bar-search] {
   background-color: var(--frame_window) !important;
   color: var(--frame_text) !important;
   box-shadow: var(--sunken) !important;
@@ -152,7 +154,7 @@
 }
 
 /* Cover-colored backgrounds: playlist, album and artist headers, Now
-   Playing, the top bar and the band behind Home all take a color from the
+   Playing, the sticky page header and the band behind Home all take a color from the
    cover art through inline styles. Flat Frame grey instead, with Frame text
    in place of the text colors Spotify picks to contrast with the cover.
    Buttons keep theirs: the color picker's swatches are the color itself. */
@@ -178,8 +180,9 @@
   --extracted-text-subdued: var(--frame_gray_text) !important;
 }
 
-/* The top bar's background fades in as the page scrolls, through an inline
-   opacity. Opaque from the start. */
+/* The sticky page header (not the title bar, below) fades in its
+   background as the page scrolls, through an inline opacity. Opaque from
+   the start. */
 [data-testid=topbar] > [style*="opacity"] {
   opacity: 1 !important;
 }
@@ -445,4 +448,19 @@ html:not(.no-focus-outline) a:not([role=button]):focus-visible {
 html:not(.no-focus-outline) [aria-selected=true]:focus-visible,
 html:not(.no-focus-outline) [role^=menuitem]:focus-visible {
   outline-color: var(--frame_selection_text) !important;
+}
+
+/* ---- Title bar (#58) ---- */
+
+/* The top bar (back, forward, Home, search) is the window's title bar:
+   navy while Spotify has focus, grey when another window does (theme.js
+   marks it). Its buttons stay grey push buttons, like a Win95 title bar's,
+   and the traffic lights keep their system colors, as in Chrome. */
+.Root__globalNav {
+  background-color: var(--frame_title) !important;
+  color: var(--frame_title_text) !important;
+}
+html.vintage-window-inactive .Root__globalNav {
+  background-color: var(--frame_title_inactive) !important;
+  color: var(--frame_title_inactive_text) !important;
 }
