@@ -16,6 +16,10 @@ _Avoid_: UI, shell
 Where text and code are read and edited: terminal, editors, TUI apps, and inline popups that show code (completion, hover, signature help, diagnostics). Light, K-95-style canvas (navy text on white, as in Kermit 95 on Windows) with Windows VGA data colors. Always light: no dark variant.
 _Avoid_: editor theme, canvas
 
+**Display**:
+A black LCD readout set into the **Frame**, like the time and track displays in Windows' Media Rack: lit cyan text in the **Work surface** font over unlit "ghost" segments, inside a sunken bevel. Shows status, not text being worked on. Only Spotify's player bar has one.
+_Avoid_: LCD theme, screen
+
 **Frame data colors**:
 The darker set of data colors (Win95 dark VGA) used when red/green/yellow etc. appear on the **Frame** grey.
 _Avoid_: dark palette, light-mode colors
@@ -28,6 +32,6 @@ The standing rule for the **Vintage theme**: no transparency or blur, square cor
 
 ## Relationships
 
-- The **Vintage theme** is made of exactly one **Frame** palette and one **Work surface** palette
-- Each themed tool belongs to either the **Frame** or a **Work surface**
+- The **Vintage theme** is made of exactly one **Frame** palette, one **Work surface** palette and one **Display** palette
+- Each themed tool belongs to either the **Frame** or a **Work surface**; a **Display** sits inside the **Frame**
 - The **Theme spec** is subject to **Purist fidelity**

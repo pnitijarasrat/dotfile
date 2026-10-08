@@ -1,6 +1,6 @@
 /* Vintage theme for Spotify (#53). Spotify is one maximized Win95 window:
    the Frame everywhere except the lyrics view, a Work surface
-   (docs/web-theme.md). Colors Spotify draws from its
+   (docs/web-theme.md), and the player bar's LCDs, a Display. Colors Spotify draws from its
    palette come from color.ini; this file is for what the palette can't reach.
    Hex values appear only in this token block, named by spec role. */
 :root {
@@ -19,10 +19,14 @@
   --frame_selection: #000080;
   --frame_selection_text: #FFFFFF;
   --frame_tooltip: #FFFFE1;
+  --frame_data_green: #008000;
   --work_bg: #FFFFFF;
   --work_fg: #000080;
   --work_cursorline: #FFFFE1;
   --work_line_number: #808080;
+  --display_bg: #000000;
+  --display_fg: #00FFFF;
+  --display_ghost: #008080;
 
   --raised: inset -1px -1px var(--frame_dark_shadow), inset 1px 1px var(--frame_highlight),
             inset -2px -2px var(--frame_shadow), inset 2px 2px var(--frame_light);
@@ -266,8 +270,8 @@
   padding: 4px !important;
 }
 
-/* On states (shuffle, repeat, liked) keep the navy bright accent, until
-   the Media Rack's LEDs replace it (#63). */
+/* On states keep the navy bright accent. In the player bar, shuffle,
+   repeat and liked show a green LED instead (the Media Rack, below). */
 [data-encore-id=buttonTertiary][class*=color-text-bright-accent] {
   color: var(--frame_selection) !important;
 }
@@ -512,4 +516,232 @@ html.vintage-window-inactive .Root__globalNav {
 [style*="--lyrics-color-background"] .rzOQhNuCNTsDR8rE8ss1.MZZCOz_ImVH1skMtX3aI,
 [style*="--lyrics-color-background"] .rzOQhNuCNTsDR8rE8ss1.loNizikBbaCKyI9Gv8xg:hover {
   color: var(--work_fg) !important;
+}
+
+/* ---- Player bar, a Media Rack unit (#63) ----
+   The Windows multimedia app's CD unit: a raised grey rack with sunken
+   LCDs (cover, time over the seek bar, track, like) above a row of square
+   transport buttons with the volume slider on the right. Spotify's
+   wrappers are flattened so one grid can place each part; the duration
+   readout is dropped. */
+[data-testid=now-playing-bar] {
+  background-color: var(--frame_face) !important;
+  box-shadow: var(--raised) !important;
+  padding: 6px 8px !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+[data-testid=now-playing-bar] > div > div,
+[data-testid=now-playing-widget],
+[data-testid=player-controls] {
+  display: contents !important;
+}
+[data-testid=now-playing-bar] > div {
+  display: grid !important;
+  grid-template-columns: 84px 200px 1fr auto;
+  grid-template-areas:
+    "cover time track like"
+    "cover transport right right";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 6px;
+  width: 100%;
+  height: auto !important;
+}
+[data-testid=now-playing-widget] > div:nth-child(1) { grid-area: cover; }
+[data-testid=now-playing-widget] > div:nth-child(2) { grid-area: track; align-self: stretch; }
+[data-testid=now-playing-widget] > div:nth-child(3) { grid-area: like; }
+[data-testid=general-controls] { grid-area: transport; }
+[data-testid=player-controls] > div:last-child { grid-area: time; }
+[data-testid=now-playing-bar] > div > div:nth-child(3) > div { grid-area: right; justify-self: end; }
+
+/* Cover art stays in full color, in a sunken frame spanning both rows. */
+[data-testid=now-playing-widget] > div:nth-child(1) {
+  width: 76px;
+  height: 76px;
+  padding: 2px;
+  background-color: var(--frame_face);
+  box-shadow: var(--sunken) !important;
+}
+[data-testid=now-playing-widget] > div:nth-child(1) img {
+  width: 72px !important;
+  height: 72px !important;
+}
+
+/* Transport: square raised push buttons with black glyphs, sunken while
+   pressed. Play is one of them, with no big circle; on states show as
+   LEDs, not navy glyphs. */
+[data-testid=now-playing-bar] button:not([data-testid=cover-art-button]) {
+  position: relative;
+  min-width: 40px !important;
+  width: 40px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--frame_face) !important;
+  box-shadow: var(--raised) !important;
+  color: var(--frame_text) !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+[data-testid=now-playing-bar] button:not([data-testid=cover-art-button]):active {
+  background-color: var(--frame_light) !important;
+  box-shadow: var(--sunken) !important;
+}
+[data-testid=now-playing-bar] button svg {
+  fill: var(--frame_text) !important;
+  color: var(--frame_text) !important;
+  width: 14px;
+  height: 14px;
+}
+[data-testid=control-button-playpause] > span {
+  background-color: var(--frame_face) !important;
+  width: auto !important;
+  height: auto !important;
+  color: var(--frame_text) !important;
+  transform: none !important;
+}
+[data-testid=general-controls],
+[data-testid=general-controls] > div {
+  display: flex !important;
+  gap: 2px !important;
+  align-items: center;
+}
+/* Spotify's own on-state dot under shuffle and repeat. */
+[data-testid=now-playing-bar] button::after {
+  display: none !important;
+}
+
+/* LEDs: a small square in the corner of shuffle, repeat and liked, lit
+   green when on. Shuffle has no stable id; its label says the state. */
+[data-testid=now-playing-bar] button[aria-label*=huffle]::before,
+[data-testid=control-button-repeat]::before,
+[data-testid=now-playing-widget] > div:nth-child(3) button::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 5px;
+  height: 5px;
+  background-color: var(--frame_shadow);
+}
+[data-testid=now-playing-bar] button[aria-label^="Disable Shuffle"]::before,
+[data-testid=control-button-repeat][aria-checked=true]::before,
+[data-testid=control-button-repeat][aria-checked=mixed]::before,
+[data-testid=now-playing-widget] > div:nth-child(3) button[aria-checked=true]::before {
+  background-color: var(--frame_data_green);
+}
+
+/* LCDs: the time (over the seek bar) and the track, a Display. */
+[data-testid=now-playing-widget] > div:nth-child(2),
+[data-testid=player-controls] > div:last-child {
+  background-color: var(--display_bg);
+  box-shadow: var(--sunken) !important;
+  padding: 4px 8px;
+  min-width: 0;
+}
+[data-testid=player-controls] > div:last-child {
+  display: grid !important;
+  grid-template-columns: 1fr;
+  grid-template-areas: "pos" "bar";
+  row-gap: 4px;
+  align-self: stretch;
+}
+[data-testid=playback-position] { grid-area: pos; }
+[data-testid=playback-duration] { display: none !important; }
+[data-testid=player-controls] > div:last-child > div:nth-child(2) { grid-area: bar; width: 100%; }
+
+/* Lit text is the Work surface font, crisp at 16px, its em. The artist
+   line is unlit, in the ghost color. */
+[data-testid=now-playing-widget] > div:nth-child(2) *,
+[data-testid=playback-position],
+[data-testid=playback-position] * {
+  font-family: "Fixedsys Excelsior", Menlo, Thonburi, monospace !important;
+  font-size: 16px !important;
+  line-height: 16px !important;
+  font-weight: normal !important;
+  color: var(--display_fg) !important;
+  font-variant-ligatures: none;
+  font-synthesis: none;
+  -webkit-font-smoothing: none;
+  min-width: 0 !important;
+}
+[data-testid=now-playing-widget] > div:nth-child(2) > div:nth-child(3) * {
+  color: var(--display_ghost) !important;
+}
+
+/* Unlit 88:88 ghost segments behind the time, five cells wide
+   (Fixedsys Excelsior is 0.5em). */
+[data-testid=playback-position] {
+  position: relative;
+  text-align: right !important;
+  width: 2.5em !important;
+  min-width: 2.5em !important;
+  flex: none !important;
+}
+[data-testid=playback-position]::before {
+  content: "88:88";
+  position: absolute;
+  right: 0;
+  color: var(--display_ghost);
+  font-family: "Fixedsys Excelsior", Menlo, Thonburi, monospace !important;
+  font-size: 16px !important;
+  line-height: 16px !important;
+}
+[data-testid=playback-position] > span {
+  position: relative;
+}
+
+/* Seek bar: Media Rack has none, so a thin sunken track with a navy fill
+   keeps click-to-seek. No handle. */
+[data-testid=playback-progressbar] [data-testid=progress-bar-background] {
+  height: 10px !important;
+  background-color: var(--frame_face) !important;
+  box-shadow: var(--sunken) !important;
+  overflow: hidden;
+}
+[data-testid=playback-progressbar] [data-testid=progress-bar-background] > div:nth-child(3) > div {
+  background-color: var(--frame_selection) !important;
+}
+[data-testid=playback-progressbar] [data-testid=progress-bar-background] > div:nth-child(2),
+[data-testid=playback-progressbar] [data-testid=progress-bar-handle] {
+  display: none !important;
+}
+
+/* Volume: a Win95 slider, a raised thumb in a sunken white slot, no fill. */
+[data-testid=now-playing-bar] > div > div:nth-child(3) > div {
+  display: flex !important;
+  gap: 2px !important;
+  align-items: center;
+}
+[data-testid=volume-bar] {
+  flex: 0 0 120px !important;
+  width: 120px !important;
+  display: flex !important;
+  gap: 6px;
+  align-items: center;
+}
+[data-testid=volume-bar] > div {
+  flex: 1 !important;
+}
+[data-testid=volume-bar] [data-testid=progress-bar-background] {
+  height: 4px !important;
+  background-color: var(--frame_window) !important;
+  box-shadow: var(--sunken) !important;
+  overflow: visible !important;
+}
+[data-testid=volume-bar] [data-testid=progress-bar-background] > div:nth-child(n+2):not([data-testid]) {
+  visibility: hidden;
+}
+[data-testid=volume-bar] [data-testid=progress-bar-handle] {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  width: 10px !important;
+  height: 20px !important;
+  margin-top: -2px;
+  background-color: var(--frame_face) !important;
+  box-shadow: var(--raised) !important;
 }
