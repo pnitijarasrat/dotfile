@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57, #58, #59).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57, #58, #59, #63).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -343,9 +343,9 @@ test("the playing track and on states are navy", () => {
   eq(d["--essential-bright-accent"], "var(--frame_selection)", "--essential-bright-accent");
 });
 
-// Track lists in the main view (the Library sidebar is also a grid, and
-// stays Frame grey).
-const trackList = "main [role=grid]";
+// Track lists in the main view (the Library sidebar, Home's shelves and
+// search's top result are grids too, and stay Frame grey).
+const trackList = "main [role=grid].main-trackList-trackList";
 const trackRow = `${trackList} [role=row]`;
 const selectedRow = `${trackRow}[aria-selected=true]`;
 
@@ -560,6 +560,117 @@ test("past lyrics lines are opaque work_line_number, upcoming ones work_fg", () 
   eq(declsFor(upcomingLine).color, "var(--work_fg)", "upcoming line color");
   // Hovering a past line, which seeks to it, brings it back to work_fg.
   eq(declsFor(`${pastLine}:hover`).color, "var(--work_fg)", "hovered past line color");
+});
+
+// The player bar, a Media Rack unit (#63): LCD displays over a row of
+// transport buttons.
+const rack = "[data-testid=now-playing-bar]";
+const trackLcd = "[data-testid=now-playing-widget] > div:nth-child(2)";
+const timeLcd = "[data-testid=player-controls] > div:last-child";
+// The rack's own buttons; the Connect bar under it keeps Spotify's link.
+const rackButton = `${rack} .main-nowPlayingBar-nowPlayingBar button:not([data-testid=cover-art-button])`;
+const playFace = `${rack} [data-testid=control-button-playpause]:not([aria-disabled=true]) > [class*=button-primary__inner]`;
+
+test("the spec's Display roles are VGA values, and the stylesheet's tokens", () => {
+  const vga = { display_bg: "ansi_0", display_fg: "ansi_14", display_ghost: "ansi_6" };
+  for (const [role, ansi] of Object.entries(vga)) {
+    if (!roles[role]) throw new Error(`role ${role} is not in the spec`);
+    eq(roles[role], roles[ansi], `${role} (${ansi})`);
+    if (!new RegExp(`--${role}:`).test(tokenBlock)) throw new Error(`--${role} is not in the token block`);
+  }
+});
+
+test("CONTEXT.md defines Display, and an ADR says why", () => {
+  if (!/^\*\*Display\*\*:$/m.test(read("CONTEXT.md"))) throw new Error("CONTEXT.md has no **Display** entry");
+  read("docs/adr/0002-display-surface.md");
+});
+
+test("the rack is a raised frame_face panel", () => {
+  const d = declsFor(rack);
+  eq(d["background-color"], "var(--frame_face)", "rack background-color");
+  eq(d["box-shadow"], "var(--raised)", "rack box-shadow");
+});
+
+test("the time and track LCDs are sunken display_bg", () => {
+  for (const s of [trackLcd, timeLcd]) {
+    const d = declsFor(s, "background-color");
+    eq(d["background-color"], "var(--display_bg)", `${s} background-color`);
+    eq(d["box-shadow"], "var(--sunken)", `${s} box-shadow`);
+  }
+});
+
+test("LCD text is display_fg in the Work surface font at 16px", () => {
+  for (const s of [`${trackLcd} *`, "[data-testid=playback-position]"]) {
+    const d = declsFor(s, "font-family");
+    eq(squash(d["font-family"]), workStack, `${s} font-family`);
+    eq(d["font-size"], "16px", `${s} font-size`);
+    eq(d.color, "var(--display_fg)", `${s} color`);
+    eq(d["font-synthesis"], "none", `${s} font-synthesis`);
+  }
+});
+
+test("unlit 88:88 ghost segments sit behind the time", () => {
+  const d = declsFor("[data-testid=playback-position]::before");
+  eq(d.content, '"88:88"', "ghost content");
+  eq(d.color, "var(--display_ghost)", "ghost color");
+});
+
+test("transport buttons are square raised push buttons, Play the same size", () => {
+  const d = declsFor(rackButton);
+  eq(d["background-color"], "var(--frame_face)", "button background-color");
+  eq(d["box-shadow"], "var(--raised)", "button box-shadow");
+  eq(d.color, "var(--frame_text)", "button color");
+  // Disabled buttons (previous with nothing before) don't sink.
+  const pressed = declsFor(`${rackButton}:active:not(:disabled):not([aria-disabled=true])`);
+  eq(pressed["background-color"], "var(--frame_light)", "pressed background-color");
+  eq(pressed["box-shadow"], "var(--sunken)", "pressed box-shadow");
+  // No rule sizes Play apart from the rest, and its big circle is gone.
+  forbid((d) => d.selector.includes("control-button-playpause") && /^(min-)?(width|height)$/.test(d.prop) && d.value !== "auto");
+  // Play's inner face loses its own bevel (#56), pressed or not, so the
+  // button has one.
+  for (const s of [playFace, playFace.replace("]:not", "]:active:not")]) {
+    const play = declsFor(s);
+    eq(play["background-color"], "var(--frame_face)", `${s} background-color`);
+    eq(play["box-shadow"], "none", `${s} box-shadow`);
+  }
+});
+
+test("disabled transport buttons have a frame_gray_text glyph", () => {
+  for (const s of [`${rack} button:disabled`, `${rack} button[aria-disabled=true]`]) eq(declsFor(s).color, "var(--frame_gray_text)", `${s} color`);
+  // Glyphs take the button's color.
+  eq(declsFor(`${rack} button svg`).fill, "currentColor", "glyph fill");
+});
+
+test("shuffle, repeat and liked have an LED: frame_shadow off, frame_data_green on", () => {
+  const off = [
+    `${rack} button[aria-label*=huffle]::before`,
+    "[data-testid=control-button-repeat]::before",
+    "[data-testid=now-playing-widget] > div:nth-child(3) button::before",
+  ];
+  const on = [
+    `${rack} button[aria-label^="Disable Shuffle"]::before`,
+    // Repeat one is mixed.
+    "[data-testid=control-button-repeat][aria-checked=true]::before",
+    "[data-testid=control-button-repeat][aria-checked=mixed]::before",
+    "[data-testid=now-playing-widget] > div:nth-child(3) button[aria-checked=true]::before",
+  ];
+  for (const s of off) eq(declsFor(s)["background-color"], "var(--frame_shadow)", `${s} background-color`);
+  for (const s of on) eq(declsFor(s)["background-color"], "var(--frame_data_green)", `${s} background-color`);
+});
+
+test("the seek bar is a sunken track with a frame_selection fill", () => {
+  const track = declsFor("[data-testid=playback-progressbar] [data-testid=progress-bar-background]");
+  eq(track["box-shadow"], "var(--sunken)", "seek track box-shadow");
+  const fill = declsFor("[data-testid=playback-progressbar] [data-testid=progress-bar-background] > div:nth-child(3) > div");
+  eq(fill["background-color"], "var(--frame_selection)", "seek fill background-color");
+});
+
+test("volume is a Win95 slider: a raised frame_face thumb in a sunken slot", () => {
+  const slot = declsFor("[data-testid=volume-bar] [data-testid=progress-bar-background]");
+  eq(slot["box-shadow"], "var(--sunken)", "volume slot box-shadow");
+  const thumb = declsFor("[data-testid=volume-bar] [data-testid=progress-bar-handle]");
+  eq(thumb["background-color"], "var(--frame_face)", "volume thumb background-color");
+  eq(thumb["box-shadow"], "var(--raised)", "volume thumb box-shadow");
 });
 
 test("config selects Vintage with the color scheme, CSS and theme.js injection on", () => {
