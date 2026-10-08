@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -139,6 +139,68 @@ test("bevels are the --raised and --sunken tokens from docs/web-theme.md", () =>
 test("hex appears only in the token block", () => {
   const outside = css.replace(tokenBlock, "").match(/#[0-9A-Fa-f]{3,8}\b/g);
   if (outside) throw new Error(`hex outside the token block: ${outside.join(", ")}`);
+});
+
+// The stylesheet's rules, comments dropped, as { selector, decls: [[prop, value]] }.
+const rules = [...css.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)].map((m) => ({
+  selector: m[1].trim(),
+  decls: m[2]
+    .split(";")
+    .map((d) => d.match(/^\s*([-a-z_]+)\s*:\s*([\s\S]*?)\s*$/))
+    .filter(Boolean)
+    .map((d) => [d[1], d[2].replace(/\s*!important$/, "")]),
+}));
+const decls = rules.flatMap((r) => r.decls.map(([prop, value]) => ({ selector: r.selector, prop, value })));
+
+// Fails with every declaration that matches.
+function forbid(match) {
+  const found = decls.filter(match);
+  if (found.length) throw new Error(found.map((d) => `${d.selector} { ${d.prop}: ${d.value} }`).join("; "));
+}
+
+test("Purist: no rounded corners", () => {
+  forbid((d) => /radius/.test(d.prop) && !/^0(px)?$/.test(d.value));
+});
+
+test("Purist: no blur, gradient or translucency, except to remove them", () => {
+  // Translucent colors: rgba/hsla, slash alpha (rgb(0 0 0 / 50%)), transparent.
+  const translucent = /blur|backdrop-filter|gradient|rgba|hsla|\/\s*[\d.]+%?\s*\)|transparent/;
+  forbid(
+    (d) =>
+      (translucent.test(`${d.prop}: ${d.value}`) && d.value !== "none") ||
+      (d.prop === "opacity" && !(Number(d.value) >= 1)),
+  );
+});
+
+test("Purist: box-shadows are only the bevel tokens", () => {
+  forbid((d) => d.prop === "box-shadow" && !["none", "var(--raised)", "var(--sunken)"].includes(d.value));
+});
+
+test("Purist: every element loses corners, blur, filters, shadows and gradients", () => {
+  // Rules whose selector list reaches every element: `*`, or `*:not(...)`
+  // to spare inline photos.
+  const universal = rules.filter((r) => r.selector.split(",").some((s) => /^\*(:not\(.*\))?$/.test(s.trim())));
+  const universalDecls = Object.fromEntries(universal.flatMap((r) => r.decls));
+  const want = { "border-radius": "0", "backdrop-filter": "none", filter: "none", "box-shadow": "none", "background-image": "none", "mask-image": "none" };
+  for (const [prop, value] of Object.entries(want)) eq(universalDecls[prop], value, `* { ${prop} }`);
+});
+
+test("cover-colored backgrounds Spotify sets inline become Frame grey with Frame text", () => {
+  // Headers, Now Playing and the Home band take their color from the cover
+  // through these inline styles.
+  const hooks = {
+    "background-color": ["background-color", "frame_face"],
+    "--background-base": ["--background-base", "frame_face"],
+    "--background-color": ["--background-color", "frame_face"],
+    "--extracted-background-color": ["--extracted-background-color", "frame_face"],
+    "--bg-color-from": ["--bg-color-from", "frame_face"],
+    "--text-base": ["--text-base", "frame_text"],
+  };
+  for (const [hook, [prop, role]] of Object.entries(hooks)) {
+    const rule = rules.find((r) => r.selector.includes(`[style*="${hook}"]`));
+    if (!rule) throw new Error(`no rule for inline ${hook}`);
+    eq(Object.fromEntries(rule.decls)[prop], `var(--${role})`, `[style*="${hook}"] ${prop}`);
+  }
 });
 
 test("config selects Vintage with the color scheme and CSS injection on", () => {
