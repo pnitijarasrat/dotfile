@@ -567,7 +567,8 @@ test("past lyrics lines are opaque work_line_number, upcoming ones work_fg", () 
 const rack = "[data-testid=now-playing-bar]";
 const trackLcd = "[data-testid=now-playing-widget] > div:nth-child(2)";
 const timeLcd = "[data-testid=player-controls] > div:last-child";
-const rackButton = `${rack} button:not([data-testid=cover-art-button])`;
+// The rack's own buttons; the Connect bar under it keeps Spotify's link.
+const rackButton = `${rack} .main-nowPlayingBar-nowPlayingBar button:not([data-testid=cover-art-button])`;
 const playFace = `${rack} [data-testid=control-button-playpause]:not([aria-disabled=true]) > [class*=button-primary__inner]`;
 
 test("the spec's Display roles are VGA values, and the stylesheet's tokens", () => {

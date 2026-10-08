@@ -75,5 +75,6 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] Shuffle, repeat and like have a small square LED in the corner: grey when off, green when on (repeat one too). Their glyphs stay black, not navy or Spotify green, and Spotify's dot under them is gone.
 - [ ] The seek bar is a sunken grey track with a navy fill and no handle; clicking it seeks.
 - [ ] The volume is a Win95 slider: a raised grey thumb in a thin sunken white slot; dragging it and clicking the slot change the volume.
+- [ ] While another device plays, "Playing on iPhone" fills the bar under the rack on one line, right-aligned, white on navy.
 
 `user.css` also remaps Spotify's own color sets (`.encore-*-set`), which the palette can't reach: they hard-code dark hex, or turn black once white becomes `frame_text` (#64). Known gaps still open in #53: black text on the dark red error toast.

@@ -526,7 +526,8 @@ html.vintage-window-inactive .Root__globalNav {
    wrappers are flattened so one grid can place each part; the duration
    readout is dropped. The parts are found by test id and, where they
    have none, by DOM order and English labels, so they need checking after
-   an update. Long titles scroll by Spotify's own marquee. */
+   an update. Long titles scroll by Spotify's own marquee. The Connect bar
+   under the rack ("Playing on iPhone") keeps Spotify's layout. */
 [data-testid=now-playing-bar] {
   background-color: var(--frame_face) !important;
   box-shadow: var(--raised) !important;
@@ -534,12 +535,12 @@ html.vintage-window-inactive .Root__globalNav {
   height: auto !important;
   min-height: 0 !important;
 }
-[data-testid=now-playing-bar] > div > div,
+[data-testid=now-playing-bar] .main-nowPlayingBar-nowPlayingBar > div,
 [data-testid=now-playing-widget],
 [data-testid=player-controls] {
   display: contents !important;
 }
-[data-testid=now-playing-bar] > div {
+[data-testid=now-playing-bar] .main-nowPlayingBar-nowPlayingBar {
   display: grid !important;
   grid-template-columns: 84px 200px 1fr auto;
   grid-template-areas:
@@ -556,7 +557,7 @@ html.vintage-window-inactive .Root__globalNav {
 [data-testid=now-playing-widget] > div:nth-child(3) { grid-area: like; }
 [data-testid=general-controls] { grid-area: transport; }
 [data-testid=player-controls] > div:last-child { grid-area: time; }
-[data-testid=now-playing-bar] > div > div:nth-child(3) > div { grid-area: right; justify-self: end; }
+.main-nowPlayingBar-nowPlayingBar > div:nth-child(3) > div { grid-area: right; justify-self: end; }
 
 /* Cover art stays in full color, in a sunken frame spanning both rows. */
 [data-testid=now-playing-widget] > div:nth-child(1) {
@@ -575,7 +576,7 @@ html.vintage-window-inactive .Root__globalNav {
    sunken while pressed, all one size. Play is one of them, with no big
    circle; on states show as LEDs, not navy glyphs. Disabled ones (#56)
    have gray glyphs and don't sink. */
-[data-testid=now-playing-bar] button:not([data-testid=cover-art-button]) {
+[data-testid=now-playing-bar] .main-nowPlayingBar-nowPlayingBar button:not([data-testid=cover-art-button]) {
   position: relative;
   min-width: 40px !important;
   width: 40px !important;
@@ -590,7 +591,7 @@ html.vintage-window-inactive .Root__globalNav {
   transform: none !important;
   opacity: 1 !important;
 }
-[data-testid=now-playing-bar] button:not([data-testid=cover-art-button]):active:not(:disabled):not([aria-disabled=true]) {
+[data-testid=now-playing-bar] .main-nowPlayingBar-nowPlayingBar button:not([data-testid=cover-art-button]):active:not(:disabled):not([aria-disabled=true]) {
   background-color: var(--frame_light) !important;
   box-shadow: var(--sunken) !important;
 }
@@ -724,7 +725,7 @@ html.vintage-window-inactive .Root__globalNav {
 }
 
 /* Volume: a Win95 slider, a raised thumb in a sunken white slot, no fill. */
-[data-testid=now-playing-bar] > div > div:nth-child(3) > div {
+.main-nowPlayingBar-nowPlayingBar > div:nth-child(3) > div {
   display: flex !important;
   gap: 2px !important;
   align-items: center;
