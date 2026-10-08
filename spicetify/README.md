@@ -32,7 +32,7 @@ To go back to stock Spotify: `spicetify restore`.
 
 ## Check
 
-Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
+Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
 
 Then check by eye in the running app (the list grows as #53 lands):
 
@@ -41,11 +41,15 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] No gradients, blur or translucent surfaces: no dark fade under headers or cards, no blurred cover behind Now Playing, no frosted top bar, no drop shadows under menus or cards.
 - [ ] Playlist, album and artist headers, the top bar and the Now Playing view are flat grey, not tinted from the cover, and their text is black.
 - [ ] Cover art and artist photos still show in full color, including the artist header photo.
-- [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover. The Home button is a grey push button and the search box is a sunken white field.
+- [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover. The search box is a sunken white field.
 - [ ] Filter chips (All, Music, Podcasts) are grey push buttons; the selected one is navy with white text.
 - [ ] Connect panel: the "This computer" card is grey, not black.
 - [ ] Seek and volume bars have a light grey track with a navy fill.
-- [ ] Play-on-hover buttons on cards are navy with a white glyph.
+- [ ] Buttons are raised grey push buttons with black glyphs: Home, back and forward, Play and the transport buttons, the play-on-hover buttons on cards, More, Add, Preview. No circles, no growing on hover.
+- [ ] Pressing a button sinks it (sunken bevel, lighter grey face) until released; it doesn't fade.
+- [ ] Disabled buttons (back with no history) have a grey glyph on a solid face, not a faded button, and don't sink when clicked.
+- [ ] Icons are black: the top bar, the search box, the Now Playing placeholder, dialog close buttons.
+- [ ] Shuffle and repeat on, and the liked heart, are navy (until the Media Rack's LEDs, #63); the playing track's title in a track list is navy.
 - [ ] Text is black; secondary text (artists, captions) is grey.
 - [ ] All text is Microsoft Sans Serif 14: sidebar, track lists, the player bar, menus, buttons, the search box. No Spotify Mix (Circular-like) text anywhere.
 - [ ] Bold text (section headings such as "Made For You", "Your Library", the track list's column headers) is Tahoma Bold, not a smeared fake bold, and text Spotify draws regular stays Microsoft Sans Serif.
