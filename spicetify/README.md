@@ -32,7 +32,7 @@ To go back to stock Spotify: `spicetify restore`.
 
 ## Check
 
-Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
+Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that track lists are sunken white list boxes with a navy selected row and no hover on rows or cards, that menus are raised with a navy hovered item, the tooltips, the Win95 scrollbars and the dotted focus outline, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
 
 Then check by eye in the running app (the list grows as #53 lands):
 
@@ -55,7 +55,14 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] Bold text (section headings such as "Made For You", "Your Library", the track list's column headers) is Tahoma Bold, not a smeared fake bold, and text Spotify draws regular stays Microsoft Sans Serif.
 - [ ] Playlist, album and artist titles are Tahoma Bold 24, not huge; long titles still fit the header.
 - [ ] No Spotify green anywhere: Play button, shuffle/repeat on, liked heart, the playing track's title, the progress and volume fill are navy.
-- [ ] Track rows and cards don't change color on hover.
+- [ ] Track lists (playlist, album, Liked Songs, search songs) are sunken white list boxes; the Library sidebar stays grey.
+- [ ] Clicking a track selects it in navy with white text: title, artist, album, duration and icons, the playing track's title too. Shift-click selects several.
+- [ ] Track rows and cards don't change color or grow on hover, and the play-on-hover button still appears on rows (in place of the number) and cards, and still plays.
+- [ ] Right-click a track: the context menu is a raised grey box with black text; the hovered item, and one whose submenu is open, is navy with white text and icon. Same for the Library's sort dropdown and the profile menu.
+- [ ] Checked menu items (the Library's sort order) are black, not green.
+- [ ] Tooltips (hover the back button, Shuffle) are pale yellow with a black hairline and black text.
+- [ ] Scrollbars in the main view, the sidebar and menus are 16px, always shown when there's more to scroll: a light grey track with a raised grey thumb.
+- [ ] Tab through the page: the focused control has a 1px dotted black outline inside it (white on a selected row or menu item); clicking with the mouse shows none.
 - [ ] Error toasts are dark red.
 
-`user.css` also remaps Spotify's own color sets (`.encore-*-set`), which the palette can't reach: they hard-code dark hex, or turn black once white becomes `frame_text` (#64). Known gaps still open in #53: black text on selected rows (#57) and on the dark red error toast.
+`user.css` also remaps Spotify's own color sets (`.encore-*-set`), which the palette can't reach: they hard-code dark hex, or turn black once white becomes `frame_text` (#64). Known gaps still open in #53: black text on the dark red error toast.

@@ -281,3 +281,168 @@
 [data-encore-id=icon]:not([data-encore-id^=button] *, [class*=legacy-list-row] *, [class*=bright-accent], [class*=bright-accent] *) {
   color: var(--frame_text) !important;
 }
+
+/* ---- Win95 lists, menus, scrollbars and focus (#57) ---- */
+
+/* Track lists: sunken white list boxes. Only those in the main view; the
+   Library sidebar is a grid too, and stays Frame grey. Spotify's hover and
+   pressed backgrounds inside it are white, and the padding keeps rows off
+   the bevel. */
+main [role=grid] {
+  --background-base: var(--frame_window);
+  --background-highlight: var(--frame_window);
+  --background-press: var(--frame_window);
+  --background-tinted-base: var(--frame_window);
+  --background-tinted-highlight: var(--frame_window);
+  --background-tinted-press: var(--frame_window);
+  background-color: var(--frame_window) !important;
+  box-shadow: var(--sunken) !important;
+  padding: 2px !important;
+}
+
+/* No hover highlight: rows are white whatever state they're in. Spotify
+   tints them through hashed classes this file can't list. The
+   play-on-hover button in the row still appears. */
+main [role=grid] [role=row],
+main [role=grid] [role=row] > * {
+  background-color: var(--frame_window) !important;
+}
+
+/* The selected row is navy with white text, the playing track's navy title
+   and Spotify's black icons included. Buttons keep their own faces. */
+main [role=grid] [role=row][aria-selected=true],
+main [role=grid] [role=row][aria-selected=true] > * {
+  --text-base: var(--frame_selection_text);
+  --text-subdued: var(--frame_selection_text);
+  --text-bright-accent: var(--frame_selection_text);
+  --essential-base: var(--frame_selection_text);
+  --essential-subdued: var(--frame_selection_text);
+  --essential-bright-accent: var(--frame_selection_text);
+  background-color: var(--frame_selection) !important;
+  color: var(--frame_selection_text) !important;
+}
+main [role=grid] [role=row][aria-selected=true] *:not([data-encore-id^=button], [data-encore-id^=button] *) {
+  color: var(--frame_selection_text) !important;
+}
+
+/* Cards don't highlight or grow on hover; the play-on-hover button still
+   appears. */
+[data-encore-id=card],
+[data-encore-id=card]:hover {
+  background-color: var(--frame_face) !important;
+  transform: none !important;
+}
+
+/* Context menus and dropdowns: raised Frame menus. The box around the menu
+   or list has a hashed class, so it's found by what it holds. */
+:has(> [role=menu]),
+:has(> [role=listbox]) {
+  background-color: var(--frame_face) !important;
+  border: none !important;
+  box-shadow: var(--raised) !important;
+  padding: 3px !important;
+}
+[role=menu],
+[role=listbox] {
+  background-color: var(--frame_face) !important;
+}
+
+/* Checked items were Spotify green; the check mark says it. */
+[role=menu] [role=menuitemradio][aria-checked=true],
+[role=menu] [role=menuitemcheckbox][aria-checked=true] {
+  color: var(--frame_text) !important;
+}
+
+/* The hovered item, and the one whose submenu is open, is navy with white
+   text, icons included. */
+[role=menu] [role^=menuitem]:hover,
+[role=menu] [role^=menuitem]:focus,
+[role=menu] [role^=menuitem][aria-expanded=true],
+[role=listbox] [role=option]:hover,
+[role=listbox] [role=option][data-focused] {
+  --text-base: var(--frame_selection_text);
+  --text-subdued: var(--frame_selection_text);
+  --text-bright-accent: var(--frame_selection_text);
+  --essential-base: var(--frame_selection_text);
+  --essential-subdued: var(--frame_selection_text);
+  --essential-bright-accent: var(--frame_selection_text);
+  background-color: var(--frame_selection) !important;
+  color: var(--frame_selection_text) !important;
+}
+[role=menu] [role^=menuitem]:hover *,
+[role=menu] [role^=menuitem]:focus *,
+[role=menu] [role^=menuitem][aria-expanded=true] *,
+[role=listbox] [role=option]:hover *,
+[role=listbox] [role=option][data-focused] * {
+  color: var(--frame_selection_text) !important;
+}
+
+/* Tooltips: pale yellow with a black hairline. Encore's tooltips carry a
+   versioned class (e-NNNNN-tooltip), so it's matched by its end; the
+   trigger around the button is not a tooltip. */
+[role=tooltip],
+[class*=legacy-tooltip],
+[class*=-tooltip]:not([class*=tooltip-trigger]) {
+  --text-base: var(--frame_text);
+  background-color: var(--frame_tooltip) !important;
+  color: var(--frame_text) !important;
+  border: 1px solid var(--frame_dark_shadow) !important;
+}
+
+/* Scrollbars: a frame_light track with a raised frame_face thumb, 16px
+   and always shown. Spotify draws most with OverlayScrollbars, which
+   fades them out when idle; the rest are native. Win95 arrow buttons are
+   out of reach of both. */
+.os-scrollbar {
+  --os-size: 16px !important;
+  --os-padding-perpendicular: 0 !important;
+  --os-padding-axis: 0 !important;
+  --os-handle-min-size: 16px !important;
+}
+.os-scrollbar-auto-hide.os-scrollbar-auto-hide-hidden:not(.os-scrollbar-unusable) {
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+.os-scrollbar-track {
+  background-color: var(--frame_light) !important;
+}
+.os-scrollbar-handle {
+  background-color: var(--frame_face) !important;
+  box-shadow: var(--raised) !important;
+}
+::-webkit-scrollbar {
+  width: 16px !important;
+  height: 16px !important;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background-color: var(--frame_light) !important;
+}
+::-webkit-scrollbar-thumb {
+  background-color: var(--frame_face) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: var(--raised) !important;
+}
+
+/* Focus: a 1px dotted black outline inside the control, past its bevel,
+   when focus comes from the keyboard (Spotify adds .no-focus-outline for
+   the mouse). Text fields show their caret instead; links have no bevel,
+   so the outline hugs the text. On navy it's white. */
+html:not(.no-focus-outline) :focus-visible:not(input):not(textarea),
+html:not(.no-focus-outline) [data-focus-visible]:not([data-focus-visible=false]):not(input):not(textarea) {
+  outline: 1px dotted var(--frame_text) !important;
+  outline-offset: -4px !important;
+}
+/* Spotify rings the whole main view in blue when it takes focus; a Win95
+   window's client area has no focus rect. */
+html:not(.no-focus-outline) main:focus::after {
+  outline: none !important;
+}
+html:not(.no-focus-outline) a:not([role=button]):focus-visible {
+  outline-offset: 0 !important;
+}
+html:not(.no-focus-outline) [aria-selected=true]:focus-visible,
+html:not(.no-focus-outline) [role^=menuitem]:focus-visible {
+  outline-color: var(--frame_selection_text) !important;
+}
