@@ -19,6 +19,10 @@
   --frame_selection: #000080;
   --frame_selection_text: #FFFFFF;
   --frame_tooltip: #FFFFE1;
+  --work_bg: #FFFFFF;
+  --work_fg: #000080;
+  --work_cursorline: #FFFFE1;
+  --work_line_number: #808080;
 
   --raised: inset -1px -1px var(--frame_dark_shadow), inset 1px 1px var(--frame_highlight),
             inset -2px -2px var(--frame_shadow), inset 2px 2px var(--frame_light);
@@ -463,4 +467,49 @@ html:not(.no-focus-outline) [role^=menuitem]:focus-visible {
 html.vintage-window-inactive .Root__globalNav {
   background-color: var(--frame_title_inactive) !important;
   color: var(--frame_title_inactive_text) !important;
+}
+
+/* ---- Lyrics, a Work surface (#59) ---- */
+
+/* The lyrics view (the full page and the Now Playing panel) reads like a
+   terminal: white, not the cover color Spotify passes in inline as
+   --lyrics-color-*. The rest of the page is still Frame. */
+[style*="--lyrics-color-background"] {
+  --lyrics-color-background: var(--work_bg) !important;
+  --lyrics-color-active: var(--work_fg) !important;
+  --lyrics-color-inactive: var(--work_fg) !important;
+  --lyrics-color-passed: var(--work_line_number) !important;
+  --lyrics-color-messaging: var(--work_fg) !important;
+  background-color: var(--work_bg) !important;
+}
+
+/* Fixedsys Excelsior is crisp only at 16px, its em; no ligatures, fake
+   bold or italics. Buttons in the view stay Frame push buttons. */
+[style*="--lyrics-color-background"],
+[style*="--lyrics-color-background"] *:not([data-encore-id^=button]):not([data-encore-id^=button] *) {
+  font-family: "Fixedsys Excelsior", Menlo, Thonburi, monospace !important;
+  font-size: 16px !important;
+  line-height: 16px !important;
+  font-variant-ligatures: none !important;
+  font-synthesis: none !important;
+  font-style: normal !important;
+}
+
+/* Line states, like the editor's: the current line is work_fg on the
+   work_cursorline band, past lines are line-number grey (Spotify fades
+   them to 50%) and upcoming ones work_fg; a hovered past line, which
+   seeks when clicked, is work_fg too. Spotify marks them only with hashed
+   classes, so these need checking after an update; if they stop matching,
+   every line is work_fg on white. */
+[style*="--lyrics-color-background"] .rzOQhNuCNTsDR8rE8ss1.dPaa_Hg0z0Ql_UBrV9uZ {
+  color: var(--work_fg) !important;
+  background-color: var(--work_cursorline) !important;
+}
+[style*="--lyrics-color-background"] .rzOQhNuCNTsDR8rE8ss1.loNizikBbaCKyI9Gv8xg {
+  color: var(--work_line_number) !important;
+  opacity: 1 !important;
+}
+[style*="--lyrics-color-background"] .rzOQhNuCNTsDR8rE8ss1.MZZCOz_ImVH1skMtX3aI,
+[style*="--lyrics-color-background"] .rzOQhNuCNTsDR8rE8ss1.loNizikBbaCKyI9Gv8xg:hover {
+  color: var(--work_fg) !important;
 }

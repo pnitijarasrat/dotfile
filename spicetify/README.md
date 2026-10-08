@@ -1,6 +1,6 @@
 # Spotify
 
-Spotify in the **Vintage theme** ([#53](https://github.com/pnitijarasrat/dotfile/issues/53)), as a hand-written local [Spicetify](https://spicetify.app) theme named `Vintage`. Spotify is one maximized Win95 window, so it's all **Frame**; see the Spotify row in `docs/theme-spec.md`. No Marketplace, extensions or custom apps.
+Spotify in the **Vintage theme** ([#53](https://github.com/pnitijarasrat/dotfile/issues/53)), as a hand-written local [Spicetify](https://spicetify.app) theme named `Vintage`. Spotify is one maximized Win95 window, so it's all **Frame** except the lyrics view, a **Work surface**; see the Spotify row in `docs/theme-spec.md`. No Marketplace, extensions or custom apps.
 
 - `Themes/Vintage/color.ini`: the color scheme. Every slot is a Frame role, commented with its name.
 - `Themes/Vintage/user.css`: role-named tokens (`--frame_face`, ...) plus the `--raised` and `--sunken` bevels, for what the color scheme can't reach.
@@ -33,7 +33,7 @@ To go back to stock Spotify: `spicetify restore`.
 
 ## Check
 
-Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that track lists are sunken white list boxes with a navy selected row and no hover on rows or cards, that menus are raised with a navy hovered item, the tooltips, the Win95 scrollbars and the dotted focus outline, that the top bar is a navy title bar that theme.js greys out when Spotify loses focus, with a sunken white search box, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
+Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that buttons are raised push buttons that sink when pressed, with gray disabled glyphs and black icons, that the bright accent (the playing track, the on states) is navy, that track lists are sunken white list boxes with a navy selected row and no hover on rows or cards, that menus are raised with a navy hovered item, the tooltips, the Win95 scrollbars and the dotted focus outline, that the top bar is a navy title bar that theme.js greys out when Spotify loses focus, with a sunken white search box, that lyrics are Fixedsys Excelsior 16 on white with the current line on a pale yellow band, grey past lines and navy upcoming ones, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
 
 Then check by eye in the running app (the list grows as #53 lands):
 
@@ -67,5 +67,7 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] Scrollbars in the main view, the sidebar and menus are 16px, always shown when there's more to scroll: a light grey track with a raised grey thumb.
 - [ ] Tab through the page: the focused control has a 1px dotted black outline inside it (white on a selected row or menu item); clicking with the mouse shows none.
 - [ ] Error toasts are dark red.
+- [ ] Lyrics (the lyrics button in the player bar, and the Now Playing panel's lyrics card) are on white, never a cover color, in crisp Fixedsys Excelsior 16: not blurry, not bold, not italic. Its buttons stay grey push buttons in Microsoft Sans Serif.
+- [ ] As the song plays, the current line is navy on a pale yellow band, past lines are grey (solid, not faded) and upcoming lines navy. Hovering a past line turns it navy and underlined; clicking it seeks.
 
 `user.css` also remaps Spotify's own color sets (`.encore-*-set`), which the palette can't reach: they hard-code dark hex, or turn black once white becomes `frame_text` (#64). Known gaps still open in #53: black text on the dark red error toast.

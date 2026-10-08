@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57, #58).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57, #58, #59).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -257,7 +257,10 @@ const commented = [...css.matchAll(/\/\*([\s\S]*?)\*\/\s*([^{}/]+)\{([^{}]*)\}/g
 }));
 
 test("font sizes other than the Frame's 14px are commented deviations", () => {
-  for (const d of decls.filter((d) => d.prop === "font-size" && d.value !== "14px")) {
+  // The Work surface's own 16px, in the rule that sets its stack, is not one.
+  const isWork = (d) =>
+    d.value === "16px" && rules.some((r) => r.selector === d.selector && r.decls.some(([p, v]) => p === "font-family" && squash(v) === workStack));
+  for (const d of decls.filter((d) => d.prop === "font-size" && d.value !== "14px" && !isWork(d))) {
     const r = commented.find((r) => r.selector === d.selector);
     if (!r || !/Deviation:/.test(r.comment)) throw new Error(`${d.selector} { font-size: ${d.value} } has no Deviation comment`);
   }
@@ -273,10 +276,11 @@ test("every deviation comment has a Spotify row in the spec's Deviations table",
   }
 });
 
-// The declarations of the rule whose selector list has exactly `selector`.
-function declsFor(selector) {
-  const rule = rules.find((r) => r.selector.split(",").some((s) => s.trim() === selector));
-  if (!rule) throw new Error(`no rule for ${selector}`);
+// The declarations of the rule whose selector list has exactly `selector`
+// (and that sets `prop`, if given).
+function declsFor(selector, prop) {
+  const rule = rules.find((r) => r.selector.split(",").some((s) => s.trim() === selector) && (!prop || r.decls.some(([p]) => p === prop)));
+  if (!rule) throw new Error(`no rule for ${selector}${prop ? ` that sets ${prop}` : ""}`);
   return Object.fromEntries(rule.decls);
 }
 
@@ -505,6 +509,57 @@ test("the search box is a sunken frame_window edit field", () => {
   eq(d["background-color"], "var(--frame_window)", "search box background-color");
   eq(d.color, "var(--frame_text)", "search box color");
   eq(d["box-shadow"], "var(--sunken)", "search box box-shadow");
+});
+
+// The lyrics view, a Work surface. Both lyrics views (the full page and the
+// Now Playing panel) set their cover colors inline as --lyrics-color-*.
+const lyrics = '[style*="--lyrics-color-background"]';
+// Spotify's hashed line classes: every line, then the current, past and
+// upcoming ones.
+const lyricsLine = `${lyrics} .rzOQhNuCNTsDR8rE8ss1`;
+const currentLine = `${lyricsLine}.dPaa_Hg0z0Ql_UBrV9uZ`;
+const pastLine = `${lyricsLine}.loNizikBbaCKyI9Gv8xg`;
+const upcomingLine = `${lyricsLine}.MZZCOz_ImVH1skMtX3aI`;
+
+test("lyrics are on a work_bg canvas, never a cover color", () => {
+  const d = declsFor(lyrics);
+  eq(d["--lyrics-color-background"], "var(--work_bg)", "--lyrics-color-background");
+  eq(d["background-color"], "var(--work_bg)", "lyrics background-color");
+  // The colors Spotify picks from the cover for the lines.
+  eq(d["--lyrics-color-active"], "var(--work_fg)", "--lyrics-color-active");
+  eq(d["--lyrics-color-inactive"], "var(--work_fg)", "--lyrics-color-inactive");
+  eq(d["--lyrics-color-passed"], "var(--work_line_number)", "--lyrics-color-passed");
+  eq(d["--lyrics-color-messaging"], "var(--work_fg)", "--lyrics-color-messaging");
+});
+
+test("lyrics are in the Work surface font at 16px, crisp and upright", () => {
+  // Buttons in the view stay Frame push buttons.
+  for (const s of [lyrics, `${lyrics} *:not([data-encore-id^=button]):not([data-encore-id^=button] *)`]) {
+    // The canvas colors are a rule of their own.
+    const d = declsFor(s, "font-family");
+    eq(squash(d["font-family"]), workStack, `${s} font-family`);
+    eq(d["font-size"], "16px", `${s} font-size`);
+    eq(d["line-height"], "16px", `${s} line-height`);
+    eq(d["font-variant-ligatures"], "none", `${s} font-variant-ligatures`);
+    eq(d["font-synthesis"], "none", `${s} font-synthesis`);
+    eq(d["font-style"], "normal", `${s} font-style`);
+  }
+});
+
+test("the current lyrics line is work_fg on a work_cursorline band", () => {
+  const d = declsFor(currentLine);
+  eq(d.color, "var(--work_fg)", "current line color");
+  eq(d["background-color"], "var(--work_cursorline)", "current line background-color");
+});
+
+test("past lyrics lines are opaque work_line_number, upcoming ones work_fg", () => {
+  const past = declsFor(pastLine);
+  eq(past.color, "var(--work_line_number)", "past line color");
+  // Spotify fades past lines to 50%.
+  eq(past.opacity, "1", "past line opacity");
+  eq(declsFor(upcomingLine).color, "var(--work_fg)", "upcoming line color");
+  // Hovering a past line, which seeks to it, brings it back to work_fg.
+  eq(declsFor(`${pastLine}:hover`).color, "var(--work_fg)", "hovered past line color");
 });
 
 test("config selects Vintage with the color scheme, CSS and theme.js injection on", () => {
