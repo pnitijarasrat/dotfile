@@ -71,7 +71,7 @@ const slotRoles = {
   card: "frame_face",
   shadow: "frame_shadow",
   "selected-row": "frame_selection",
-  // Spotify green: Win95 selection navy.
+  // Spotify green (Spicetify replaces it with these two): Win95 selection navy.
   button: "frame_selection",
   "button-active": "frame_selection",
   // Seek and volume track behind the navy fill.
@@ -82,9 +82,6 @@ const slotRoles = {
   "notification-error": "frame_data_red",
   misc: "frame_gray_text",
 };
-
-// Spicetify replaces Spotify's greens with these slots.
-const greenSlots = ["button", "button-active"];
 
 test("color scheme is a [Vintage] section", () => {
   if (!Object.keys(scheme).length) throw new Error("color.ini has no [Vintage] section");
@@ -99,10 +96,6 @@ test("every slot takes its spec role", () => {
 
 test("sets every Spicetify slot and nothing else", () => {
   eq(Object.keys(scheme).sort().join(","), Object.keys(slotRoles).sort().join(","), "color slots");
-});
-
-test("no Spotify green: green slots are frame_selection", () => {
-  for (const slot of greenSlots) eq(slotRoles[slot], "frame_selection", slot);
 });
 
 test("spec row gives the same slot-to-role mapping", () => {

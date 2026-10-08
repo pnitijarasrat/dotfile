@@ -1,5 +1,6 @@
 /* Vintage theme for Spotify (#53). Spotify is one maximized Win95 window:
-   the Frame everywhere (docs/web-theme.md). Colors Spotify draws from its
+   the Frame everywhere except the lyrics view, a Work surface
+   (docs/web-theme.md). Colors Spotify draws from its
    palette come from color.ini; this file is for what the palette can't reach.
    Hex values appear only in this token block, named by spec role. */
 :root {

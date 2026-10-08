@@ -41,3 +41,5 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] No Spotify green anywhere: Play button, shuffle/repeat on, liked heart, the playing track's title, the progress and volume fill are navy.
 - [ ] Track rows and cards don't change color on hover.
 - [ ] Error toasts are dark red.
+
+Known gaps until the stylesheet stage of #53: the palette alone leaves black text and glyphs on navy (the Play button, tinted chips, selected rows) and on the dark red error toast, which is hard to read. The stylesheet makes the Play button a raised grey push button and puts `frame_selection_text` on navy.
