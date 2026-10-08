@@ -25,3 +25,116 @@
   --sunken: inset -1px -1px var(--frame_highlight), inset 1px 1px var(--frame_shadow),
             inset -2px -2px var(--frame_light), inset 2px 2px var(--frame_dark_shadow);
 }
+
+/* ---- Dark surfaces the palette can't reach (#64) ----
+   Spotify paints some surfaces from its own encore color sets, which
+   hard-code dark hex or, once Spicetify swaps white for --spice-text,
+   turn black. Each set is remapped to Frame roles here. */
+
+/* Base set: hover, pressed and elevated surfaces (Home button, carousel
+   arrows, the Connect card, hover cards) stay flat Frame grey. */
+.encore-dark-theme,
+.encore-dark-theme .encore-base-set,
+.encore-dark-theme .encore-muted-accent-set,
+.encore-dark-theme .encore-app-frame-set,
+.encore-dark-theme .encore-inverted-dark-set {
+  --background-base: var(--frame_face);
+  --background-highlight: var(--frame_face);
+  --background-press: var(--frame_light);
+  --background-elevated-base: var(--frame_face);
+  --background-elevated-highlight: var(--frame_face);
+  --background-elevated-press: var(--frame_light);
+  --background-tinted-base: var(--frame_face);
+  --background-tinted-highlight: var(--frame_face);
+  --background-tinted-press: var(--frame_light);
+  --text-base: var(--frame_text);
+  --text-subdued: var(--frame_gray_text);
+  --essential-base: var(--frame_text);
+  --essential-subdued: var(--frame_gray_text);
+  --decorative-base: var(--frame_text);
+  --decorative-subdued: var(--frame_shadow);
+}
+
+/* Inverted sets were white-on-black in Spotify, so with the palette they
+   turn black: the player's Play button, the selected chip, "Start a Jam".
+   They become plain Frame buttons with black glyphs. */
+.encore-dark-theme .encore-inverted-set,
+.encore-dark-theme .encore-inverted-light-set {
+  --background-base: var(--frame_face);
+  --background-highlight: var(--frame_face);
+  --background-press: var(--frame_light);
+  --background-elevated-base: var(--frame_face);
+  --background-elevated-highlight: var(--frame_face);
+  --background-elevated-press: var(--frame_light);
+  --background-tinted-base: var(--frame_face);
+  --background-tinted-highlight: var(--frame_face);
+  --background-tinted-press: var(--frame_light);
+  --text-base: var(--frame_text);
+  --text-subdued: var(--frame_gray_text);
+  --text-bright-accent: var(--frame_selection);
+  --essential-base: var(--frame_text);
+  --essential-subdued: var(--frame_gray_text);
+  --essential-bright-accent: var(--frame_selection);
+  --decorative-base: var(--frame_text);
+  --decorative-subdued: var(--frame_shadow);
+}
+
+/* Was Spotify green: navy, and anything drawn on it is selection text
+   (the play-on-hover buttons on cards), never black on navy. */
+.encore-dark-theme .encore-bright-accent-set,
+.encore-dark-theme .encore-positive-set {
+  --background-base: var(--frame_selection);
+  --background-highlight: var(--frame_selection);
+  --background-press: var(--frame_selection);
+  --background-elevated-base: var(--frame_selection);
+  --background-elevated-highlight: var(--frame_selection);
+  --background-elevated-press: var(--frame_selection);
+  --background-tinted-base: var(--frame_selection);
+  --background-tinted-highlight: var(--frame_selection);
+  --background-tinted-press: var(--frame_selection);
+  --text-base: var(--frame_selection_text);
+  --text-subdued: var(--frame_selection_text);
+  --essential-base: var(--frame_selection_text);
+  --essential-subdued: var(--frame_selection_text);
+  --decorative-base: var(--frame_selection_text);
+  --decorative-subdued: var(--frame_selection);
+}
+
+/* Search box: a sunken white Win95 text field. */
+[data-testid=search-input] {
+  background-color: var(--frame_window) !important;
+  color: var(--frame_text) !important;
+  box-shadow: var(--sunken) !important;
+}
+
+/* Home button: a Frame push button. */
+[data-testid=home-button] {
+  background-color: var(--frame_face) !important;
+  box-shadow: var(--raised) !important;
+}
+
+/* Filter chips: Frame push buttons; the selected one is a navy selection. */
+[class*=legacy-chip__inner] {
+  background-color: var(--frame_face) !important;
+  color: var(--frame_text) !important;
+  box-shadow: var(--raised) !important;
+}
+[class*=legacy-chip__inner--selected] {
+  background-color: var(--frame_selection) !important;
+  color: var(--frame_selection_text) !important;
+  box-shadow: var(--sunken) !important;
+}
+
+/* The band behind Home's header takes a dark color from the cover art,
+   set inline. Flat Frame grey instead. */
+.main-view-container__scroll-node-child > main > div > div[style*=background-color] {
+  background-color: var(--frame_face) !important;
+}
+
+/* Seek and volume bars: a frame_light track with a navy fill. Spotify's
+   track color is white at 30% alpha, which the palette swap breaks. */
+[data-testid=progress-bar] {
+  --fg-color: var(--frame_selection) !important;
+  --bg-color: var(--frame_light) !important;
+  --is-active-fg-color: var(--frame_selection) !important;
+}
