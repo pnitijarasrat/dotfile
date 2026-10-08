@@ -193,3 +193,36 @@
   --bg-color: var(--frame_light) !important;
   --is-active-fg-color: var(--frame_selection) !important;
 }
+
+/* ---- Fonts (#55) ----
+   Microsoft Sans Serif has no bold, and the browser would fake one. So the
+   family is redefined from the installed fonts: its regular face is itself
+   and its bold face is Tahoma Bold. Everything Spotify sets bold (600 and
+   up, in hashed classes this file can't list) comes out Tahoma Bold. */
+@font-face {
+  font-family: "Microsoft Sans Serif";
+  src: local("Microsoft Sans Serif"), local("MicrosoftSansSerif");
+  font-weight: 1 599;
+}
+@font-face {
+  font-family: "Microsoft Sans Serif";
+  src: local("Tahoma Bold"), local("Tahoma-Bold");
+  font-weight: 600 1000;
+}
+
+/* The Frame font at 14 on every element, so Spotify's own sizes are gone.
+   Weights stay: they pick the face above. */
+*, *::before, *::after {
+  font-family: "Microsoft Sans Serif", Tahoma, sans-serif !important;
+  font-size: 14px !important;
+}
+
+/* Deviation: big playlist, album and artist titles. Tahoma Bold 24, not 14:
+   Spotify draws them at about 96px (the encore headline styles, sometimes
+   fitted to the header through an inline size, which this overrides), and
+   at 14 they'd be lost in the header. The reset above hits a span inside a
+   title too, so this reaches descendants. */
+[class*=encore-text-headline], [class*=encore-text-headline] * {
+  font-size: 24px !important;
+  font-weight: bold !important;
+}

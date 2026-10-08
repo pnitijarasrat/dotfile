@@ -32,7 +32,7 @@ To go back to stock Spotify: `spicetify restore`.
 
 ## Check
 
-Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), and the config.
+Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), that only the Frame and Work surface font stacks appear and that bold Microsoft Sans Serif is Tahoma Bold, that every `Deviation:` comment in `user.css` has a Spotify row in the spec's Deviations table, and the config.
 
 Then check by eye in the running app (the list grows as #53 lands):
 
@@ -47,6 +47,9 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] Seek and volume bars have a light grey track with a navy fill.
 - [ ] Play-on-hover buttons on cards are navy with a white glyph.
 - [ ] Text is black; secondary text (artists, captions) is grey.
+- [ ] All text is Microsoft Sans Serif 14: sidebar, track lists, the player bar, menus, buttons, the search box. No Spotify Mix (Circular-like) text anywhere.
+- [ ] Bold text (section headings such as "Made For You", "Your Library", the track list's column headers) is Tahoma Bold, not a smeared fake bold, and text Spotify draws regular stays Microsoft Sans Serif.
+- [ ] Playlist, album and artist titles are Tahoma Bold 24, not huge; long titles still fit the header.
 - [ ] No Spotify green anywhere: Play button, shuffle/repeat on, liked heart, the playing track's title, the progress and volume fill are navy.
 - [ ] Track rows and cards don't change color on hover.
 - [ ] Error toasts are dark red.

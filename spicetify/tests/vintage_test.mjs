@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61, #64, #54).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -200,6 +200,76 @@ test("cover-colored backgrounds Spotify sets inline become Frame grey with Frame
     const rule = rules.find((r) => r.selector.includes(`[style*="${hook}"]`));
     if (!rule) throw new Error(`no rule for inline ${hook}`);
     eq(Object.fromEntries(rule.decls)[prop], `var(--${role})`, `[style*="${hook}"] ${prop}`);
+  }
+});
+
+// The Frame and Work surface font stacks from docs/web-theme.md.
+const squash = (s) => s.replace(/\s+/g, " ").replace(/'/g, '"').trim();
+const webTheme = read("docs/web-theme.md");
+const stack = (font) => squash(webTheme.match(new RegExp(`font-family: ("?${font}[^;]*);`))?.[1] ?? "");
+const frameStack = stack("Microsoft Sans Serif");
+const workStack = stack("Fixedsys Excelsior");
+
+test("only the Frame and Work surface font stacks", () => {
+  if (!frameStack || !workStack) throw new Error("docs/web-theme.md has no Frame or Work surface font stack");
+  forbid((d) => d.prop === "font");
+  // An @font-face names one family, not a stack.
+  forbid((d) => d.prop === "font-family" && d.selector !== "@font-face" && ![frameStack, workStack].includes(squash(d.value)));
+});
+
+test("every element is in the Frame font at 14px", () => {
+  const universal = rules.find((r) => r.selector.split(",").some((s) => s.trim() === "*") && r.decls.some(([p]) => p === "font-family"));
+  if (!universal) throw new Error("no * rule sets the font");
+  const d = Object.fromEntries(universal.decls);
+  eq(squash(d["font-family"]), frameStack, "* font-family");
+  eq(d["font-size"], "14px", "* font-size");
+});
+
+test("bold Microsoft Sans Serif is Tahoma Bold", () => {
+  // The family's faces, each with its weight range, so 400 must land on
+  // Microsoft Sans Serif and 600 to 900 on Tahoma Bold.
+  const faces = rules
+    .filter((r) => r.selector === "@font-face")
+    .map((r) => Object.fromEntries(r.decls))
+    .filter((f) => squash(f["font-family"] ?? "") === '"Microsoft Sans Serif"')
+    .map((f) => ({ src: f.src, weights: (f["font-weight"] ?? "").split(/\s+/).map(Number) }));
+  const face = (weight) => faces.find(({ weights: [lo, hi = lo] }) => lo <= weight && weight <= hi)?.src ?? "";
+  if (!/^local\("Microsoft Sans Serif"\)/.test(face(400))) throw new Error(`weight 400 is ${face(400) || "no face"}`);
+  for (const w of [600, 700, 800, 900]) {
+    if (!/^local\("Tahoma Bold"\)/.test(face(w))) throw new Error(`weight ${w} is ${face(w) || "no face"}`);
+  }
+});
+
+test("big titles are Tahoma Bold 24", () => {
+  // The encore headline styles are Spotify's ~96px titles.
+  const title = rules.find((r) => r.selector.split(",").some((s) => s.trim() === "[class*=encore-text-headline]"));
+  if (!title) throw new Error("no rule for the encore headline styles");
+  const d = Object.fromEntries(title.decls);
+  eq(d["font-size"], "24px", "headline font-size");
+  eq(d["font-weight"], "bold", "headline font-weight");
+});
+
+// Each rule with the comment just before it.
+const commented = [...css.matchAll(/\/\*([\s\S]*?)\*\/\s*([^{}/]+)\{([^{}]*)\}/g)].map((m) => ({
+  comment: m[1],
+  selector: m[2].trim(),
+  body: m[3],
+}));
+
+test("font sizes other than the Frame's 14px are commented deviations", () => {
+  for (const d of decls.filter((d) => d.prop === "font-size" && d.value !== "14px")) {
+    const r = commented.find((r) => r.selector === d.selector);
+    if (!r || !/Deviation:/.test(r.comment)) throw new Error(`${d.selector} { font-size: ${d.value} } has no Deviation comment`);
+  }
+});
+
+test("every deviation comment has a Spotify row in the spec's Deviations table", () => {
+  // Comments read "Deviation: <what departs>." and the row "| Spotify | <what departs> |".
+  const deviations = [...css.matchAll(/Deviation:\s*([^.]+)\./g)].map((m) => m[1].replace(/\s+/g, " ").trim());
+  if (!deviations.length) throw new Error("no Deviation comments in user.css");
+  const table = spec.split(/^## Deviations$/m)[1]?.split(/^## /m)[0] ?? "";
+  for (const what of deviations) {
+    if (!table.includes(`| Spotify | ${what} |`)) throw new Error(`no Deviations row "| Spotify | ${what} |"`);
   }
 });
 
