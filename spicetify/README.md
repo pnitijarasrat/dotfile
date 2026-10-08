@@ -32,11 +32,15 @@ To go back to stock Spotify: `spicetify restore`.
 
 ## Check
 
-Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, and the config.
+Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot-to-role mapping against the spec row, that hex only appears in the token block, Purist fidelity (no rounded corners, blur, gradients or translucency; box-shadows only as the bevels), and the config.
 
 Then check by eye in the running app (the list grows as #53 lands):
 
 - [ ] Background, sidebar, player bar and cards are `frame_face` grey; no dark surfaces.
+- [ ] Square corners everywhere: cover art, artist photos, cards, buttons, chips, the search box, menus, dialogs and the panels' edges.
+- [ ] No gradients, blur or translucent surfaces: no dark fade under headers or cards, no blurred cover behind Now Playing, no frosted top bar, no drop shadows under menus or cards.
+- [ ] Playlist, album and artist headers, the top bar and the Now Playing view are flat grey, not tinted from the cover, and their text is black.
+- [ ] Cover art and artist photos still show in full color, including the artist header photo.
 - [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover. The Home button is a grey push button and the search box is a sunken white field.
 - [ ] Filter chips (All, Music, Podcasts) are grey push buttons; the selected one is navy with white text.
 - [ ] Connect panel: the "This computer" card is grey, not black.

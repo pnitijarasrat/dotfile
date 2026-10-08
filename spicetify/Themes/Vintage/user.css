@@ -125,10 +125,65 @@
   box-shadow: var(--sunken) !important;
 }
 
-/* The band behind Home's header takes a dark color from the cover art,
-   set inline. Flat Frame grey instead. */
-.main-view-container__scroll-node-child > main > div > div[style*=background-color] {
+/* ---- Purist fidelity (#54) ----
+   Spotify's class names are hashed and change with each update, so these
+   rules reach every element rather than chasing each rounded, blurred or
+   shaded one. Bevels above win over the shadow reset by specificity. */
+
+/* Square corners, cover art included; no blur, filters or drop shadows. */
+*, *::before, *::after {
+  border-radius: 0 !important;
+  backdrop-filter: none !important;
+  filter: none !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* No gradients: Spotify's scrims, fades and noise texture go. Photos Spotify
+   sets as an inline background (url(...)) keep it, and so do the panels that
+   pass their photo in --background-image. Fade-out masks are dropped too;
+   the checkbox tick is a mask on ::after, so pseudo-elements keep theirs. */
+*:not([style*="url("]), *::before, *::after {
+  background-image: none !important;
+}
+[style*="--background-image:"] {
+  background-image: var(--background-image) !important;
+}
+* {
+  mask-image: none !important;
+}
+
+/* Cover-colored backgrounds: playlist, album and artist headers, Now
+   Playing, the top bar and the band behind Home all take a color from the
+   cover art through inline styles. Flat Frame grey instead, with Frame text
+   in place of the text colors Spotify picks to contrast with the cover.
+   Buttons keep theirs: the color picker's swatches are the color itself. */
+[style*="background-color"]:not(button) {
   background-color: var(--frame_face) !important;
+}
+[style*="--background-base"],
+[style*="--background-color"],
+[style*="--extracted-background-color"],
+[style*="--bg-color-from"],
+[style*="--text-base"] {
+  --background-base: var(--frame_face) !important;
+  --background-base-min-contrast: var(--frame_face) !important;
+  --background-base-high-contrast: var(--frame_face) !important;
+  --background-color: var(--frame_face) !important;
+  --extracted-background-color: var(--frame_face) !important;
+  --extracted-background-tinted: var(--frame_face) !important;
+  --bg-color-from: var(--frame_face) !important;
+  --bg-color-to: var(--frame_face) !important;
+  --text-base: var(--frame_text) !important;
+  --text-subdued: var(--frame_gray_text) !important;
+  --higher-contrast-text-base-color: var(--frame_text) !important;
+  --extracted-text-subdued: var(--frame_gray_text) !important;
+}
+
+/* The top bar's background fades in as the page scrolls, through an inline
+   opacity. Opaque from the start. */
+[data-testid=topbar] > [style*="opacity"] {
+  opacity: 1 !important;
 }
 
 /* Seek and volume bars: a frame_light track with a navy fill. Spotify's
