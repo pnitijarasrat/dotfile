@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -271,6 +271,72 @@ test("every deviation comment has a Spotify row in the spec's Deviations table",
   for (const what of deviations) {
     if (!table.includes(`| Spotify | ${what} |`)) throw new Error(`no Deviations row "| Spotify | ${what} |"`);
   }
+});
+
+// The declarations of the rule whose selector list has exactly `selector`.
+function declsFor(selector) {
+  const rule = rules.find((r) => r.selector.split(",").some((s) => s.trim() === selector));
+  if (!rule) throw new Error(`no rule for ${selector}`);
+  return Object.fromEntries(rule.decls);
+}
+
+// Spotify's encore buttons. Primary ones (Play) paint their face on an
+// inner span, so that span is the face.
+const buttonFaces = [
+  "[data-encore-id=buttonSecondary]",
+  "[data-encore-id=buttonTertiary]",
+  "[data-encore-id=buttonPrimary] > [class*=button-primary__inner]",
+];
+
+test("buttons are raised Frame push buttons", () => {
+  for (const face of buttonFaces) {
+    const d = declsFor(face);
+    eq(d["background-color"], "var(--frame_face)", `${face} background-color`);
+    eq(d.color, "var(--frame_text)", `${face} color`);
+    eq(d["box-shadow"], "var(--raised)", `${face} box-shadow`);
+  }
+});
+
+test("pressed buttons sink with a frame_light face", () => {
+  // Disabled buttons don't sink; aria-disabled ones still match :active.
+  const pressed = [
+    "[data-encore-id=buttonSecondary]:active:not([aria-disabled=true])",
+    "[data-encore-id=buttonTertiary]:active:not([aria-disabled=true])",
+    "[data-encore-id=buttonPrimary]:active:not([aria-disabled=true]) > [class*=button-primary__inner]",
+  ];
+  for (const face of pressed) {
+    const d = declsFor(face);
+    eq(d["background-color"], "var(--frame_light)", `${face} background-color`);
+    eq(d["box-shadow"], "var(--sunken)", `${face} box-shadow`);
+  }
+});
+
+test("disabled buttons are opaque frame_gray_text", () => {
+  const disabled = [
+    "[data-encore-id^=button]:disabled",
+    "[data-encore-id^=button][aria-disabled=true]",
+    "[data-encore-id=buttonPrimary]:disabled > [class*=button-primary__inner]",
+    "[data-encore-id=buttonPrimary][aria-disabled=true] > [class*=button-primary__inner]",
+  ];
+  for (const face of disabled) {
+    const d = declsFor(face);
+    eq(d.color, "var(--frame_gray_text)", `${face} color`);
+    eq(d.opacity, "1", `${face} opacity`);
+  }
+});
+
+test("icons are frame_text", () => {
+  // Inside a button an icon takes the button's color (gray when disabled).
+  const icon = rules.find((r) => r.selector.startsWith("[data-encore-id=icon]"));
+  if (!icon) throw new Error("no rule for [data-encore-id=icon]");
+  eq(Object.fromEntries(icon.decls).color, "var(--frame_text)", "icon color");
+});
+
+test("the playing track and on states are navy", () => {
+  // Spotify marks them with its bright accent, the green it used to be.
+  const d = declsFor(".encore-dark-theme");
+  eq(d["--text-bright-accent"], "var(--frame_selection)", "--text-bright-accent");
+  eq(d["--essential-bright-accent"], "var(--frame_selection)", "--essential-bright-accent");
 });
 
 test("config selects Vintage with the color scheme and CSS injection on", () => {

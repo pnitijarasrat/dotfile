@@ -32,7 +32,8 @@
    turn black. Each set is remapped to Frame roles here. */
 
 /* Base set: hover, pressed and elevated surfaces (Home button, carousel
-   arrows, the Connect card, hover cards) stay flat Frame grey. */
+   arrows, the Connect card, hover cards) stay flat Frame grey. The bright
+   accent, which marks the playing track and the on states, is navy. */
 .encore-dark-theme,
 .encore-dark-theme .encore-base-set,
 .encore-dark-theme .encore-muted-accent-set,
@@ -49,8 +50,10 @@
   --background-tinted-press: var(--frame_light);
   --text-base: var(--frame_text);
   --text-subdued: var(--frame_gray_text);
+  --text-bright-accent: var(--frame_selection);
   --essential-base: var(--frame_text);
   --essential-subdued: var(--frame_gray_text);
+  --essential-bright-accent: var(--frame_selection);
   --decorative-base: var(--frame_text);
   --decorative-subdued: var(--frame_shadow);
 }
@@ -79,8 +82,9 @@
   --decorative-subdued: var(--frame_shadow);
 }
 
-/* Was Spotify green: navy, and anything drawn on it is selection text
-   (the play-on-hover buttons on cards), never black on navy. */
+/* Was Spotify green (positive badges and fills, the Jam and onboarding
+   accents): navy, and anything drawn on it is selection text, never black
+   on navy. Buttons that sit on this set get the Frame face instead. */
 .encore-dark-theme .encore-bright-accent-set,
 .encore-dark-theme .encore-positive-set {
   --background-base: var(--frame_selection);
@@ -105,12 +109,6 @@
   background-color: var(--frame_window) !important;
   color: var(--frame_text) !important;
   box-shadow: var(--sunken) !important;
-}
-
-/* Home button: a Frame push button. */
-[data-testid=home-button] {
-  background-color: var(--frame_face) !important;
-  box-shadow: var(--raised) !important;
 }
 
 /* Filter chips: Frame push buttons; the selected one is a navy selection. */
@@ -225,4 +223,61 @@
 [class*=encore-text-headline], [class*=encore-text-headline] * {
   font-size: 24px !important;
   font-weight: bold !important;
+}
+
+/* ---- Win95 controls (#56) ---- */
+
+/* Buttons: raised Frame push buttons with black glyphs, Play included.
+   Spotify's encore buttons carry a stable data-encore-id; the primary ones
+   (Play, the play-on-hover buttons on cards) paint their face on an inner
+   span, so that span is the face. */
+[data-encore-id=buttonSecondary],
+[data-encore-id=buttonTertiary],
+[data-encore-id=buttonPrimary] > [class*=button-primary__inner] {
+  background-color: var(--frame_face) !important;
+  color: var(--frame_text) !important;
+  border: none !important;
+  box-shadow: var(--raised) !important;
+  opacity: 1 !important;
+}
+
+/* Win95 buttons don't grow on hover or fade while pressed: they sink,
+   unless disabled (aria-disabled ones still match :active). */
+[data-encore-id^=button] {
+  transform: none !important;
+}
+[data-encore-id=buttonSecondary]:active:not([aria-disabled=true]),
+[data-encore-id=buttonTertiary]:active:not([aria-disabled=true]),
+[data-encore-id=buttonPrimary]:active:not([aria-disabled=true]) > [class*=button-primary__inner] {
+  background-color: var(--frame_light) !important;
+  box-shadow: var(--sunken) !important;
+}
+
+/* Condensed icon buttons (back, forward, More, Add) have no side padding,
+   so the glyph would sit on the bevel. */
+[data-encore-id=buttonTertiary][class*=button-tertiary--condensed] {
+  padding: 4px !important;
+}
+
+/* On states (shuffle, repeat, liked) keep the navy bright accent, until
+   the Media Rack's LEDs replace it (#63). */
+[data-encore-id=buttonTertiary][class*=color-text-bright-accent] {
+  color: var(--frame_selection) !important;
+}
+
+/* Disabled: gray text on an opaque face, where Spotify fades to 30%. */
+[data-encore-id^=button]:disabled,
+[data-encore-id^=button][aria-disabled=true],
+[data-encore-id=buttonPrimary]:disabled > [class*=button-primary__inner],
+[data-encore-id=buttonPrimary][aria-disabled=true] > [class*=button-primary__inner] {
+  color: var(--frame_gray_text) !important;
+  opacity: 1 !important;
+}
+
+/* Icons: Spotify's own SVGs, filled with the text color. Inside a button
+   they take the button's color (gray when disabled), and in list rows the
+   row's (the active Connect device and the playing playlist are navy);
+   elsewhere they're black, except navy accents. */
+[data-encore-id=icon]:not([data-encore-id^=button] *, [class*=legacy-list-row] *, [class*=bright-accent], [class*=bright-accent] *) {
+  color: var(--frame_text) !important;
 }
