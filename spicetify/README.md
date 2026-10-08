@@ -37,9 +37,14 @@ Run `node spicetify/tests/vintage_test.mjs` after any change. It checks the slot
 Then check by eye in the running app (the list grows as #53 lands):
 
 - [ ] Background, sidebar, player bar and cards are `frame_face` grey; no dark surfaces.
+- [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover. The Home button is a grey push button and the search box is a sunken white field.
+- [ ] Filter chips (All, Music, Podcasts) are grey push buttons; the selected one is navy with white text.
+- [ ] Connect panel: the "This computer" card is grey, not black.
+- [ ] Seek and volume bars have a light grey track with a navy fill.
+- [ ] Play-on-hover buttons on cards are navy with a white glyph.
 - [ ] Text is black; secondary text (artists, captions) is grey.
 - [ ] No Spotify green anywhere: Play button, shuffle/repeat on, liked heart, the playing track's title, the progress and volume fill are navy.
 - [ ] Track rows and cards don't change color on hover.
 - [ ] Error toasts are dark red.
 
-Known gaps until the stylesheet stage of #53: the palette alone leaves black text and glyphs on navy (the Play button, tinted chips, selected rows) and on the dark red error toast, which is hard to read. The stylesheet makes the Play button a raised grey push button and puts `frame_selection_text` on navy.
+`user.css` also remaps Spotify's own color sets (`.encore-*-set`), which the palette can't reach: they hard-code dark hex, or turn black once white becomes `frame_text` (#64). Known gaps still open in #53: black text on selected rows (#57) and on the dark red error toast.
