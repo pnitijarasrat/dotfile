@@ -1,0 +1,27 @@
+/* Vintage theme for Spotify (#53). Spotify is one maximized Win95 window:
+   the Frame everywhere except the lyrics view, a Work surface
+   (docs/web-theme.md). Colors Spotify draws from its
+   palette come from color.ini; this file is for what the palette can't reach.
+   Hex values appear only in this token block, named by spec role. */
+:root {
+  --frame_face: #C0C0C0;
+  --frame_highlight: #FFFFFF;
+  --frame_light: #E0E0E0;
+  --frame_shadow: #808080;
+  --frame_dark_shadow: #000000;
+  --frame_title: #000080;
+  --frame_title_text: #FFFFFF;
+  --frame_title_inactive: #808080;
+  --frame_title_inactive_text: #C0C0C0;
+  --frame_text: #000000;
+  --frame_gray_text: #808080;
+  --frame_window: #FFFFFF;
+  --frame_selection: #000080;
+  --frame_selection_text: #FFFFFF;
+  --frame_tooltip: #FFFFE1;
+
+  --raised: inset -1px -1px var(--frame_dark_shadow), inset 1px 1px var(--frame_highlight),
+            inset -2px -2px var(--frame_shadow), inset 2px 2px var(--frame_light);
+  --sunken: inset -1px -1px var(--frame_highlight), inset 1px 1px var(--frame_shadow),
+            inset -2px -2px var(--frame_light), inset 2px 2px var(--frame_dark_shadow);
+}
