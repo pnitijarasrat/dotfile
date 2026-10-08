@@ -1,4 +1,4 @@
-// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56).
+// Checks for the Spotify Vintage theme (#53, #61, #64, #54, #55, #56, #57).
 // Run: node spicetify/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -337,6 +337,124 @@ test("the playing track and on states are navy", () => {
   const d = declsFor(".encore-dark-theme");
   eq(d["--text-bright-accent"], "var(--frame_selection)", "--text-bright-accent");
   eq(d["--essential-bright-accent"], "var(--frame_selection)", "--essential-bright-accent");
+});
+
+// Track lists in the main view (the Library sidebar is also a grid, and
+// stays Frame grey).
+const trackList = "main [role=grid]";
+const trackRow = `${trackList} [role=row]`;
+const selectedRow = `${trackRow}[aria-selected=true]`;
+
+test("track lists are sunken frame_window list boxes", () => {
+  const d = declsFor(trackList);
+  eq(d["background-color"], "var(--frame_window)", "list box background-color");
+  eq(d["box-shadow"], "var(--sunken)", "list box box-shadow");
+  // Hover and pressed backgrounds Spotify draws from its palette stay white.
+  for (const v of ["--background-highlight", "--background-tinted-highlight", "--background-press"]) {
+    eq(d[v], "var(--frame_window)", `list box ${v}`);
+  }
+});
+
+test("rows don't highlight on hover", () => {
+  // Pinned white whatever state the row is in, so no hover rule can tint it.
+  for (const s of [trackRow, `${trackRow} > *`]) eq(declsFor(s)["background-color"], "var(--frame_window)", `${s} background-color`);
+});
+
+// Text and icon colors Spotify draws from its palette, all white on navy.
+const selectionText = ["--text-base", "--text-subdued", "--text-bright-accent", "--essential-base", "--essential-subdued", "--essential-bright-accent"];
+
+test("the selected row is frame_selection with frame_selection_text", () => {
+  for (const s of [selectedRow, `${selectedRow} > *`]) {
+    const d = declsFor(s);
+    eq(d["background-color"], "var(--frame_selection)", `${s} background-color`);
+    eq(d.color, "var(--frame_selection_text)", `${s} color`);
+    // The playing track's navy title would vanish on navy.
+    for (const v of selectionText) eq(d[v], "var(--frame_selection_text)", `${s} ${v}`);
+  }
+  // Every glyph in the row, Spotify's black icons included; buttons keep their faces.
+  const inner = rules.find((r) => r.selector.startsWith(`${selectedRow} *`));
+  if (!inner) throw new Error(`no rule for ${selectedRow} *`);
+  eq(Object.fromEntries(inner.decls).color, "var(--frame_selection_text)", "selected row text color");
+});
+
+test("cards don't highlight on hover", () => {
+  for (const s of ["[data-encore-id=card]", "[data-encore-id=card]:hover"]) {
+    const d = declsFor(s);
+    eq(d["background-color"], "var(--frame_face)", `${s} background-color`);
+    eq(d.transform, "none", `${s} transform`);
+  }
+});
+
+test("menus and dropdowns are raised Frame menus", () => {
+  // The menu's own box, whatever class Spotify gives it.
+  for (const s of ["[role=menu]", "[role=listbox]"]) {
+    eq(declsFor(s)["background-color"], "var(--frame_face)", `${s} background-color`);
+  }
+  for (const s of [":has(> [role=menu])", ":has(> [role=listbox])"]) {
+    const d = declsFor(s);
+    eq(d["background-color"], "var(--frame_face)", `${s} background-color`);
+    eq(d["box-shadow"], "var(--raised)", `${s} box-shadow`);
+    eq(d.border, "none", `${s} border`);
+  }
+});
+
+test("the hovered menu item is navy", () => {
+  const hovered = [
+    "[role=menu] [role^=menuitem]:hover",
+    "[role=menu] [role^=menuitem]:focus",
+    "[role=menu] [role^=menuitem][aria-expanded=true]",
+    "[role=listbox] [role=option]:hover",
+    "[role=listbox] [role=option][data-focused]",
+  ];
+  for (const s of hovered) {
+    const d = declsFor(s);
+    eq(d["background-color"], "var(--frame_selection)", `${s} background-color`);
+    eq(d.color, "var(--frame_selection_text)", `${s} color`);
+    for (const v of selectionText) eq(d[v], "var(--frame_selection_text)", `${s} ${v}`);
+    const inner = declsFor(`${s} *`);
+    eq(inner.color, "var(--frame_selection_text)", `${s} * color`);
+  }
+});
+
+test("checked menu items aren't Spotify green", () => {
+  for (const s of ["[role=menu] [role=menuitemradio][aria-checked=true]", "[role=menu] [role=menuitemcheckbox][aria-checked=true]"]) {
+    eq(declsFor(s).color, "var(--frame_text)", `${s} color`);
+  }
+});
+
+test("tooltips are frame_tooltip with a 1px frame_dark_shadow border", () => {
+  for (const s of ["[role=tooltip]", "[class*=legacy-tooltip]", "[class*=-tooltip]:not([class*=tooltip-trigger])"]) {
+    const d = declsFor(s);
+    eq(d["background-color"], "var(--frame_tooltip)", `${s} background-color`);
+    eq(d.color, "var(--frame_text)", `${s} color`);
+    eq(d.border, "1px solid var(--frame_dark_shadow)", `${s} border`);
+  }
+});
+
+test("scrollbars are Win95: a frame_light track and a raised frame_face thumb", () => {
+  // Spotify's OverlayScrollbars, and the native ones where it has none.
+  for (const s of [".os-scrollbar-track", "::-webkit-scrollbar-track"]) {
+    eq(declsFor(s)["background-color"], "var(--frame_light)", `${s} background-color`);
+  }
+  for (const s of [".os-scrollbar-handle", "::-webkit-scrollbar-thumb"]) {
+    const d = declsFor(s);
+    eq(d["background-color"], "var(--frame_face)", `${s} background-color`);
+    eq(d["box-shadow"], "var(--raised)", `${s} box-shadow`);
+  }
+});
+
+test("focus is a 1px dotted frame_text outline inside the control", () => {
+  // The browser's :focus-visible, and encore's data-focus-visible.
+  for (const s of [
+    "html:not(.no-focus-outline) :focus-visible:not(input):not(textarea)",
+    "html:not(.no-focus-outline) [data-focus-visible]:not([data-focus-visible=false]):not(input):not(textarea)",
+  ]) {
+    const d = declsFor(s);
+    eq(d.outline, "1px dotted var(--frame_text)", `${s} outline`);
+    if (!(parseInt(d["outline-offset"], 10) < 0)) throw new Error(`${s} outline-offset ${d["outline-offset"]} is not inside the control`);
+  }
+  // Spotify's blue ring around the focused main view.
+  eq(declsFor("html:not(.no-focus-outline) main:focus::after").outline, "none", "main view focus ring");
 });
 
 test("config selects Vintage with the color scheme and CSS injection on", () => {
