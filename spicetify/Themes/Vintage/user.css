@@ -1,7 +1,7 @@
 /* Vintage theme for Spotify (#53). Spotify is one maximized Win95 window:
    the Frame everywhere except the lyrics view, a Work surface
-   (docs/web-theme.md), and the player bar's LCDs, a Display. Colors Spotify draws from its
-   palette come from color.ini; this file is for what the palette can't reach.
+   (docs/web-theme.md), and the player bar's LCDs, a Display. Colors
+   Spotify draws from its palette come from color.ini; this file is for what the palette can't reach.
    Hex values appear only in this token block, named by spec role. */
 :root {
   --frame_face: #C0C0C0;
@@ -195,8 +195,9 @@
   opacity: 1 !important;
 }
 
-/* Seek and volume bars: a frame_light track with a navy fill. Spotify's
-   track color is white at 30% alpha, which the palette swap breaks. */
+/* Progress bars: a frame_light track with a navy fill. Spotify's track
+   color is white at 30% alpha, which the palette swap breaks. The player
+   bar's seek and volume bars are the Media Rack's own (#63). */
 [data-testid=progress-bar] {
   --fg-color: var(--frame_selection) !important;
   --bg-color: var(--frame_light) !important;
@@ -523,7 +524,9 @@ html.vintage-window-inactive .Root__globalNav {
    LCDs (cover, time over the seek bar, track, like) above a row of square
    transport buttons with the volume slider on the right. Spotify's
    wrappers are flattened so one grid can place each part; the duration
-   readout is dropped. */
+   readout is dropped. The parts are found by test id and, where they
+   have none, by DOM order and English labels, so they need checking after
+   an update. Long titles scroll by Spotify's own marquee. */
 [data-testid=now-playing-bar] {
   background-color: var(--frame_face) !important;
   box-shadow: var(--raised) !important;
@@ -560,7 +563,7 @@ html.vintage-window-inactive .Root__globalNav {
   width: 76px;
   height: 76px;
   padding: 2px;
-  background-color: var(--frame_face);
+  background-color: var(--frame_face) !important;
   box-shadow: var(--sunken) !important;
 }
 [data-testid=now-playing-widget] > div:nth-child(1) img {
@@ -568,9 +571,10 @@ html.vintage-window-inactive .Root__globalNav {
   height: 72px !important;
 }
 
-/* Transport: square raised push buttons with black glyphs, sunken while
-   pressed. Play is one of them, with no big circle; on states show as
-   LEDs, not navy glyphs. */
+/* Transport: square-cornered raised push buttons with black glyphs,
+   sunken while pressed, all one size. Play is one of them, with no big
+   circle; on states show as LEDs, not navy glyphs. Disabled ones (#56)
+   have gray glyphs and don't sink. */
 [data-testid=now-playing-bar] button:not([data-testid=cover-art-button]) {
   position: relative;
   min-width: 40px !important;
@@ -586,21 +590,28 @@ html.vintage-window-inactive .Root__globalNav {
   transform: none !important;
   opacity: 1 !important;
 }
-[data-testid=now-playing-bar] button:not([data-testid=cover-art-button]):active {
+[data-testid=now-playing-bar] button:not([data-testid=cover-art-button]):active:not(:disabled):not([aria-disabled=true]) {
   background-color: var(--frame_light) !important;
   box-shadow: var(--sunken) !important;
 }
+[data-testid=now-playing-bar] button:disabled,
+[data-testid=now-playing-bar] button[aria-disabled=true] {
+  color: var(--frame_gray_text) !important;
+}
 [data-testid=now-playing-bar] button svg {
-  fill: var(--frame_text) !important;
-  color: var(--frame_text) !important;
+  fill: currentColor !important;
   width: 14px;
   height: 14px;
 }
-[data-testid=control-button-playpause] > span {
+/* Play's inner span is a push button of its own (#56); here the button
+   is the face, so the span is flat, pressed or not. */
+[data-testid=now-playing-bar] [data-testid=control-button-playpause]:not([aria-disabled=true]) > [class*=button-primary__inner],
+[data-testid=now-playing-bar] [data-testid=control-button-playpause]:active:not([aria-disabled=true]) > [class*=button-primary__inner] {
   background-color: var(--frame_face) !important;
+  box-shadow: none !important;
   width: auto !important;
   height: auto !important;
-  color: var(--frame_text) !important;
+  color: inherit !important;
   transform: none !important;
 }
 [data-testid=general-controls],
@@ -625,19 +636,19 @@ html.vintage-window-inactive .Root__globalNav {
   left: 3px;
   width: 5px;
   height: 5px;
-  background-color: var(--frame_shadow);
+  background-color: var(--frame_shadow) !important;
 }
 [data-testid=now-playing-bar] button[aria-label^="Disable Shuffle"]::before,
 [data-testid=control-button-repeat][aria-checked=true]::before,
 [data-testid=control-button-repeat][aria-checked=mixed]::before,
 [data-testid=now-playing-widget] > div:nth-child(3) button[aria-checked=true]::before {
-  background-color: var(--frame_data_green);
+  background-color: var(--frame_data_green) !important;
 }
 
 /* LCDs: the time (over the seek bar) and the track, a Display. */
 [data-testid=now-playing-widget] > div:nth-child(2),
 [data-testid=player-controls] > div:last-child {
-  background-color: var(--display_bg);
+  background-color: var(--display_bg) !important;
   box-shadow: var(--sunken) !important;
   padding: 4px 8px;
   min-width: 0;
@@ -663,8 +674,9 @@ html.vintage-window-inactive .Root__globalNav {
   line-height: 16px !important;
   font-weight: normal !important;
   color: var(--display_fg) !important;
-  font-variant-ligatures: none;
-  font-synthesis: none;
+  font-variant-ligatures: none !important;
+  font-synthesis: none !important;
+  font-style: normal !important;
   -webkit-font-smoothing: none;
   min-width: 0 !important;
 }
@@ -689,6 +701,7 @@ html.vintage-window-inactive .Root__globalNav {
   font-family: "Fixedsys Excelsior", Menlo, Thonburi, monospace !important;
   font-size: 16px !important;
   line-height: 16px !important;
+  -webkit-font-smoothing: none;
 }
 [data-testid=playback-position] > span {
   position: relative;

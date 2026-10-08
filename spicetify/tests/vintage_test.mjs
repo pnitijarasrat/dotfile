@@ -568,6 +568,7 @@ const rack = "[data-testid=now-playing-bar]";
 const trackLcd = "[data-testid=now-playing-widget] > div:nth-child(2)";
 const timeLcd = "[data-testid=player-controls] > div:last-child";
 const rackButton = `${rack} button:not([data-testid=cover-art-button])`;
+const playFace = `${rack} [data-testid=control-button-playpause]:not([aria-disabled=true]) > [class*=button-primary__inner]`;
 
 test("the spec's Display roles are VGA values, and the stylesheet's tokens", () => {
   const vga = { display_bg: "ansi_0", display_fg: "ansi_14", display_ghost: "ansi_6" };
@@ -590,12 +591,11 @@ test("the rack is a raised frame_face panel", () => {
 });
 
 test("the time and track LCDs are sunken display_bg", () => {
-  const d = declsFor(trackLcd, "background-color");
-  if (!rules.some((r) => r.selector.split(",").map((s) => s.trim()).includes(timeLcd) && r.decls.some(([p]) => p === "background-color"))) {
-    throw new Error("the time LCD has no background");
+  for (const s of [trackLcd, timeLcd]) {
+    const d = declsFor(s, "background-color");
+    eq(d["background-color"], "var(--display_bg)", `${s} background-color`);
+    eq(d["box-shadow"], "var(--sunken)", `${s} box-shadow`);
   }
-  eq(d["background-color"], "var(--display_bg)", "LCD background-color");
-  eq(d["box-shadow"], "var(--sunken)", "LCD box-shadow");
 });
 
 test("LCD text is display_fg in the Work surface font at 16px", () => {
@@ -619,13 +619,25 @@ test("transport buttons are square raised push buttons, Play the same size", () 
   eq(d["background-color"], "var(--frame_face)", "button background-color");
   eq(d["box-shadow"], "var(--raised)", "button box-shadow");
   eq(d.color, "var(--frame_text)", "button color");
-  const pressed = declsFor(`${rackButton}:active`);
+  // Disabled buttons (previous with nothing before) don't sink.
+  const pressed = declsFor(`${rackButton}:active:not(:disabled):not([aria-disabled=true])`);
   eq(pressed["background-color"], "var(--frame_light)", "pressed background-color");
   eq(pressed["box-shadow"], "var(--sunken)", "pressed box-shadow");
   // No rule sizes Play apart from the rest, and its big circle is gone.
   forbid((d) => d.selector.includes("control-button-playpause") && /^(min-)?(width|height)$/.test(d.prop) && d.value !== "auto");
-  const play = declsFor("[data-testid=control-button-playpause] > span");
-  eq(play["background-color"], "var(--frame_face)", "Play face background-color");
+  // Play's inner face loses its own bevel (#56), pressed or not, so the
+  // button has one.
+  for (const s of [playFace, playFace.replace("]:not", "]:active:not")]) {
+    const play = declsFor(s);
+    eq(play["background-color"], "var(--frame_face)", `${s} background-color`);
+    eq(play["box-shadow"], "none", `${s} box-shadow`);
+  }
+});
+
+test("disabled transport buttons have a frame_gray_text glyph", () => {
+  for (const s of [`${rack} button:disabled`, `${rack} button[aria-disabled=true]`]) eq(declsFor(s).color, "var(--frame_gray_text)", `${s} color`);
+  // Glyphs take the button's color.
+  eq(declsFor(`${rack} button svg`).fill, "currentColor", "glyph fill");
 });
 
 test("shuffle, repeat and liked have an LED: frame_shadow off, frame_data_green on", () => {

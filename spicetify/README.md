@@ -68,11 +68,10 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] Error toasts are dark red.
 - [ ] Lyrics (the lyrics button in the player bar, and the Now Playing panel's lyrics card) are on white, never a cover color, in crisp Fixedsys Excelsior 16: not blurry, not bold, not italic. Its buttons stay grey push buttons in Microsoft Sans Serif.
 - [ ] As the song plays, the current line is navy on a pale yellow band, past lines are grey (solid, not faded) and upcoming lines navy. Hovering a past line turns it navy and underlined; clicking it seeks.
-
 - [ ] The player bar is one raised grey rack: the cover art in full color in a sunken frame on the left, spanning both rows.
 - [ ] Top row: a black LCD with the elapsed time in cyan Fixedsys Excelsior over dim `88:88` ghost digits and the seek bar under it; a wide black LCD with the track title in cyan and the artist dim; then the like button. No duration readout.
 - [ ] LCD text is crisp, not blurry or bold; long titles still scroll.
-- [ ] Bottom row: shuffle, previous, play/pause, next and repeat are square raised grey buttons with black glyphs, all one size (no big round Play); each sinks while pressed. The volume slider sits on the right.
+- [ ] Bottom row: shuffle, previous, play/pause, next and repeat are square-cornered raised grey buttons with black glyphs, all one size, with one bevel each (no big round Play); each sinks while pressed. Previous with nothing before it has a grey glyph and doesn't sink. The volume slider sits on the right.
 - [ ] Shuffle, repeat and like have a small square LED in the corner: grey when off, green when on (repeat one too). Their glyphs stay black, not navy or Spotify green, and Spotify's dot under them is gone.
 - [ ] The seek bar is a sunken grey track with a navy fill and no handle; clicking it seeks.
 - [ ] The volume is a Win95 slider: a raised grey thumb in a thin sunken white slot; dragging it and clicking the slot change the volume.
