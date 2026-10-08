@@ -188,11 +188,39 @@
   --extracted-text-subdued: var(--frame_gray_text) !important;
 }
 
+/* Text over the Canvas video in Now Playing (the panel's title, the
+   track and artist) was read against a dark scrim, a gradient. It sits on
+   a flat Frame band instead. */
+.main-nowPlayingView-headerWrapper,
+.main-nowPlayingView-contextItemInfo {
+  background-color: var(--frame_face) !important;
+}
+
 /* The sticky page header (not the title bar, below) fades in its
    background as the page scrolls, through an inline opacity. Opaque from
    the start. */
 [data-testid=topbar] > [style*="opacity"] {
   opacity: 1 !important;
+}
+/* Its overlay darkens the cover color with black at 60%, which on Frame
+   grey is a dark band. */
+.main-topBar-overlay {
+  display: none !important;
+}
+
+/* The playing-now equaliser beside a Home shortcut or a row is a green
+   image (an animated GIF while playing). The bright accent is navy, so the
+   image is only its shape: a mask over a navy face, the picture itself
+   pushed out of the box. */
+img[src*="equaliser"] {
+  object-position: 100vw 0;
+  background-color: var(--frame_selection) !important;
+}
+img[src*="equaliser-green.svg"] {
+  mask: url("/images/equaliser-green.svg") center / contain no-repeat !important;
+}
+img[src*="equaliser-animated-green.gif"] {
+  mask: url("/images/equaliser-animated-green.gif") center / contain no-repeat !important;
 }
 
 /* Progress bars: a frame_light track with a navy fill. Spotify's track
@@ -242,7 +270,10 @@
 /* Buttons: raised Frame push buttons with black glyphs, Play included.
    Spotify's encore buttons carry a stable data-encore-id; the primary ones
    (Play, the play-on-hover buttons on cards) paint their face on an inner
-   span, so that span is the face. */
+   span, so that span is the face. Opacity and transform at rest stay
+   Spotify's: buttons that appear on hover (the play buttons on Home's
+   shortcuts and in rows, the Now Playing panel's header) are hidden by
+   them until then. */
 [data-encore-id=buttonSecondary],
 [data-encore-id=buttonTertiary],
 [data-encore-id=buttonPrimary] > [class*=button-primary__inner] {
@@ -250,12 +281,14 @@
   color: var(--frame_text) !important;
   border: none !important;
   box-shadow: var(--raised) !important;
-  opacity: 1 !important;
 }
 
 /* Win95 buttons don't grow on hover or fade while pressed: they sink,
    unless disabled (aria-disabled ones still match :active). */
-[data-encore-id^=button] {
+[data-encore-id^=button]:hover,
+[data-encore-id^=button]:active,
+[data-encore-id^=button]:hover > *,
+[data-encore-id^=button]:active > * {
   transform: none !important;
 }
 [data-encore-id=buttonSecondary]:active:not([aria-disabled=true]),
@@ -263,6 +296,7 @@
 [data-encore-id=buttonPrimary]:active:not([aria-disabled=true]) > [class*=button-primary__inner] {
   background-color: var(--frame_light) !important;
   box-shadow: var(--sunken) !important;
+  opacity: 1 !important;
 }
 
 /* Condensed icon buttons (back, forward, More, Add) have no side padding,
@@ -297,10 +331,11 @@
 /* ---- Win95 lists, menus, scrollbars and focus (#57) ---- */
 
 /* Track lists: sunken white list boxes. Only those in the main view; the
-   Library sidebar is a grid too, and stays Frame grey. Spotify's hover and
+   Library sidebar, Home's shelves and search's top result are grids too,
+   and stay Frame grey. Spotify's hover and
    pressed backgrounds inside it are white, and the padding keeps rows off
    the bevel. */
-main [role=grid] {
+main [role=grid].main-trackList-trackList {
   --background-base: var(--frame_window);
   --background-highlight: var(--frame_window);
   --background-press: var(--frame_window);
@@ -315,15 +350,15 @@ main [role=grid] {
 /* No hover highlight: rows are white whatever state they're in. Spotify
    tints them through hashed classes this file can't list. The
    play-on-hover button in the row still appears. */
-main [role=grid] [role=row],
-main [role=grid] [role=row] > * {
+main [role=grid].main-trackList-trackList [role=row],
+main [role=grid].main-trackList-trackList [role=row] > * {
   background-color: var(--frame_window) !important;
 }
 
 /* The selected row is navy with white text, the playing track's navy title
    and Spotify's black icons included. Buttons keep their own faces. */
-main [role=grid] [role=row][aria-selected=true],
-main [role=grid] [role=row][aria-selected=true] > * {
+main [role=grid].main-trackList-trackList [role=row][aria-selected=true],
+main [role=grid].main-trackList-trackList [role=row][aria-selected=true] > * {
   --text-base: var(--frame_selection_text);
   --text-subdued: var(--frame_selection_text);
   --text-bright-accent: var(--frame_selection_text);
@@ -333,7 +368,7 @@ main [role=grid] [role=row][aria-selected=true] > * {
   background-color: var(--frame_selection) !important;
   color: var(--frame_selection_text) !important;
 }
-main [role=grid] [role=row][aria-selected=true] *:not([data-encore-id^=button], [data-encore-id^=button] *) {
+main [role=grid].main-trackList-trackList [role=row][aria-selected=true] *:not([data-encore-id^=button], [data-encore-id^=button] *) {
   color: var(--frame_selection_text) !important;
 }
 

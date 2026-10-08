@@ -343,9 +343,9 @@ test("the playing track and on states are navy", () => {
   eq(d["--essential-bright-accent"], "var(--frame_selection)", "--essential-bright-accent");
 });
 
-// Track lists in the main view (the Library sidebar is also a grid, and
-// stays Frame grey).
-const trackList = "main [role=grid]";
+// Track lists in the main view (the Library sidebar, Home's shelves and
+// search's top result are grids too, and stay Frame grey).
+const trackList = "main [role=grid].main-trackList-trackList";
 const trackRow = `${trackList} [role=row]`;
 const selectedRow = `${trackRow}[aria-selected=true]`;
 

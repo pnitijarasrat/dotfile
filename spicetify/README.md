@@ -43,6 +43,9 @@ Then check by eye in the running app (the list grows as #53 lands):
 - [ ] Playlist, album and artist headers, the sticky page header and the Now Playing view are flat grey, not tinted from the cover, and their text is black.
 - [ ] Cover art and artist photos still show in full color, including the artist header photo.
 - [ ] Home: the band behind the shortcuts is flat grey, not tinted from the cover.
+- [ ] Home: a shortcut's Play button appears only while it's hovered, and the playing one's equaliser is navy. Shelves (Made For You, Jump back in) and search's top result aren't boxed in a sunken list box.
+- [ ] Playlist and album pages: the sticky header that appears on scroll is flat grey, not a dark band.
+- [ ] Now Playing panel: over a Canvas video, the panel title and the track and artist sit on grey bands; the hide, share and expand buttons appear only on hover.
 - [ ] The top bar is navy across the whole window while Spotify has focus; click another app and it turns grey, click back and it's navy again. The traffic lights keep their system colors.
 - [ ] The search box in the top bar is a sunken white field with a black icon and grey placeholder; the back, forward, Home and browse buttons are grey push buttons on the bar.
 - [ ] Filter chips (All, Music, Podcasts) are grey push buttons; the selected one is navy with white text.
