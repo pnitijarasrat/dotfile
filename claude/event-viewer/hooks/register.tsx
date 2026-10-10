@@ -10,7 +10,7 @@ const COMMAND = 'event-viewer'
 const TITLE = 'Event Viewer - Claude Session'
 
 // Frame roles (docs/theme-spec.md)
-const C = {
+const FRAME = {
   frame_face: '#C0C0C0',
   frame_highlight: '#FFFFFF',
   frame_dark_shadow: '#000000',
@@ -26,7 +26,7 @@ const INLINE_BODY_ROWS = 12
 type Seg = { t: string; fg: string; bg?: string; b?: boolean; press?: () => unknown; key?: string }
 type Row = Seg[]
 
-const sg = (t: string, fg = C.frame_text, bg: string | undefined = C.frame_face, b = false): Seg => ({ t, fg, bg, b })
+const sg = (t: string, fg = FRAME.frame_text, bg: string | undefined = FRAME.frame_face, b = false): Seg => ({ t, fg, bg, b })
 
 function cut(t: string, n: number) {
   const chars = [...t]
@@ -38,12 +38,12 @@ function cut(t: string, n: number) {
 function titleBar(w: number, close: () => unknown): Row {
   const buttons = 10
   return [
-    sg(cut(` ${TITLE}`, Math.max(0, w - buttons)), C.frame_title_text, C.frame_title, true),
-    sg(' _ ', C.frame_text, C.frame_face, true),
-    sg(' ', C.frame_title_text, C.frame_title),
-    sg(' □ ', C.frame_text, C.frame_face, true),
-    sg(' ', C.frame_title_text, C.frame_title),
-    { ...sg(' × ', C.frame_text, C.frame_face, true), press: close, key: 'close' },
+    sg(cut(` ${TITLE}`, Math.max(0, w - buttons)), FRAME.frame_title_text, FRAME.frame_title, true),
+    sg(' _ ', FRAME.frame_text, FRAME.frame_face, true),
+    sg(' ', FRAME.frame_title_text, FRAME.frame_title),
+    sg(' □ ', FRAME.frame_text, FRAME.frame_face, true),
+    sg(' ', FRAME.frame_title_text, FRAME.frame_title),
+    { ...sg(' × ', FRAME.frame_text, FRAME.frame_face, true), press: close, key: 'close' },
   ]
 }
 
@@ -51,11 +51,11 @@ function titleBar(w: number, close: () => unknown): Row {
 // drawn with 1/8-cell lines so the bevel reads as one pixel.
 function windowRows(w: number, bodyRows: number, close: () => unknown): Row[] {
   const iw = w - 2
-  const edge = (r: Row): Row => [sg('▏', C.frame_highlight), ...r, sg('▕', C.frame_dark_shadow)]
+  const edge = (r: Row): Row => [sg('▏', FRAME.frame_highlight), ...r, sg('▕', FRAME.frame_dark_shadow)]
   return [
     edge(titleBar(iw, close)),
     ...Array.from({ length: bodyRows }, () => edge([sg(' '.repeat(iw))])),
-    [sg('▔'.repeat(w), C.frame_dark_shadow, undefined)],
+    [sg('▔'.repeat(w), FRAME.frame_dark_shadow, undefined)],
   ]
 }
 
@@ -69,13 +69,13 @@ export const register: Register = on => {
   })
 
   on('command.run', { command: COMMAND }, async $ => {
-    await $.ui.open({ id: PANE, title: 'Event Viewer', focus: true })
+    await $.ui.open({ id: PANE, title: 'Event Viewer', focus: true, columns: 104, rows: 40 })
     return { text: 'Event Viewer opened.' }
   }).catch(() => ({ text: 'The Event Viewer could not open.' }))
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
-    const w = Math.max(40, e.props.bodyColumns)
+    const w = Math.max(60, e.props.bodyColumns)
     // A docked window fills the dock less its title bar and bottom edge.
     const bodyRows = e.props.placement === 'dock' ? Math.max(3, e.props.scroll.bodyRows - 2) : INLINE_BODY_ROWS
     const rows = windowRows(w, bodyRows, () => $.ui.close({ id: PANE }))
