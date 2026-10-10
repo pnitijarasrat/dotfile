@@ -1,4 +1,4 @@
-// Checks for the Ghostty Vintage theme (#13, #44).
+// Checks for the Ghostty Vintage theme (#13, #44, #78).
 // Run: node ghostty/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -90,15 +90,18 @@ test("bold is not bright and synthetic bold stays off", () => {
   eq(config.find((e) => e.key === "font-synthetic-style")?.value, "false", "font-synthetic-style");
 });
 
-test("Purist fidelity and fonts are unchanged", () => {
+test("Purist fidelity and the JetBrains Mono NL font", () => {
   const expected = {
     theme: ["vintage"],
     "background-opacity": ["1"],
     "background-blur": ["false"],
     "window-decoration": ["none"],
-    "font-family": ['"Fixedsys Excelsior"', '"Menlo"', '"Thonburi"'],
-    "font-size": ["32"],
+    "font-family": ['"JetBrains Mono NL"', '"Menlo"', '"Thonburi"'],
+    "font-size": ["14"],
     "font-feature": ["-calt, -liga"],
+    "font-style-bold": ["false"],
+    "font-style-italic": ["false"],
+    "font-style-bold-italic": ["false"],
   };
   for (const [key, values] of Object.entries(expected)) {
     eq(config.filter((e) => e.key === key).map((e) => e.value).join(" | "), values.join(" | "), key);
