@@ -12,3 +12,6 @@ spicetify/Backup/
 spicetify/Extracted/
 spicetify/CustomApps/
 spicetify/Extensions/
+
+# Claude Code writes the mod API's types beside a mod each time it loads it
+claude/*/.claude-plugin/types/
