@@ -2,4 +2,4 @@
 
 | File | Font | Source | License |
 |---|---|---|---|
-| `FSEX302.ttf` | Fixedsys Excelsior 3.022 (kika build), the old Work surface font: kept but unused once VSCode (#79) and Spotify (#80) move to JetBrains Mono NL (#78) | `FSEX302.ttf` from release [v3.09.10](https://github.com/kika/fixedsys/releases/tag/v3.09.10) of [kika/fixedsys](https://github.com/kika/fixedsys) | Public domain; [CC0](https://creativecommons.org/publicdomain/zero/1.0/) where that isn't permitted |
+| `FSEX302.ttf` | Fixedsys Excelsior 3.022 (kika build), the old Work surface font: kept but unused once Spotify (#80) moves to JetBrains Mono NL (#78, #79) | `FSEX302.ttf` from release [v3.09.10](https://github.com/kika/fixedsys/releases/tag/v3.09.10) of [kika/fixedsys](https://github.com/kika/fixedsys) | Public domain; [CC0](https://creativecommons.org/publicdomain/zero/1.0/) where that isn't permitted |
