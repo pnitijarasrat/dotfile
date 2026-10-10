@@ -1,0 +1,1 @@
+{ "name": "win95-activity-prototype", "version": "0.1.0", "description": "PROTOTYPE (#87): three Win95 looks for the activity window, fake data, throwaway", "types": "./types/index.d.ts" }
