@@ -28,7 +28,7 @@ _Avoid_: dark palette, light-mode colors
 The locked description of the **Vintage theme**: palette, fonts, and a per-tool decision of how it adopts them. It's the destination of the vintage-theme map, and comes before any re-theming.
 
 **Purist fidelity**:
-The standing rule for the **Vintage theme**: no transparency or blur, square corners, no Nerd Font icons or emoji. Fonts are chosen for crisp reading on Retina rather than as literal bitmaps.
+The standing rule for the **Vintage theme**: no transparency or blur, square corners, no Nerd Font icons or emoji. Fonts are vector faces chosen for reading on Retina at plain sizes, not bitmap fonts at whole-pixel sizes.
 
 ## Relationships
 

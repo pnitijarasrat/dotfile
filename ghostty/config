@@ -17,11 +17,15 @@ background-opacity=1
 background-blur=false
 window-decoration=none
 
-# Fixedsys Excelsior, falling back to Menlo, then Thonburi
-font-family="Fixedsys Excelsior"
+# JetBrains Mono NL, falling back to Menlo, then Thonburi
+font-family="JetBrains Mono NL"
 font-family="Menlo"
 font-family="Thonburi"
-font-size=32
+font-size=14
 window-inherit-font-size=false
 font-synthetic-style=false
+# Regular only: bold and italic text use the Regular face
+font-style-bold=false
+font-style-italic=false
+font-style-bold-italic=false
 font-feature=-calt, -liga
