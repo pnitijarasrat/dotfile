@@ -1,4 +1,4 @@
-// Checks for the Vintage VSCode theme (#19, #20, #33, #34, #46).
+// Checks for the Vintage VSCode theme (#19, #20, #33, #46, #79).
 // Run: node vscode/tests/vintage_test.mjs
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -236,28 +236,20 @@ test("token colors use the syntax roles, with no italic or bold (#46)", () => {
   eq(theme.semanticTokenColors["variable.readonly"], roles.work_fg, "variable.readonly");
 });
 
-test("the terminal uses the editor's Work surface font (#33)", () => {
-  for (const key of ["fontFamily", "fontSize", "fontWeight"]) {
-    eq(settings[`terminal.integrated.${key}`], settings[`editor.${key}`], `terminal.integrated.${key}`);
+test("the editor and terminal use the Work surface font (#79)", () => {
+  for (const prefix of ["editor", "terminal.integrated"]) {
+    eq(settings[`${prefix}.fontFamily`], "'JetBrains Mono NL', Menlo, Thonburi", `${prefix}.fontFamily`);
+    eq(settings[`${prefix}.fontSize`], 11, `${prefix}.fontSize`);
+    eq(settings[`${prefix}.fontWeight`], "normal", `${prefix}.fontWeight`);
   }
-  // terminal lineHeight multiplies the font's cell height (1 em for Fixedsys
-  // Excelsior); editor lineHeight is in px.
-  eq(
-    settings["terminal.integrated.lineHeight"] * settings["terminal.integrated.fontSize"],
-    settings["editor.lineHeight"],
-    "terminal line height in px",
-  );
-  eq(settings["terminal.integrated.fontLigatures.enabled"], settings["editor.fontLigatures"], "terminal ligatures");
-});
-
-test("the Work surface font lands on whole Fixedsys pixels (#34)", () => {
-  // Fixedsys Excelsior's em is 16 font px; on 2x Retina each font px must
-  // cover a whole number of screen px. Zoom scales by 1.2 per level.
-  const fontPx = (settings["editor.fontSize"] * 1.2 ** settings["window.zoomLevel"] * 2) / 16;
-  if (Math.abs(fontPx - Math.round(fontPx)) > 0.01) {
-    throw new Error(`${fontPx.toFixed(3)} screen px per font px is not whole`);
-  }
-  eq(settings["window.zoomLevel"], 1, "window.zoomLevel (chrome grows to match the code)");
+  // JetBrains Mono NL has a real bold face; bold looks the same as normal text (ADR 0003).
+  eq(settings["terminal.integrated.fontWeightBold"], "normal", "terminal.integrated.fontWeightBold");
+  eq(settings["window.zoomLevel"], 1, "window.zoomLevel");
+  // editor lineHeight 0 is automatic; terminal lineHeight multiplies the font's cell height.
+  eq(settings["editor.lineHeight"], 0, "editor.lineHeight");
+  eq(settings["terminal.integrated.lineHeight"], 1, "terminal.integrated.lineHeight");
+  eq(settings["editor.fontLigatures"], false, "editor.fontLigatures");
+  eq(settings["terminal.integrated.fontLigatures.enabled"], false, "terminal.integrated.fontLigatures.enabled");
 });
 
 if (failures.length) {

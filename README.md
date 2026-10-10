@@ -2,8 +2,8 @@
 
 ## Fonts
 
-- **Work surface** (Ghostty, Neovim): **JetBrains Mono NL**, Regular weight, installed into `~/Library/Fonts` (#78, `docs/adr/0003-jetbrains-mono-work-surface.md`). The fallback chain is JetBrains Mono NL → Menlo → Thonburi, written into each tool's config. VSCode (#79) and Spotify (#80) are still being migrated.
-- **Fixedsys Excelsior** (kika build, CC0), the old Work surface font, is kept in `fonts/` but unused once VSCode and Spotify move (#12). Run `./fonts/install.sh` to copy every font in `fonts/` into `~/Library/Fonts`. See `fonts/README.md` for its source and license.
+- **Work surface** (Ghostty, Neovim, VSCode): **JetBrains Mono NL**, Regular weight, installed into `~/Library/Fonts` (#78, `docs/adr/0003-jetbrains-mono-work-surface.md`). The fallback chain is JetBrains Mono NL → Menlo → Thonburi, written into each tool's config. Spotify (#80) is still being migrated.
+- **Fixedsys Excelsior** (kika build, CC0), the old Work surface font, is kept in `fonts/` but unused once Spotify moves (#12). Run `./fonts/install.sh` to copy every font in `fonts/` into `~/Library/Fonts`. See `fonts/README.md` for its source and license.
 - **SketchyBar** uses Microsoft Sans Serif and Tahoma Bold (for Start and the task button), both bundled with macOS. Its icons are PNGs in `sketchybar/icons/`, so it needs no Nerd Font.
 - **Nerd Fonts:** none are needed. Hack, DejaVuSansM and Meslo were removed after #9. JetBrains Mono Nerd Font is still installed but unused (it was only for iTerm2, which is gone) and can be removed; keep the plain JetBrains Mono NL, which the Work surface uses.
 

@@ -17,21 +17,22 @@
     "totalTypeScript.hideAllTips": false,
     "totalTypeScript.hideBasicTips": false,
 
-    // Work surface font (docs/theme-spec.md). Fixedsys Excelsior is only crisp
-    // when fontSize x 1.2^zoomLevel is a multiple of 8. Zoom 1 brings the
-    // chrome (13) to ~15.6 and 13.333 brings code to 16, so all panes match (#34).
-    "editor.fontFamily": "'Fixedsys Excelsior', Menlo, Thonburi",
-    "editor.fontSize": 13.333,
-    "editor.lineHeight": 13.333,
+    // Work surface font (docs/theme-spec.md, #79). Zoom 1 scales everything by
+    // 1.2, so code at 11 renders at about 13 and the chrome keeps its size.
+    "editor.fontFamily": "'JetBrains Mono NL', Menlo, Thonburi",
+    "editor.fontSize": 11,
+    // 0 is automatic: VSCode picks a line height from the font size.
+    "editor.lineHeight": 0,
     "editor.fontWeight": "normal",
     "editor.fontLigatures": false,
     "window.zoomLevel": 1,
-    // The terminal (and the Claude Code panel in it) is Work surface too (#33):
-    // same font as the editor. Its lineHeight multiplies the font's cell height,
-    // which for Fixedsys Excelsior is exactly 1 em.
-    "terminal.integrated.fontFamily": "'Fixedsys Excelsior', Menlo, Thonburi",
-    "terminal.integrated.fontSize": 13.333,
+    // The terminal (and the Claude Code panel in it) is Work surface too:
+    // same font as the editor. Its lineHeight multiplies the font's cell height.
+    "terminal.integrated.fontFamily": "'JetBrains Mono NL', Menlo, Thonburi",
+    "terminal.integrated.fontSize": 11,
     "terminal.integrated.lineHeight": 1,
     "terminal.integrated.fontWeight": "normal",
+    // JetBrains Mono NL has a real bold face; bold looks the same as normal (ADR 0003).
+    "terminal.integrated.fontWeightBold": "normal",
     "terminal.integrated.fontLigatures.enabled": false
 }
