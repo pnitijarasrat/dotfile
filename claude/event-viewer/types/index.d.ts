@@ -27,8 +27,26 @@ export type LogEvent = {
 // between turns. A running call in the log outranks it on the Display (#92).
 export type Phase = { kind: 'idle' | 'thinking' | 'working'; since: number; model?: string }
 
+// The Summary's counters for one session (#94), kept beside the log so its
+// row limit can't cap them: settled calls by status (Total and Running come
+// from these and the running rows), the main loop's completed turns and their
+// time, with when the current one started, every subagent spawned, and every
+// step's tokens.
+export type Stats = {
+  done: number
+  error: number
+  denied: number
+  turns: number
+  busyMs: number
+  turnSince?: number
+  subagents: number
+  tokensIn: number
+  tokensOut: number
+}
+
 // The log of one session: a log whose session is not the current one is empty.
-export type Log = { session: string; events: LogEvent[]; phase?: Phase }
+// Absent stats are all zero.
+export type Log = { session: string; events: LogEvent[]; phase?: Phase; stats?: Stats }
 
 // The row whose Event Properties are open ('' for none), and how far its
 // Input and Result boxes are scrolled.

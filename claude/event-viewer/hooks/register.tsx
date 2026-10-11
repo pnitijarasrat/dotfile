@@ -6,13 +6,17 @@ import { displayOf, elapsedOf } from './display.ts'
 import { inputOf, outputOf, windowOf, wrap } from './inspect.ts'
 import { MAX_EVENTS, categoryOf, columnsOf, durationOf, settle, startEvent, statusOf, timeOf } from './log.ts'
 import type { Settled } from './log.ts'
-import type { Inspect, Log, LogEvent, Phase } from '../types'
+import { spent, statsOf, summaryOf, tally } from './stats.ts'
+import type { Figure } from './stats.ts'
+import type { SessionUsage } from 'claude-code'
+import type { Inspect, Log, LogEvent, Phase, Stats } from '../types'
 
 // The Event Viewer (#83): a Win95 Frame window, opened by /event-viewer, that
 // shows what Claude is doing in this session. Laid out as the prototype in
 // #87 decided (variant B): title bar, raised bevel, grey body holding the
-// activity log of tool calls (#91), the Display as its status bar (#92), and
-// a selected row's Event Properties (#93).
+// activity log of tool calls (#91) with its Summary of session stats (#94),
+// the Display as its status bar (#92), and a selected row's Event Properties
+// (#93).
 
 const PANE = 'event-viewer'
 const COMMAND = 'event-viewer'
@@ -61,7 +65,7 @@ const TYPE_FG: Record<LogEvent['status'], string> = {
 }
 
 // Rows of an inline window's grey body; a docked one fills the dock.
-const INLINE_BODY_ROWS = 19
+const INLINE_BODY_ROWS = 26
 
 // A Seg is a run of cells in one style; a Row is segs exactly one window wide.
 // Neighbouring segs with the same key press as one Button.
@@ -156,6 +160,30 @@ function logBox(events: LogEvent[], w: number, room: number, selected: string, s
   })
   const blank = Array.from({ length: Math.max(0, room - rows.length) }, (): Row => [])
   return sunken([header, ...rows, ...blank], w, FRAME.frame_window)
+}
+
+// The Summary (#94): an etched group box, shadow above and left, highlight
+// below and right, of three columns of figures, each label left and its value
+// right; a figure not known yet reads `-` in gray.
+const SUMMARY_ROWS = 7
+
+function summaryBox(columns: (w: number) => Figure[][], w: number): Row[] {
+  const inner = w - 2
+  const cw = Math.floor(inner / 3)
+  const figure = (f: Figure | undefined): Row => {
+    if (f === undefined) return [sg(' '.repeat(cw))]
+    const value = f.value === undefined ? sg('-', FRAME.frame_gray_text) : sg(f.value)
+    const label = ` ${f.label}:`
+    return fit([sg(label), sg(' '.repeat(Math.max(1, cw - cells(label) - cells(value.t) - 1))), value, sg(' ')], cw)
+  }
+  const cols = columns(cw)
+  const rows = Array.from({ length: SUMMARY_ROWS - 2 }, (_, i): Row => cols.flatMap(col => figure(col[i])))
+  const title = ' Summary '
+  return [
+    [sg('┌─', FRAME.frame_shadow), sg(title), sg('─'.repeat(Math.max(0, w - 3 - cells(title))), FRAME.frame_shadow), sg('┐', FRAME.frame_highlight)],
+    ...rows.map(r => [sg('│', FRAME.frame_shadow), ...fit(r, inner), sg('│', FRAME.frame_highlight)]),
+    [sg('└', FRAME.frame_shadow), sg('─'.repeat(inner), FRAME.frame_highlight), sg('┘', FRAME.frame_highlight)],
+  ]
 }
 
 // The Display: one sunken LCD row of lit cyan over black, the step on the
@@ -276,10 +304,11 @@ function titleBar(w: number, close: () => unknown): Row {
 }
 
 // The grey body: menu bar, the caption with the event count, the log filling
-// the rest, and the Display at the bottom. A selected row's Event Properties
-// dock beside the log in a wide body and sit under it in a narrow one; the
+// the rest with the Summary under it, and the Display at the bottom. A
+// selected row's Event Properties dock beside the log and its Summary in a
+// wide body and sit under the Summary in a narrow one, so it stays put; the
 // window grows to show them whole when the body is short.
-function bodyRows(held: Log, view: Inspect, now: number, w: number, rows: number, act: Act): Row[] {
+function bodyRows(held: Log, usage: SessionUsage | undefined, view: Inspect, now: number, w: number, rows: number, act: Act): Row[] {
   const n = held.events.length
   const ev = held.events.find(x => x.id === view.id)
   const side = ev !== undefined && w + 2 >= DOCK_FROM
@@ -292,12 +321,13 @@ function bodyRows(held: Log, view: Inspect, now: number, w: number, rows: number
   const panelW = side ? Math.max(PANEL_MIN, Math.min(Math.floor(w * PANEL_SHARE), w - 3 - logMin)) : w - 2
   const props = ev === undefined ? [] : panel(ev, view, panelW, lines, act)
   // The list box's two edges and header aside, its rows show calls.
-  const listRows = side ? Math.max(area, props.length) : Math.max(area - props.length, 5)
+  const listRows = Math.max((side ? Math.max(area, props.length) : area - props.length) - SUMMARY_ROWS, 5)
   const logW = side ? w - 3 - panelW : w - 2
   const list = logBox(held.events, logW, listRows - 3, view.id, act.select)
+  const summary = summaryBox(cw => summaryOf(held, usage, now, cw), logW)
   const middle = side
-    ? list.map((r, i) => fit([sg(' '), ...r, sg(' '), ...(props[i] ?? [])], w))
-    : [...list.map(inset), ...props.map(inset)]
+    ? [...list, ...summary].map((r, i) => fit([sg(' '), ...r, sg(' '), ...(props[i] ?? [])], w))
+    : [...list.map(inset), ...summary.map(inset), ...props.map(inset)]
   return [
     menuBar(w),
     fit([sg(' Claude Session', FRAME.frame_text, FRAME.frame_face, true), sg(` - ${n} event(s)`, FRAME.frame_gray_text)], w),
@@ -326,6 +356,15 @@ async function phaseTo($: EngineInterface, kind: Phase['kind'], model?: string) 
     const held = ofSession(l, session)
     const named = model ?? held.phase?.model
     return { ...held, phase: { kind, since, ...(named === undefined ? {} : { model: named }) } }
+  })
+}
+
+// The Summary's counters, changed in the current session's log.
+async function count($: EngineInterface, change: (s: Stats, now: number) => Stats) {
+  const [session, now] = await Promise.all([$.session.id(), $.clock.now()])
+  await update($, log, l => {
+    const held = ofSession(l, session)
+    return { ...held, stats: change(statsOf(held), now) }
   })
 }
 
@@ -362,9 +401,16 @@ export const register: Register = on => {
     // when this dispatch began, before tool.check kept the verdict on the row.
     const end = async (ran: Settled) => {
       const endedAt = await $.clock.now()
-      await update($, log, l => l.session !== session ? l : {
-        ...l,
-        events: l.events.map(x => (x.id === ev.id ? { ...x, status: statusOf(ran, x.verdict), endedAt, output: outputOf(ran, x) } : x)),
+      // Counted even when the row has dropped off the top of the log.
+      await update($, log, l => {
+        if (l.session !== session) return l
+        const row = l.events.find(x => x.id === ev.id)
+        const status = statusOf(ran, row?.verdict)
+        return {
+          ...l,
+          events: l.events.map(x => (x === row ? { ...x, status, endedAt, output: outputOf(ran, x) } : x)),
+          stats: tally(statsOf(l), status),
+        }
       })
     }
     try {
@@ -394,13 +440,20 @@ export const register: Register = on => {
   // thinks while thinking streams, works again once the rest of the step
   // streams, and goes idle as it ends. A subagent's turn is told on the
   // Display by its Agent call, so its steps change nothing here.
+  // Busy time runs from a turn's start until it completes.
   on('turn.start', async ($, e, next) => {
     await phaseTo($, 'working')
+    await count($, (s, now) => ({ ...s, turnSince: now }))
     return next(e)
   })
 
+  // Every step's tokens count, a subagent's too.
   on('turn.step', async function* ($, e, next) {
-    if (e.agentId !== undefined) return yield* next(e)
+    if (e.agentId !== undefined) {
+      const result = yield* next(e)
+      await count($, s => spent(s, result.usage))
+      return result
+    }
     await phaseTo($, 'working', e.model)
     let kind: Phase['kind'] = 'working'
     const stream = next(e)
@@ -412,21 +465,41 @@ export const register: Register = on => {
       }
       yield chunk
     }
-    return stream.result
+    const result = await stream.result
+    await count($, s => spent(s, result.usage))
+    return result
   })
 
+  // A main-loop turn ends, aborted or errored too: it counts, with its time.
   on('turn.complete', async ($, e, next) => {
-    if (e.agentId === undefined) await phaseTo($, 'idle')
+    if (e.agentId === undefined) {
+      await phaseTo($, 'idle')
+      await count($, ({ turnSince: _, ...s }) => ({ ...s, turns: s.turns + 1, busyMs: s.busyMs + e.durationMs }))
+    }
     return next(e)
   })
 
-  // The Display's time ticks once a second while a window is drawn: each draw
-  // asks for the next at the turn of the step's second.
+  // Every subagent, a background one or a subagent's own, counts as spawned.
+  on('agent.spawn', async ($, e, next) => {
+    const spawned = await next(e)
+    await count($, s => ({ ...s, subagents: s.subagents + 1 }))
+    return spawned
+  })
+
+  // The window's clocks tick once a second while it is drawn: each draw asks
+  // for the next at the turn of the soonest one's second.
   let tick: { cancel: () => void } | undefined
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
-    const [stored, view, session, now] = await Promise.all([read($, log), read($, inspect), $.session.id(), $.clock.now()])
+    // Usage is read on every draw, and is not known until the engine has it.
+    const [stored, view, session, now, usage] = await Promise.all([
+      read($, log),
+      read($, inspect),
+      $.session.id(),
+      $.clock.now(),
+      $.session.usage().catch(() => undefined),
+    ])
     const held = ofSession(stored, session)
     const w = Math.max(60, e.props.bodyColumns)
     // A docked window fills the dock less its title bar and bottom edge.
@@ -442,11 +515,13 @@ export const register: Register = on => {
       },
       scroll: (box, to) => update($, inspect, v => ({ ...v, [box]: to })),
     }
-    const rows = windowRows(w, bodyRows(held, view, now, w - 2, rowCount, act), () => $.ui.close({ id: PANE }))
+    const rows = windowRows(w, bodyRows(held, usage, view, now, w - 2, rowCount, act), () => $.ui.close({ id: PANE }))
 
-    const { since } = displayOf(held)
+    // Each clock shown turns its second at its own start: the Display's step,
+    // the current turn's Busy time and the Session age.
+    const starts = [displayOf(held).since, statsOf(held).turnSince, usage?.startedAt].filter(t => t !== undefined)
     tick?.cancel()
-    tick = since === undefined ? undefined : $.clock.after(1000 - ((now - since) % 1000), () => {
+    tick = starts.length === 0 ? undefined : $.clock.after(Math.min(...starts.map(t => 1000 - ((now - t) % 1000))), () => {
       tick = undefined
       $.ui.invalidate('ui.render')
     })
