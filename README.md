@@ -44,3 +44,15 @@ Check the theme against `docs/theme-spec.md` with `node raycast/tests/vintage_te
 The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37). It also makes the New Tab page the flat teal Classic desktop (#38). Incognito windows keep Chrome's own dark look: Chrome doesn't apply themes there. Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme` (the file picker hides `.config`; press Cmd+Shift+. to show it, or Cmd+Shift+G to type the path). To reload after changing `manifest.json`, run **Load unpacked** on the same folder again. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
 
 Check the theme against `docs/theme-spec.md` (palette, and the color keys the installed Chrome knows) with `node chrome/tests/vintage_test.mjs`.
+
+## Claude Code
+
+The **Event Viewer** mod lives in `claude/event-viewer` (#83, #90). `/event-viewer` opens it as a pane: a Win95 Frame window showing what Claude is doing in the session. Every terminal session (Ghostty, VS Code's integrated terminal) loads it from this folder, and saving a file reloads it. Name the folder once under `env` in `~/.claude/settings.json`, which isn't tracked here:
+
+```json
+"env": { "CLAUDE_CODE_PLUGIN_DIRS": "~/.config/claude/event-viewer" }
+```
+
+Don't also copy or install it anywhere else (`~/.claude/dev-mods/`, a marketplace), or two copies load.
+
+Check it with `claude plugin validate claude/event-viewer` and `claude plugin test claude/event-viewer`. Type-check it with `tsc -p claude/event-viewer` (TypeScript 5.4+) once a session has loaded it: the engine writes the types its `tsconfig.json` extends into `.claude-plugin/types/`, which git ignores.
