@@ -1,1 +1,1 @@
-{ "name": "event-viewer", "version": "0.1.0", "description": "Win95 Event Viewer window of what Claude is doing in this session (#83)", "author": { "name": "pnitijarasrat" } }
+{ "name": "event-viewer", "version": "0.1.0", "description": "Win95 Event Viewer window of what Claude is doing in this session (#83)", "author": { "name": "pnitijarasrat" }, "types": "./types/index.d.ts" }
