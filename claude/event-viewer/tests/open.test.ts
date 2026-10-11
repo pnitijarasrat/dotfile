@@ -8,6 +8,7 @@ const mount = ($: Parameters<TestBody>[0], bodyColumns: number, placement: 'dock
   } as never)
 
 test('/event-viewer opens the Event Viewer window', async ($, on) => {
+  on('session.id', async () => ({ value: 'one' }) as never)
   const opened: string[] = []
   on('ui.open', async ($, e) => {
     opened.push(e.id)
@@ -24,6 +25,7 @@ test('/event-viewer opens the Event Viewer window', async ($, on) => {
 })
 
 test('the title bar × closes the window', async ($, on) => {
+  on('session.id', async () => ({ value: 'one' }) as never)
   const closed: string[] = []
   on('ui.close', async ($, e) => {
     closed.push(e.id)
