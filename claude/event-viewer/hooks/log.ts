@@ -9,7 +9,7 @@ export const MAX_EVENTS = 500
 // What a tool's arguments are about, by the first of these it has: a file, a
 // command, a pattern, a URL. Anything else shows its first string argument.
 const TARGET_KEYS = ['file_path', 'notebook_path', 'command', 'pattern', 'url', 'query', 'skill', 'description', 'prompt']
-const ENVELOPE_KEYS = new Set(['tool', 'tool_use_id', 'agentId', 'requestMeta', 'consent'])
+export const ENVELOPE_KEYS = new Set(['tool', 'tool_use_id', 'agentId', 'requestMeta', 'consent'])
 
 export function targetOf(e: Record<string, unknown>): string {
   const pick = (k: string) => (typeof e[k] === 'string' && e[k] !== '' ? (e[k] as string) : undefined)
@@ -37,7 +37,7 @@ export function startEvent(e: Record<string, unknown> & { tool: string; tool_use
 // prompt; core hands that back as an errored result, not a deny.
 const REFUSED = /doesn't want to proceed with this tool use/
 
-export type Settled = { deny?: string; isError?: true; text?: string }
+export type Settled = { deny?: string; isError?: true; text?: string; result?: unknown }
 
 // How a call settles: refused by a hook (deny), a permission rule (a deny
 // verdict) or the person (their refusal), else failed or done.

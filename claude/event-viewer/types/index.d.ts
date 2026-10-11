@@ -13,8 +13,13 @@ export type LogEvent = {
   status: EventStatus
   startedAt: number
   endedAt?: number
-  // tool.check's verdict for the call, when one was seen.
+  // tool.check's verdict for the call, when one was seen, and a deny's reason.
   verdict?: 'allow' | 'ask' | 'deny'
+  reason?: string
+  // The call's arguments as text, and once it settles what it answered: its
+  // result, a denial's reason or the error (#93). Absent on rows kept before.
+  input?: string
+  output?: string
 }
 
 // What the main loop's turn is doing outside its tool calls, since when:
@@ -25,8 +30,12 @@ export type Phase = { kind: 'idle' | 'thinking' | 'working'; since: number; mode
 // The log of one session: a log whose session is not the current one is empty.
 export type Log = { session: string; events: LogEvent[]; phase?: Phase }
 
+// The row whose Event Properties are open ('' for none), and how far its
+// Input and Result boxes are scrolled.
+export type Inspect = { id: string; input: number; output: number }
+
 declare module 'claude-code' {
   interface PluginState {
-    'event-viewer': { log: Log }
+    'event-viewer': { log: Log; inspect: Inspect }
   }
 }

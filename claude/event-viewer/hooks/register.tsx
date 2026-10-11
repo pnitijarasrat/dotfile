@@ -2,14 +2,16 @@ import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
 import { displayOf, elapsedOf } from './display.ts'
-import { MAX_EVENTS, columnsOf, settle, startEvent, statusOf } from './log.ts'
+import { inputOf, outputOf, windowOf, wrap } from './inspect.ts'
+import { MAX_EVENTS, categoryOf, columnsOf, durationOf, settle, startEvent, statusOf, timeOf } from './log.ts'
 import type { Settled } from './log.ts'
-import type { Log, LogEvent, Phase } from '../types'
+import type { Inspect, Log, LogEvent, Phase } from '../types'
 
 // The Event Viewer (#83): a Win95 Frame window, opened by /event-viewer, that
 // shows what Claude is doing in this session. Laid out as the prototype in
 // #87 decided (variant B): title bar, raised bevel, grey body holding the
-// activity log of tool calls (#91) and the Display as its status bar (#92).
+// activity log of tool calls (#91), the Display as its status bar (#92), and
+// a selected row's Event Properties (#93).
 
 const PANE = 'event-viewer'
 const COMMAND = 'event-viewer'
@@ -17,6 +19,9 @@ const TITLE = 'Event Viewer - Claude Session'
 
 // The log lives in session state, so it survives a reload of this module.
 const log = atom({ plugin: 'event-viewer', key: 'log' } as const, { session: '', events: [] } as Log)
+
+// The row whose Event Properties are open, and how far its boxes scroll.
+const inspect = atom({ plugin: 'event-viewer', key: 'inspect' } as const, { id: '', input: 0, output: 0 } as Inspect)
 
 // The log as this session holds it: another session's starts empty.
 const ofSession = (l: Log, session: string): Log => (l.session === session ? l : { session, events: [] })
@@ -30,6 +35,8 @@ const FRAME = {
   frame_title_text: '#FFFFFF',
   frame_text: '#000000',
   frame_shadow: '#808080',
+  frame_selection: '#000080',
+  frame_selection_text: '#FFFFFF',
   frame_gray_text: '#808080',
   frame_window: '#FFFFFF',
   frame_data_red: '#800000',
@@ -56,7 +63,8 @@ const TYPE_FG: Record<LogEvent['status'], string> = {
 const INLINE_BODY_ROWS = 19
 
 // A Seg is a run of cells in one style; a Row is segs exactly one window wide.
-type Seg = { t: string; fg: string; bg?: string; b?: boolean; press?: () => unknown; key?: string }
+// Neighbouring segs with the same key press as one Button.
+type Seg = { t: string; fg: string; bg?: string; b?: boolean; press?: () => unknown; key?: string; hotkey?: string }
 type Row = Seg[]
 
 const sg = (t: string, fg = FRAME.frame_text, bg: string | undefined = FRAME.frame_face, b = false): Seg => ({ t, fg, bg, b })
@@ -84,13 +92,28 @@ function fit(r: Row, w: number, bg = FRAME.frame_face): Row {
   return out
 }
 
-// A sunken box of w cells around rows: shadow above and left, highlight below
-// and right, in 1/8-cell lines.
-function sunken(rows: Row[], w: number, fill: string): Row[] {
+// A box of w cells around rows in 1/8-cell lines, `lit` above and left and
+// `dark` below and right.
+function bevel(rows: Row[], w: number, fill: string, lit: string, dark: string): Row[] {
   return [
-    [sg(' '), sg('▁'.repeat(w - 2), FRAME.frame_shadow), sg(' ')],
-    ...rows.map(r => [sg('▕', FRAME.frame_shadow), ...fit(r, w - 2, fill), sg('▏', FRAME.frame_highlight)]),
-    [sg(' '), sg('▔'.repeat(w - 2), FRAME.frame_highlight), sg(' ')],
+    [sg(' '), sg('▁'.repeat(w - 2), lit), sg(' ')],
+    ...rows.map(r => [sg('▕', lit), ...fit(r, w - 2, fill), sg('▏', dark)]),
+    [sg(' '), sg('▔'.repeat(w - 2), dark), sg(' ')],
+  ]
+}
+
+// Sunken: shadow above and left, highlight below and right.
+const sunken = (rows: Row[], w: number, fill: string) => bevel(rows, w, fill, FRAME.frame_shadow, FRAME.frame_highlight)
+// Raised: highlight above and left, dark shadow below and right.
+const raised = (rows: Row[], w: number) => bevel(rows, w, FRAME.frame_face, FRAME.frame_highlight, FRAME.frame_dark_shadow)
+
+// A one-row push button: its side lines for the bevel.
+function pushButton(key: string, label: string, press: () => unknown, opts: { hotkey?: string; bold?: boolean } = {}): Row {
+  const face = { press, key, ...(opts.hotkey === undefined ? {} : { hotkey: opts.hotkey }) }
+  return [
+    { ...sg('▕', FRAME.frame_highlight), ...face },
+    { ...sg(` ${label} `, FRAME.frame_text, FRAME.frame_face, opts.bold), ...face },
+    { ...sg('▏', FRAME.frame_dark_shadow), ...face },
   ]
 }
 
@@ -100,7 +123,8 @@ function menuBar(w: number): Row {
 }
 
 // The log: a sunken white list box under raised column headers, newest call
-// last; it shows the latest `room` calls.
+// last; it shows the latest `room` calls, or from the selected one when it
+// is older.
 const COLUMNS = [
   { title: 'Type', key: 'type', w: 13 },
   { title: 'Time', key: 'time', w: 10 },
@@ -110,16 +134,30 @@ const COLUMNS = [
   { title: 'Dur.', key: 'dur', w: 8 },
 ] as const
 
-function logBox(events: LogEvent[], w: number, room: number): Row[] {
+// Beside the Event Properties the log is narrower: once the Event column
+// would have fewer cells than this, the columns tighten to what their
+// contents need.
+const TIGHT_BELOW = 12
+const TIGHT: Record<(typeof COLUMNS)[number]['key'], number> = { type: 12, time: 9, source: 8, category: 11, event: 0, dur: 7 }
+
+// Each row presses as one: selecting it, or deselecting it when selected.
+function logBox(events: LogEvent[], w: number, room: number, selected: string, select: (id: string) => unknown): Row[] {
   const inner = w - 2
-  const fixed = COLUMNS.reduce((n, c) => n + c.w, 0)
+  const loose = COLUMNS.reduce((n, c) => n + c.w, 0)
+  const widths = COLUMNS.map(c => (inner - loose < TIGHT_BELOW ? TIGHT[c.key] : c.w))
+  const fixed = widths.reduce((n, cw) => n + cw, 0)
   // The Event column takes what the others leave.
-  const cols = COLUMNS.map(c => ({ ...c, w: c.w === 0 ? Math.max(6, inner - fixed) : c.w }))
+  const cols = COLUMNS.map((c, i) => ({ ...c, w: widths[i] === 0 ? Math.max(6, inner - fixed) : widths[i]! }))
   const header = fit(cols.flatMap(c => [sg(cut(` ${c.title}`, c.w - 1)), sg('▕', FRAME.frame_shadow)]), inner)
-  const rows = events.slice(-room).map(ev => {
+  const at = events.findIndex(ev => ev.id === selected)
+  const start = Math.max(0, events.length - room)
+  const rows = events.slice(at >= 0 && at < start ? at : start).slice(0, room).map(ev => {
     const cells = columnsOf(ev)
-    const fg = (key: string) => (key === 'type' ? TYPE_FG[ev.status] : FRAME.frame_text)
-    return fit(cols.map(c => sg(cut(` ${cells[c.key]}`, c.w), fg(c.key), FRAME.frame_window)), inner, FRAME.frame_window)
+    const chosen = ev.id === selected
+    const bg = chosen ? FRAME.frame_selection : FRAME.frame_window
+    const fg = (key: string) => (chosen ? FRAME.frame_selection_text : key === 'type' ? TYPE_FG[ev.status] : FRAME.frame_text)
+    const press = { press: () => select(chosen ? '' : ev.id), key: `ev-${ev.id}` }
+    return fit(cols.map(c => ({ ...sg(cut(` ${cells[c.key]}`, c.w), fg(c.key), bg), ...press })), inner, FRAME.frame_window)
   })
   const blank = Array.from({ length: Math.max(0, room - rows.length) }, (): Row => [])
   return sunken([header, ...rows, ...blank], w, FRAME.frame_window)
@@ -142,6 +180,93 @@ function display(log: Log, now: number, w: number): Row[] {
   return sunken([[...left, ...time]], w, DISPLAY.display_bg)
 }
 
+// The Event Properties panel (#93): a raised panel of the call's fields, then
+// its Input and its Result (Reason when denied, Error when failed) in sunken
+// frame_window boxes that wrap their text and scroll it, then ↑ ↓ and OK.
+
+const STATUS: Record<LogEvent['status'], string> = { done: 'Done', running: 'Running', denied: 'Denied', error: 'Error' }
+const OUTPUT_LABEL: Record<LogEvent['status'], string> = { done: 'Result', running: 'Result', denied: 'Reason', error: 'Error' }
+
+// The panel's rows less its two boxes' lines: the bevel's two, the title, four
+// of fields, and each box's label and two edges, and the buttons.
+const PANEL_ROWS = 14
+// Each box shows at least this many lines.
+const MIN_LINES = 3
+// Beside the log, from a body of this many columns, the panel takes this
+// share of it, never less than this, and never so much that the log's
+// tightened columns no longer fit.
+const DOCK_FROM = 100
+const PANEL_SHARE = 0.45
+const PANEL_MIN = 40
+
+type Act = {
+  select: (id: string) => unknown
+  step: (by: number) => unknown
+  scroll: (box: 'input' | 'output', to: number) => unknown
+}
+
+// A sunken white box `lines` tall over the text's wrapped lines from `at`,
+// with a scrollbar on its right while there is more than shows: ▲ and ▼ page
+// it, over a dithered track with the thumb where the window is.
+function scrollBox(key: string, text: string[], at: number, lines: number, w: number, scrollTo: (to: number) => unknown): Row[] {
+  const inner = w - 3
+  const { from, last } = windowOf(text.length, at, lines)
+  const page = Math.max(1, lines - 1)
+  const thumb = last === 0 ? -1 : 1 + Math.round((from / last) * (lines - 3))
+  const bar = (i: number): Seg => {
+    if (last === 0) return sg(' ', FRAME.frame_text, FRAME.frame_window)
+    if (i === 0) return { ...sg('▲', FRAME.frame_text), press: () => scrollTo(Math.max(0, from - page)), key: `${key}-up` }
+    if (i === lines - 1) return { ...sg('▼', FRAME.frame_text), press: () => scrollTo(Math.min(last, from + page)), key: `${key}-down` }
+    return i === thumb ? sg('█', FRAME.frame_face) : sg('▒', FRAME.frame_highlight)
+  }
+  const rows = Array.from({ length: lines }, (_, i): Row => [
+    ...fit([sg(` ${text[from + i] ?? ''}`, FRAME.frame_text, FRAME.frame_window)], inner, FRAME.frame_window),
+    bar(i),
+  ])
+  return sunken(rows, w, FRAME.frame_window)
+}
+
+// A box's label, with which lines show while some don't.
+function boxLabel(label: string, text: string[], at: number, lines: number, w: number): Row {
+  const { from, last } = windowOf(text.length, at, lines)
+  const range = last === 0 ? '' : `lines ${from + 1}-${from + lines} of ${text.length} `
+  return fit([sg(` ${label}`), sg(' '.repeat(Math.max(1, w - label.length - 1 - range.length))), sg(range, FRAME.frame_gray_text)], w)
+}
+
+// The panel, w wide, its two boxes sharing `lines` lines: the Input as many
+// as it needs up to half, the Result the rest.
+function panel(ev: LogEvent, view: Inspect, w: number, lines: number, act: Act): Row[] {
+  const iw = w - 2
+  const textW = iw - 4
+  const input = wrap(ev.input ?? '(not kept: this call was logged before its input was)', textW)
+  const output = wrap(
+    ev.status === 'running' ? '(still running: no result yet)' : ev.output ?? '(not kept: this call was logged before its result was)',
+    textW,
+  )
+  const inputLines = Math.min(Math.max(MIN_LINES, input.length), Math.floor(lines / 2))
+  const outputLines = Math.max(MIN_LINES, lines - inputLines)
+  const field = (k: string, v: Seg, w2 = iw) => fit([sg(cut(` ${k}`, 11)), v], w2)
+  const half = Math.floor(iw / 2)
+  const dur = ev.endedAt === undefined ? 'running' : durationOf(ev.endedAt - ev.startedAt)
+  const buttons = [
+    ...pushButton('prev', '↑', () => act.step(-1), { hotkey: 'k' }),
+    ...pushButton('next', '↓', () => act.step(1), { hotkey: 'j' }),
+  ]
+  const ok = pushButton('ok', 'OK', () => act.select(''), { bold: true })
+  return raised([
+    fit([sg(' Event Properties', FRAME.frame_text, FRAME.frame_face, true)], iw),
+    field('Tool:', sg(categoryOf(ev.tool))),
+    field('Target:', sg(ev.target)),
+    [...field('Status:', sg(STATUS[ev.status], TYPE_FG[ev.status], FRAME.frame_face, true), half), ...field('Duration:', sg(dur), iw - half)],
+    [...field('Started:', sg(timeOf(ev.startedAt)), half), ...field('Agent:', sg(ev.agent ?? 'main'), iw - half)],
+    boxLabel('Input', input, view.input, inputLines, iw),
+    ...scrollBox('input', input, view.input, inputLines, iw, to => act.scroll('input', to)),
+    boxLabel(OUTPUT_LABEL[ev.status], output, view.output, outputLines, iw),
+    ...scrollBox('output', output, view.output, outputLines, iw, to => act.scroll('output', to)),
+    fit([sg(' '), ...buttons, sg(' '.repeat(Math.max(1, iw - 2 - width(buttons) - width(ok)))), ...ok], iw),
+  ], w)
+}
+
 // Navy title bar with the caption buttons; only × does anything.
 function titleBar(w: number, close: () => unknown): Row {
   const buttons = 11
@@ -156,17 +281,32 @@ function titleBar(w: number, close: () => unknown): Row {
 }
 
 // The grey body: menu bar, the caption with the event count, the log filling
-// the rest, and the Display at the bottom.
-function bodyRows(held: Log, now: number, w: number, rows: number): Row[] {
+// the rest, and the Display at the bottom. A selected row's Event Properties
+// dock beside the log in a wide body and sit under it in a narrow one; the
+// window grows to show them whole when the body is short.
+function bodyRows(held: Log, view: Inspect, now: number, w: number, rows: number, act: Act): Row[] {
   const n = held.events.length
-  // Less the menu bar, the caption, the list box's two edges and header, and
-  // the Display's three rows.
-  const room = Math.max(1, rows - 8)
+  const ev = held.events.find(x => x.id === view.id)
+  const side = ev !== undefined && w + 2 >= DOCK_FROM
+  // Less the menu bar, the caption and the Display's three rows.
+  const area = Math.max(4, rows - 5)
   const inset = (r: Row) => fit([sg(' '), ...r], w)
+  const lines = side ? Math.max(2 * MIN_LINES, area - PANEL_ROWS) : 4 * MIN_LINES
+  // The log's tight columns, an Event column of 6, and the box's two edges.
+  const logMin = Object.values(TIGHT).reduce((n, cw) => n + cw, 0) + 6 + 2
+  const panelW = side ? Math.max(PANEL_MIN, Math.min(Math.floor(w * PANEL_SHARE), w - 3 - logMin)) : w - 2
+  const props = ev === undefined ? [] : panel(ev, view, panelW, lines, act)
+  // The list box's two edges and header aside, its rows show calls.
+  const listRows = side ? Math.max(area, props.length) : Math.max(area - props.length, 5)
+  const logW = side ? w - 3 - panelW : w - 2
+  const list = logBox(held.events, logW, listRows - 3, view.id, act.select)
+  const middle = side
+    ? list.map((r, i) => fit([sg(' '), ...r, sg(' '), ...(props[i] ?? [])], w))
+    : [...list.map(inset), ...props.map(inset)]
   return [
     menuBar(w),
     fit([sg(' Claude Session', FRAME.frame_text, FRAME.frame_face, true), sg(` - ${n} event(s)`, FRAME.frame_gray_text)], w),
-    ...logBox(held.events, w - 2, room).map(inset),
+    ...middle,
     ...display(held, now, w - 2).map(inset),
   ]
 }
@@ -218,7 +358,7 @@ export const register: Register = on => {
       $.clock.now(),
       e.agentId === undefined ? undefined : subagent(e.agentId),
     ])
-    const ev = startEvent(e, startedAt, agent)
+    const ev = { ...startEvent(e, startedAt, agent), input: inputOf(e) }
     await update($, log, l => {
       const held = ofSession(l, session)
       return { ...held, events: [...held.events, ev].slice(-MAX_EVENTS) }
@@ -229,7 +369,7 @@ export const register: Register = on => {
       const endedAt = await $.clock.now()
       await update($, log, l => l.session !== session ? l : {
         ...l,
-        events: l.events.map(x => (x.id === ev.id ? { ...x, status: statusOf(ran, x.verdict), endedAt } : x)),
+        events: l.events.map(x => (x.id === ev.id ? { ...x, status: statusOf(ran, x.verdict), endedAt, output: outputOf(ran, x) } : x)),
       })
     }
     try {
@@ -237,18 +377,20 @@ export const register: Register = on => {
       await end(ran)
       return ran
     } catch (err) {
-      await end({ isError: true })
+      await end({ isError: true, text: err instanceof Error ? err.message : String(err) })
       throw err
     }
   })
 
   // The permission verdict, kept on the call's row: a deny there comes back
-  // from the tool as an error, and the row shows it as denied.
+  // from the tool as an error, and the row shows it as denied, with the
+  // rule's reason.
   on('tool.check', async ($, e, next) => {
     const verdict = await next(e)
     if (e.tool_use_id !== undefined) {
       const id = e.tool_use_id
-      await update($, log, l => ({ ...l, events: settle(l.events, id, { verdict: verdict.decision }) }))
+      const reason = verdict.decision === 'deny' && verdict.reason !== undefined ? { reason: verdict.reason } : {}
+      await update($, log, l => ({ ...l, events: settle(l.events, id, { verdict: verdict.decision, ...reason }) }))
     }
     return verdict
   })
@@ -289,12 +431,23 @@ export const register: Register = on => {
 
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
-    const [stored, session, now] = await Promise.all([read($, log), $.session.id(), $.clock.now()])
+    const [stored, view, session, now] = await Promise.all([read($, log), read($, inspect), $.session.id(), $.clock.now()])
     const held = ofSession(stored, session)
     const w = Math.max(60, e.props.bodyColumns)
     // A docked window fills the dock less its title bar and bottom edge.
     const rowCount = e.props.placement === 'dock' ? Math.max(6, e.props.scroll.bodyRows - 2) : INLINE_BODY_ROWS
-    const rows = windowRows(w, bodyRows(held, now, w - 2, rowCount), () => $.ui.close({ id: PANE }))
+    // Opening a row, or stepping to another, shows its boxes from the top.
+    const show = (id: string) => update($, inspect, () => ({ id, input: 0, output: 0 }))
+    const act: Act = {
+      select: show,
+      step: by => {
+        const at = held.events.findIndex(x => x.id === view.id)
+        const to = held.events[Math.min(Math.max(0, at + by), held.events.length - 1)]
+        return at < 0 || to === undefined ? undefined : show(to.id)
+      },
+      scroll: (box, to) => update($, inspect, v => ({ ...v, [box]: to })),
+    }
+    const rows = windowRows(w, bodyRows(held, view, now, w - 2, rowCount, act), () => $.ui.close({ id: PANE }))
 
     const { since } = displayOf(held)
     tick?.cancel()
@@ -306,12 +459,19 @@ export const register: Register = on => {
     const drawSeg = (g: Seg) => (
       <Text color={g.fg} backgroundColor={g.bg} bold={g.b}>{g.t}</Text>
     )
+    // Neighbouring segs with one key draw as one Button.
+    const runs = (r: Row) => r.reduce<Seg[][]>((out, g) => {
+      const prev = out[out.length - 1]
+      if (prev && g.press && prev[0]?.key === g.key) prev.push(g)
+      else out.push([g])
+      return out
+    }, [])
     const drawRow = (r: Row) =>
       r.some(g => g.press)
         ? <Box flexDirection="row">
-            {r.map(g => g.press
-              ? <Button key={g.key} plain onPress={() => { void g.press!() }}>{drawSeg(g)}</Button>
-              : drawSeg(g))}
+            {runs(r).map(([g, ...rest]) => g!.press
+              ? <Button key={g!.key} plain hotkey={g!.hotkey} onPress={() => { void g!.press!() }}><Text>{[g!, ...rest].map(drawSeg)}</Text></Button>
+              : <Text>{[g!, ...rest].map(drawSeg)}</Text>)}
           </Box>
         : <Text wrap="truncate">{r.map(drawSeg)}</Text>
 
