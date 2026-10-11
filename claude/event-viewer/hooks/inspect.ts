@@ -1,4 +1,5 @@
 import type { LogEvent } from '../types'
+import { cellsOf } from './cells.ts'
 import { ENVELOPE_KEYS } from './log.ts'
 import type { Settled } from './log.ts'
 
@@ -57,9 +58,19 @@ export function windowOf(count: number, at: number, lines: number) {
 export function wrap(text: string, w: number) {
   const out: string[] = []
   for (const line of text.replace(/\r/g, '').replace(/\t/g, '  ').split('\n')) {
-    const chars = [...line]
-    if (chars.length === 0) out.push('')
-    for (let i = 0; i < chars.length; i += w) out.push(chars.slice(i, i + w).join(''))
+    let at = ''
+    let used = 0
+    for (const ch of line) {
+      const cw = cellsOf(ch)
+      if (used + cw > w && at !== '') {
+        out.push(at)
+        at = ''
+        used = 0
+      }
+      at += ch
+      used += cw
+    }
+    out.push(at)
   }
   return out
 }

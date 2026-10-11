@@ -1,6 +1,7 @@
 import { atom, read, update } from 'claude-code'
 import type { EngineInterface, Register } from 'claude-code'
 
+import { cells, cut } from './cells.ts'
 import { displayOf, elapsedOf } from './display.ts'
 import { inputOf, outputOf, windowOf, wrap } from './inspect.ts'
 import { MAX_EVENTS, categoryOf, columnsOf, durationOf, settle, startEvent, statusOf, timeOf } from './log.ts'
@@ -69,13 +70,7 @@ type Row = Seg[]
 
 const sg = (t: string, fg = FRAME.frame_text, bg: string | undefined = FRAME.frame_face, b = false): Seg => ({ t, fg, bg, b })
 
-function cut(t: string, n: number) {
-  const chars = [...t]
-  if (chars.length <= n) return t + ' '.repeat(n - chars.length)
-  return chars.slice(0, Math.max(0, n - 1)).join('') + '…'
-}
-
-const width = (r: Row) => r.reduce((n, g) => n + [...g.t].length, 0)
+const width = (r: Row) => r.reduce((n, g) => n + cells(g.t), 0)
 
 // Pads or cuts a row to exactly w cells.
 function fit(r: Row, w: number, bg = FRAME.frame_face): Row {
@@ -85,7 +80,7 @@ function fit(r: Row, w: number, bg = FRAME.frame_face): Row {
   let room = w
   for (const g of r) {
     if (room <= 0) break
-    const n = [...g.t].length
+    const n = cells(g.t)
     out.push(n <= room ? g : { ...g, t: cut(g.t, room) })
     room -= n
   }
