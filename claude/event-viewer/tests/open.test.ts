@@ -21,6 +21,7 @@ test('/event-viewer opens the Event Viewer window', async ($, on) => {
   for (const [bodyColumns, placement] of [[60, 'inline'], [120, 'dock']] as const) {
     const ui = await mount($, bodyColumns, placement)
     expect(await ui.find({ type: 'Text', text: /Event Viewer - Claude Session/ } as never)).toBeDefined()
+    expect(await ui.find({ type: 'Text', text: /^ × $/ } as never)).toBeDefined()
     await ui.unmount()
   }
 })
