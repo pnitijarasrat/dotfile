@@ -144,7 +144,7 @@ function display(log: Log, now: number, w: number): Row[] {
 
 // Navy title bar with the caption buttons; only × does anything.
 function titleBar(w: number, close: () => unknown): Row {
-  const buttons = 10
+  const buttons = 11
   return [
     sg(cut(` ${TITLE}`, Math.max(0, w - buttons)), FRAME.frame_title_text, FRAME.frame_title, true),
     sg(' _ ', FRAME.frame_text, FRAME.frame_face, true),
