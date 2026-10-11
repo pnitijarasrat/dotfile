@@ -17,8 +17,13 @@ export type LogEvent = {
   verdict?: 'allow' | 'ask' | 'deny'
 }
 
+// What the main loop's turn is doing outside its tool calls, since when:
+// thinking while thinking streams, working on the rest of a model step, idle
+// between turns. A running call in the log outranks it on the Display (#92).
+export type Phase = { kind: 'idle' | 'thinking' | 'working'; since: number; model?: string }
+
 // The log of one session: a log whose session is not the current one is empty.
-export type Log = { session: string; events: LogEvent[] }
+export type Log = { session: string; events: LogEvent[]; phase?: Phase }
 
 declare module 'claude-code' {
   interface PluginState {

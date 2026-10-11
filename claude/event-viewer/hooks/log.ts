@@ -66,11 +66,15 @@ export function timeOf(ms: number) {
   return `${two(d.getHours())}:${two(d.getMinutes())}:${two(d.getSeconds())}`
 }
 
+// Whole seconds as mm:ss, or hh:mm:ss from an hour.
+export function clockOf(s: number) {
+  return s < 3600 ? `${two(Math.floor(s / 60))}:${two(s % 60)}` : `${two(Math.floor(s / 3600))}:${two(Math.floor((s % 3600) / 60))}:${two(s % 60)}`
+}
+
 export function durationOf(ms: number) {
   if (ms < 1000) return `${ms}ms`
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`
-  const s = Math.round(ms / 1000)
-  return s < 3600 ? `${two(Math.floor(s / 60))}:${two(s % 60)}` : `${two(Math.floor(s / 3600))}:${two(Math.floor((s % 3600) / 60))}:${two(s % 60)}`
+  return clockOf(Math.round(ms / 1000))
 }
 
 // MCP tools read as `server:tool`.

@@ -1,4 +1,4 @@
-import { test, expect } from 'claude-code/testing'
+import { test, expect, mock } from 'claude-code/testing'
 import type { TestBody } from 'claude-code/testing'
 
 const mount = ($: Parameters<TestBody>[0], bodyColumns: number, placement: 'dock' | 'inline') =>
@@ -9,6 +9,7 @@ const mount = ($: Parameters<TestBody>[0], bodyColumns: number, placement: 'dock
 
 test('/event-viewer opens the Event Viewer window', async ($, on) => {
   on('session.id', async () => ({ value: 'one' }) as never)
+  mock.clock(on)
   const opened: string[] = []
   on('ui.open', async ($, e) => {
     opened.push(e.id)
@@ -26,6 +27,7 @@ test('/event-viewer opens the Event Viewer window', async ($, on) => {
 
 test('the title bar × closes the window', async ($, on) => {
   on('session.id', async () => ({ value: 'one' }) as never)
+  mock.clock(on)
   const closed: string[] = []
   on('ui.close', async ($, e) => {
     closed.push(e.id)
