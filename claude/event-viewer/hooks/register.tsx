@@ -1,14 +1,15 @@
 import { atom, read, update } from 'claude-code'
-import type { Register } from 'claude-code'
+import type { EngineInterface, Register } from 'claude-code'
 
+import { displayOf, elapsedOf } from './display.ts'
 import { MAX_EVENTS, columnsOf, settle, startEvent, statusOf } from './log.ts'
 import type { Settled } from './log.ts'
-import type { Log, LogEvent } from '../types'
+import type { Log, LogEvent, Phase } from '../types'
 
 // The Event Viewer (#83): a Win95 Frame window, opened by /event-viewer, that
 // shows what Claude is doing in this session. Laid out as the prototype in
 // #87 decided (variant B): title bar, raised bevel, grey body holding the
-// activity log of tool calls (#91).
+// activity log of tool calls (#91) and the Display as its status bar (#92).
 
 const PANE = 'event-viewer'
 const COMMAND = 'event-viewer'
@@ -16,6 +17,9 @@ const TITLE = 'Event Viewer - Claude Session'
 
 // The log lives in session state, so it survives a reload of this module.
 const log = atom({ plugin: 'event-viewer', key: 'log' } as const, { session: '', events: [] } as Log)
+
+// The log as this session holds it: another session's starts empty.
+const ofSession = (l: Log, session: string): Log => (l.session === session ? l : { session, events: [] })
 
 // Frame roles (docs/theme-spec.md)
 const FRAME = {
@@ -33,6 +37,13 @@ const FRAME = {
   frame_data_blue: '#000080',
 }
 
+// Display roles (docs/theme-spec.md)
+const DISPLAY = {
+  display_bg: '#000000',
+  display_fg: '#00FFFF',
+  display_ghost: '#008080',
+}
+
 // Each Type in its Frame data color (#87); Done stays frame_text.
 const TYPE_FG: Record<LogEvent['status'], string> = {
   done: FRAME.frame_text,
@@ -42,7 +53,7 @@ const TYPE_FG: Record<LogEvent['status'], string> = {
 }
 
 // Rows of an inline window's grey body; a docked one fills the dock.
-const INLINE_BODY_ROWS = 16
+const INLINE_BODY_ROWS = 19
 
 // A Seg is a run of cells in one style; a Row is segs exactly one window wide.
 type Seg = { t: string; fg: string; bg?: string; b?: boolean; press?: () => unknown; key?: string }
@@ -114,6 +125,23 @@ function logBox(events: LogEvent[], w: number, room: number): Row[] {
   return sunken([header, ...rows, ...blank], w, FRAME.frame_window)
 }
 
+// The Display: one sunken LCD row of lit cyan over black, the step on the
+// left with the event count in ghost cyan, the elapsed time on the right.
+function display(log: Log, now: number, w: number): Row[] {
+  const step = displayOf(log)
+  const clock = elapsedOf(step.since === undefined ? 0 : now - step.since)
+  const lit = (t: string, b = false) => sg(t, DISPLAY.display_fg, DISPLAY.display_bg, b)
+  const ghost = (t: string) => sg(t, DISPLAY.display_ghost, DISPLAY.display_bg)
+  const inner = w - 2
+  const time = [ghost(clock.ghost), lit(clock.lit, true), lit(' ')]
+  const left = fit([
+    lit(` ${step.word.padEnd(9)}`, true),
+    lit(step.what),
+    ghost(`   ${log.events.length} events`),
+  ], Math.max(0, inner - width(time)), DISPLAY.display_bg)
+  return sunken([[...left, ...time]], w, DISPLAY.display_bg)
+}
+
 // Navy title bar with the caption buttons; only × does anything.
 function titleBar(w: number, close: () => unknown): Row {
   const buttons = 10
@@ -127,16 +155,19 @@ function titleBar(w: number, close: () => unknown): Row {
   ]
 }
 
-// The grey body: menu bar, the caption with the event count, then the log
-// filling the rest.
-function bodyRows(events: LogEvent[], w: number, rows: number): Row[] {
-  const n = events.length
-  // Less the menu bar, the caption, and the list box's two edges and header.
-  const room = Math.max(1, rows - 5)
+// The grey body: menu bar, the caption with the event count, the log filling
+// the rest, and the Display at the bottom.
+function bodyRows(held: Log, now: number, w: number, rows: number): Row[] {
+  const n = held.events.length
+  // Less the menu bar, the caption, the list box's two edges and header, and
+  // the Display's three rows.
+  const room = Math.max(1, rows - 8)
+  const inset = (r: Row) => fit([sg(' '), ...r], w)
   return [
     menuBar(w),
     fit([sg(' Claude Session', FRAME.frame_text, FRAME.frame_face, true), sg(` - ${n} event(s)`, FRAME.frame_gray_text)], w),
-    ...logBox(events, w - 2, room).map(r => fit([sg(' '), ...r], w)),
+    ...logBox(held.events, w - 2, room).map(inset),
+    ...display(held, now, w - 2).map(inset),
   ]
 }
 
@@ -150,6 +181,17 @@ function windowRows(w: number, body: Row[], close: () => unknown): Row[] {
     ...body.map(edge),
     [sg('▔'.repeat(w), FRAME.frame_dark_shadow, undefined)],
   ]
+}
+
+// The main loop's phase, kept beside the log as of now; the model stays the
+// last one a step named until another does.
+async function phaseTo($: EngineInterface, kind: Phase['kind'], model?: string) {
+  const [session, since] = await Promise.all([$.session.id(), $.clock.now()])
+  await update($, log, l => {
+    const held = ofSession(l, session)
+    const named = model ?? held.phase?.model
+    return { ...held, phase: { kind, since, ...(named === undefined ? {} : { model: named }) } }
+  })
 }
 
 export const register: Register = on => {
@@ -178,8 +220,8 @@ export const register: Register = on => {
     ])
     const ev = startEvent(e, startedAt, agent)
     await update($, log, l => {
-      const events = l.session === session ? l.events : []
-      return { session, events: [...events, ev].slice(-MAX_EVENTS) }
+      const held = ofSession(l, session)
+      return { ...held, events: [...held.events, ev].slice(-MAX_EVENTS) }
     })
     // Settled inside the update: a read here would see the log as it stood
     // when this dispatch began, before tool.check kept the verdict on the row.
@@ -211,14 +253,55 @@ export const register: Register = on => {
     return verdict
   })
 
+  // The main loop's phase for the Display: a turn works from its start,
+  // thinks while thinking streams, works again once the rest of the step
+  // streams, and goes idle as it ends. A subagent's turn is told on the
+  // Display by its Agent call, so its steps change nothing here.
+  on('turn.start', async ($, e, next) => {
+    await phaseTo($, 'working')
+    return next(e)
+  })
+
+  on('turn.step', async function* ($, e, next) {
+    if (e.agentId !== undefined) return yield* next(e)
+    await phaseTo($, 'working', e.model)
+    let kind: Phase['kind'] = 'working'
+    const stream = next(e)
+    for await (const chunk of stream) {
+      const seen: Phase['kind'] = chunk.kind === 'thinking' ? 'thinking' : chunk.kind === 'engine' ? kind : 'working'
+      if (seen !== kind) {
+        kind = seen
+        await phaseTo($, kind, e.model)
+      }
+      yield chunk
+    }
+    return stream.result
+  })
+
+  on('turn.complete', async ($, e, next) => {
+    if (e.agentId === undefined) await phaseTo($, 'idle')
+    return next(e)
+  })
+
+  // The Display's time ticks once a second while a window is drawn: each draw
+  // asks for the next at the turn of the step's second.
+  let tick: { cancel: () => void } | undefined
+
   on('ui.render', { component: 'Pane', requestId: PANE }, async ($, e) => {
     const { Box, Text, Button } = $.ui.resolve(e)
-    const [held, session] = await Promise.all([read($, log), $.session.id()])
-    const events = held.session === session ? held.events : []
+    const [stored, session, now] = await Promise.all([read($, log), $.session.id(), $.clock.now()])
+    const held = ofSession(stored, session)
     const w = Math.max(60, e.props.bodyColumns)
     // A docked window fills the dock less its title bar and bottom edge.
     const rowCount = e.props.placement === 'dock' ? Math.max(6, e.props.scroll.bodyRows - 2) : INLINE_BODY_ROWS
-    const rows = windowRows(w, bodyRows(events, w - 2, rowCount), () => $.ui.close({ id: PANE }))
+    const rows = windowRows(w, bodyRows(held, now, w - 2, rowCount), () => $.ui.close({ id: PANE }))
+
+    const { since } = displayOf(held)
+    tick?.cancel()
+    tick = since === undefined ? undefined : $.clock.after(1000 - ((now - since) % 1000), () => {
+      tick = undefined
+      $.ui.invalidate('ui.render')
+    })
 
     const drawSeg = (g: Seg) => (
       <Text color={g.fg} backgroundColor={g.bg} bold={g.b}>{g.t}</Text>
