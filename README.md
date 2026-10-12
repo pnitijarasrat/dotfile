@@ -39,6 +39,8 @@ The launcher theme is "Vintage", in `raycast/vintage.rctheme.json` (#21). Raycas
 
 Check the theme against `docs/theme-spec.md` with `node raycast/tests/vintage_test.mjs`.
 
+"Restart yabai" and "Restart skhd" are Script Commands in `raycast/scripts/` (#125). Check them with `node raycast/tests/scripts_test.mjs`.
+
 ## Chrome
 
 The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37). It also makes the New Tab page the flat teal Classic desktop (#38). Incognito windows keep Chrome's own dark look: Chrome doesn't apply themes there. Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme` (the file picker hides `.config`; press Cmd+Shift+. to show it, or Cmd+Shift+G to type the path). To reload after changing `manifest.json`, run **Load unpacked** on the same folder again. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
@@ -59,7 +61,7 @@ Check it with `claude plugin validate claude/event-viewer` and `claude plugin te
 
 ## skhd and yabai
 
-skhd reads `skhd/skhdrc` and yabai reads `yabai/yabairc` from their default search paths (`~/.config/skhd/skhdrc`, `~/.config/yabai/yabairc`), so neither needs a flag (#124). Don't keep a `~/.skhdrc` or `~/.yabairc`. Exactly one launchd agent runs each: `com.koekeishiya.skhd` and `com.asmvik.yabai`. skhd reloads its config on save. After changing `yabairc`, run `yabai --restart-service`. There are no restart Shortcuts.
+skhd reads `skhd/skhdrc` and yabai reads `yabai/yabairc` from their default search paths (`~/.config/skhd/skhdrc`, `~/.config/yabai/yabairc`), so neither needs a flag (#124). Don't keep a `~/.skhdrc` or `~/.yabairc`. Exactly one launchd agent runs each: `com.koekeishiya.skhd` and `com.asmvik.yabai`. skhd reloads its config on save. After changing `yabairc`, run `yabai --restart-service`. There are no restart Shortcuts: "Restart yabai" and "Restart skhd" are Raycast Script Commands in `raycast/scripts/` (#125). "Restart skhd" is also the fix when Shortcuts stop working under Secure Input.
 
 The window Shortcuts follow the modifier scheme in #113:
 
@@ -71,3 +73,7 @@ The window Shortcuts follow the modifier scheme in #113:
 | Zoom / float + center / balance | Hyper+F / T / E |
 
 Check the bindings with `node skhd/tests/shortcuts_test.mjs`.
+
+## macOS Shortcuts
+
+`macos/hotkeys.sh` sets the Shortcuts macOS owns (#125). Do the Raycast checklist in `macos/README.md` first, then run it. `macos/README.md` lists the chords.
