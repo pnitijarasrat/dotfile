@@ -56,3 +56,18 @@ The **Event Viewer** mod lives in `claude/event-viewer` (#83, #90). `/event-view
 Don't also copy or install it anywhere else (`~/.claude/dev-mods/`, a marketplace), or two copies load.
 
 Check it with `claude plugin validate claude/event-viewer` and `claude plugin test claude/event-viewer`. Type-check it with `tsc -p claude/event-viewer` (TypeScript 5.4+) once a session has loaded it: the engine writes the types its `tsconfig.json` extends into `.claude-plugin/types/`, which git ignores.
+
+## skhd and yabai
+
+skhd reads `skhd/skhdrc` and yabai reads `yabai/yabairc` from their default search paths (`~/.config/skhd/skhdrc`, `~/.config/yabai/yabairc`), so neither needs a flag (#124). Don't keep a `~/.skhdrc` or `~/.yabairc`. Exactly one launchd agent runs each: `com.koekeishiya.skhd` and `com.asmvik.yabai`. skhd reloads its config on save. After changing `yabairc`, run `yabai --restart-service`. There are no restart Shortcuts.
+
+The window Shortcuts follow the modifier scheme in #113:
+
+| Verb | Chord |
+|---|---|
+| Focus window | ⌃⌘+hjkl |
+| Swap window | ⌃⌥+hjkl |
+| Resize window | ⌃⇧+hjkl |
+| Zoom / float + center / balance | Hyper+F / T / E |
+
+Check the bindings with `node skhd/tests/shortcuts_test.mjs`.
