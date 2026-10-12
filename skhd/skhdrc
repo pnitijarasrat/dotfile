@@ -29,18 +29,32 @@ hyper - f : yabai -m window --toggle zoom-fullscreen            # maximize (zoom
 hyper - t : yabai -m window --toggle float --grid 4:4:1:1:2:2   # float + center
 hyper - e : yabai -m space --balance                            # rebalance bsp split sizes
 
-# ── Spaces: cmd+digit to switch, cmd+shift+digit to move a window along ──
-# Kept as they were; another ticket replaces them.
-cmd - 1 : yabai -m space --focus 1
-cmd - 2 : yabai -m space --focus 2
-cmd - 3 : yabai -m space --focus 3
-cmd - 8 : yabai -m space --focus 4
-cmd - 9 : yabai -m space --focus 5
-cmd - 0 : yabai -m space --focus 6
+# ── Finder: open, focus or next window; not pinned to a space ──
+hyper - d : ~/.config/skhd/scripts/go.sh "Finder"
 
+# ── Go to space N (cmd+1–0, 0 = space 10) and launch, focus or cycle its ──
+# pinned app. go.sh sends the hidden Desktop N chord from macos/hotkeys.sh,
+# so SIP stays on. Pins live in yabairc; spaces 5–8 have no app.
+cmd - 1 : ~/.config/skhd/scripts/go.sh -s 1 "Ghostty"
+cmd - 2 : ~/.config/skhd/scripts/go.sh -s 2 "Google Chrome"
+cmd - 3 : ~/.config/skhd/scripts/go.sh -s 3 "Claude"
+cmd - 4 : ~/.config/skhd/scripts/go.sh -s 4 "LINE"
+cmd - 5 : ~/.config/skhd/scripts/go.sh -s 5
+cmd - 6 : ~/.config/skhd/scripts/go.sh -s 6
+cmd - 7 : ~/.config/skhd/scripts/go.sh -s 7
+cmd - 8 : ~/.config/skhd/scripts/go.sh -s 8
+cmd - 9 : ~/.config/skhd/scripts/go.sh -s 9 "Spotify"
+cmd - 0 : ~/.config/skhd/scripts/life-tracker.sh   # starts its server first if it's down
+
+# ── Send the focused window to space N; you stay where you are ──
+# Works without yabai's scripting addition.
 shift + cmd - 1 : yabai -m window --space 1
 shift + cmd - 2 : yabai -m window --space 2
 shift + cmd - 3 : yabai -m window --space 3
-shift + cmd - 7 : yabai -m window --space 4
-shift + cmd - 8 : yabai -m window --space 5
-shift + cmd - 9 : yabai -m window --space 6
+shift + cmd - 4 : yabai -m window --space 4
+shift + cmd - 5 : yabai -m window --space 5
+shift + cmd - 6 : yabai -m window --space 6
+shift + cmd - 7 : yabai -m window --space 7
+shift + cmd - 8 : yabai -m window --space 8
+shift + cmd - 9 : yabai -m window --space 9
+shift + cmd - 0 : yabai -m window --space 10

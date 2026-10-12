@@ -53,4 +53,14 @@ yabai -m rule --add app="^App Store$" manage=off
 yabai -m rule --add app="^Archive Utility$" manage=off
 yabai -m rule --add title="Preferences" manage=off
 
+# ── Apps pinned to a space; cmd+N in skhdrc goes there (#126) ──
+# Needs 10 spaces, made by hand in Mission Control. life-tracker is an
+# installed Chrome app, so it's its own app and the Chrome rule misses it.
+yabai -m rule --add app="^Ghostty$" space=1
+yabai -m rule --add app="^Google Chrome$" space=2
+yabai -m rule --add app="^Claude$" space=3
+yabai -m rule --add app="^LINE$" space=4
+yabai -m rule --add app="^Spotify$" space=9
+yabai -m rule --add app="^life-tracker$" space=10
+
 echo "yabai configuration loaded.."
