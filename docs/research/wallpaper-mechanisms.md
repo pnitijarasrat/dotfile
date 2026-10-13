@@ -5,6 +5,8 @@ Researched 2026-10-11 on this Mac: macOS 14.1 (23B74), Apple M1, one display (bu
 
 ## TL;DR
 
+> **Update 2026-10-12 (#102):** follow-up tests on this Mac overturned the Spaces and recommendation bullets below. NSWorkspace turns "Show on all Spaces" off, and writing `Index.plist` directly works, including the background colour. See [Follow-up tests](#follow-up-tests-2026-10-12-for-102).
+
 - Every mechanism, including `desktoppr` and `wallpaper` (Homebrew), ends up calling the same public API, `NSWorkspace.setDesktopImageURL(_:for:options:)`. The only exception is System Events, and it offers fewer options. A third-party tool adds nothing that roughly 50 lines of Swift can't do.
 - **Displays:** all of them work. Loop over `NSScreen.screens`, or use `every desktop` in System Events.
 - **Spaces:** none of the public APIs can target a Space you aren't on. Sonoma added a "Show on all Spaces" mode, and with it on, a programmatic set *may* reach every Space. That is **not confirmed on 14.1** (see [Unconfirmed](#unconfirmed)).
@@ -122,7 +124,7 @@ This Mac's `Index.plist` (read with `plutil`):
 - `Displays` and `Spaces` are both **empty**. That is what "Show on all Spaces" ON looks like.
 - The `Configuration` blob decodes to `{placement: 3, backgroundColor: {components: [0.054, 0.431, 0.426, 1], GenericRGB}}`. Here placement 3 means Center, the value NSWorkspace reports as `imageScaling` 2.
 
-The format isn't documented and changes between releases (macos-wallpaper's README says `desktoppicture.db` no longer works on macOS 26). **Don't write to it.** It is useful only as a diagnostic when testing.
+The format isn't documented and changes between releases (macos-wallpaper's README says `desktoppicture.db` no longer works on macOS 26). ~~**Don't write to it.**~~ Writing it turned out to be the only way to keep every Space in sync, and #102 chose it (see [Follow-up tests](#follow-up-tests-2026-10-12-for-102)).
 
 Apple's Wallpaper help for 14.0 says: "Turn on 'Show on all Spaces' to use the same wallpaper on every desktop space and display" ([Wallpaper settings, macOS 14](https://support.apple.com/guide/mac-help/mchlp1103/14.0/mac/14.0)). It doesn't say how programmatic sets behave in that mode.
 
@@ -173,8 +175,77 @@ Size the canvas to the largest display. Centre mode crops a larger canvas evenly
 
 ## Unconfirmed
 
-- **Whether `setDesktopImageURL` with "Show on all Spaces" ON updates every Space on 14.1.** It is also unconfirmed whether the set switches that toggle off, as reported for System Events on Tahoe ([forums/814926](https://developer.apple.com/forums/thread/814926)). No primary source covers Sonoma's behaviour.
-  - Suggested manual test: with two Spaces and the toggle ON, set from Space 1, switch to Space 2, then re-read `Index.plist`. Check whether entries appear under `Spaces`/`Displays` and whether the toggle is still on.
-- **Whether `setDesktopImageURL` ever triggers a TCC prompt.** Setting wasn't run, by instruction. Reading triggered none.
+- ~~Whether `setDesktopImageURL` with "Show on all Spaces" ON updates every Space on 14.1.~~ Answered in [Follow-up tests](#follow-up-tests-2026-10-12-for-102): the first set does, then the toggle is off.
+- ~~Whether `setDesktopImageURL` ever triggers a TCC prompt.~~ Setting from Ghostty triggered none.
 - **The first-run Automation prompt for System Events from this host.** It wasn't observed; consent may already exist.
 - **Multi-display behaviour.** Only one display was connected, so this is from documentation and issue reports only.
+- **Images under `~/Desktop`, `~/Documents` or `~/Downloads`** written to the store: the wallpaper extension might need TCC access to them. Untested.
+
+## Follow-up tests (2026-10-12, for #102)
+
+Run on the same Mac: macOS 14.1, one built-in display, 6 Spaces, "Show on all Spaces" ON. The store was backed up before each test and restored afterwards by copying it back and restarting the agent.
+
+### NSWorkspace and Spaces
+
+`setDesktopImageURL` on every `NSScreen`, with `imageScaling: scaleNone, allowClipping: false`:
+
+1. **First set** (`Solid Colors/Teal.png`): written into **all 6 Spaces**, but the store moved out of all-Spaces mode. `AllSpacesAndDisplays.Desktop` was removed, and `Spaces` got one entry per Space UUID (each with `Default` and `Displays/<display UUID>`), plus a top-level `Displays` entry. That is the toggle switched OFF.
+2. **Second set** (`Plum.png`): only the **current Space** changed. The other 5 kept Teal.
+
+So the Tahoe forum report ([forums/814926](https://developer.apple.com/forums/thread/814926)) holds on 14.1 for NSWorkspace too. `desktopImageURL(for:)` read straight after a set still returned the old file, because the change is asynchronous.
+
+### Writing `Index.plist` directly
+
+**`Configuration` blob.** It is a plain binary plist (not NSKeyedArchiver):
+
+```
+{ backgroundColor: { colorSpace: <binary plist of the string "kCGColorSpaceGenericRGB">, components: [r, g, b, a] },
+  placement: Int }
+```
+
+- `plistlib.dumps(..., fmt=FMT_BINARY, sort_keys=False)` reproduces the original 226 bytes exactly.
+- `"kCGColorSpaceSRGB"` is accepted too: #FF0000 rendered as exactly sRGB #FF0000.
+- The original GenericRGB #0E6E6D renders as sRGB #008080.
+- The Idle (aerials) blob is `{assetID: <UUID>}`.
+
+**Placement values** (tested with a 2:1 image):
+
+| Value | Behaviour | NSWorkspace reports |
+|---|---|---|
+| 0 | Like Fill | — |
+| 1 | Fill (aspect-fill, cropped) | scaling 3, clip 1 |
+| 2 | Tile | scaling 3, clip 1 |
+| 3 | Centre, at native **pixel** size (a 128 px PNG is 128 device pixels on Retina) | scaling 2 |
+| 4 | Stretch | scaling 1 |
+| 5 | Fit (letterboxed with the background colour) | scaling 3, clip 0 |
+| 6 | Invalid: the choice is rejected and `DefaultDesktop.heic` is shown; the store is left as written | — |
+
+**Minimal edit (tested).** Replace only `AllSpacesAndDisplays.Desktop.Content` with:
+
+```
+{ Choices: [ { Configuration: <blob above>,
+               Files: [ { relative: "file:///…percent-encoded…" } ],
+               Provider: "com.apple.wallpaper.choice.image" } ],
+  Shuffle: "$null" }
+```
+
+- Leave `Idle`, `SystemDefault`, `Type` (`"individual"`) and the dates alone.
+- Write a binary plist atomically, then restart the agent.
+- In Swift: `PropertyListSerialization` with `.mutableContainersAndLeaves`, then `.binary` and `write(options: .atomic)`.
+
+**Solid colour.** A 1×1 fully transparent PNG with placement 3 and the background colour gives an even colour across the screen.
+
+**Restarting the agent.**
+- The agent is `com.apple.wallpaper.agent` (`/System/Library/LaunchAgents/com.apple.wallpaper.plist`, KeepAlive).
+- `launchctl kickstart -k gui/$(id -u)/com.apple.wallpaper.agent` and `killall WallpaperAgent` behave the same.
+- **Without a restart nothing changes**; the agent didn't notice the edit within 20 s.
+- About 30 ms after the restart, every wallpaper window turns dark grey #2D2D31. The new wallpaper appears after **≈0.35–0.41 s**, so expect a short visible flash.
+
+**Results.**
+- **All Spaces:** after every write, all 6 Dock `Wallpaper-<UUID>` windows (captured with `CGWindowListCreateImage`, including off-screen Spaces) showed the new image and colour. `Spaces`/`Displays` stayed empty.
+- **Read-back:** after the restart, `desktopImageURL(for:)` returns the new file. Before it, it returns the old one, because NSWorkspace asks the agent.
+- **What the agent rewrites:** on startup it rewrites the store in place (same inode), changing only the `LastUse` dates and key order. It doesn't keep the file open (`lsof`), didn't write it while idle (20–30 s observed), and didn't overwrite our write when killed.
+- **Races:** stopping the agent before writing doesn't help, because KeepAlive relaunches it at once. The remaining race is another writer between our rename and the restart. That's unverified, and re-reading just before writing keeps the window small.
+- **TCC:** no prompts and no TCC or sandbox log entries. Images in `/tmp` and `/System` loaded fine.
+
+**Unverified:** multiple displays, protected folders (above), and whether the format survives a macOS upgrade.
