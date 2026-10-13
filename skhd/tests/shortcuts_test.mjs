@@ -1,4 +1,4 @@
-// Checks for the skhd window Shortcuts and the yabai config (#124, scheme in #113).
+// Checks for the skhd Shortcuts and the yabai config (#124, #126, scheme in #113).
 // Run: node skhd/tests/shortcuts_test.mjs
 import { accessSync, constants, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -66,11 +66,13 @@ test("swap window on ctrl+alt+hjkl", () => {
 });
 
 test("resize window on ctrl+shift+hjkl", () => {
+  // h/l move the shared vertical edge: grow if there's a neighbour that way,
+  // otherwise the window is at that screen edge, so shrink from the other side.
   const resize = {
-    h: "left:-40:0",
+    h: "left:-40:0 || yabai -m window --resize right:-40:0",
     j: "bottom:0:40",
     k: "top:0:-40",
-    l: "right:40:0",
+    l: "right:40:0 || yabai -m window --resize left:40:0",
   };
   for (const [key, arg] of Object.entries(resize)) {
     eq(commandFor(["ctrl", "shift"], key), `yabai -m window --resize ${arg}`, `ctrl + shift - ${key}`);
@@ -92,28 +94,32 @@ test("no bare-alt, warp, display, rotate, mirror or restart bindings", () => {
   }
 });
 
-test("space bindings are left as they were", () => {
-  const spaces = bindings.filter((b) => /^(cmd|cmd\+shift)-\d$/.test(b.chord));
-  const expected = [
-    "cmd-1 : yabai -m space --focus 1",
-    "cmd-2 : yabai -m space --focus 2",
-    "cmd-3 : yabai -m space --focus 3",
-    "cmd-8 : yabai -m space --focus 4",
-    "cmd-9 : yabai -m space --focus 5",
-    "cmd-0 : yabai -m space --focus 6",
-    "cmd+shift-1 : yabai -m window --space 1",
-    "cmd+shift-2 : yabai -m window --space 2",
-    "cmd+shift-3 : yabai -m window --space 3",
-    "cmd+shift-7 : yabai -m window --space 4",
-    "cmd+shift-8 : yabai -m window --space 5",
-    "cmd+shift-9 : yabai -m window --space 6",
-  ];
-  eq(spaces.map((b) => `${b.chord} : ${b.command}`).join("\n"), expected.join("\n"), "space bindings");
+const digit = (n) => String(n % 10);
+
+test("shift+cmd+1–0 send the focused window to space N without following it", () => {
+  for (let n = 1; n <= 10; n++) {
+    eq(commandFor(["shift", "cmd"], digit(n)), `yabai -m window --space ${n}`, `shift + cmd - ${digit(n)}`);
+  }
 });
 
-test("every binding is a window verb or a space binding", () => {
-  // 4 focus + 4 swap + 4 resize + 3 layout + 12 space.
-  eq(bindings.length, 27, "binding count");
+test("Hyper+D opens, focuses or cycles Finder", () => {
+  eq(commandFor(["hyper"], "d"), '~/.config/skhd/scripts/go.sh "Finder"', "hyper - d");
+});
+
+test("no go-to-space bindings: spaces are switched in Mission Control", () => {
+  for (const b of bindings) {
+    if (/^cmd-\d$/.test(b.chord)) throw new Error(`${b.chord} is bound`);
+    if (b.command.includes("space --focus")) throw new Error(`${b.chord} uses space --focus`);
+  }
+});
+
+test("yabairc pins no app to a space", () => {
+  if (/space=\d/.test(read("yabai/yabairc"))) throw new Error("yabairc has a space= rule");
+});
+
+test("every binding is a window verb, a move-to-space binding or Finder", () => {
+  // 4 focus + 4 swap + 4 resize + 3 layout + 10 move + Finder.
+  eq(bindings.length, 26, "binding count");
   const chords = bindings.map((b) => b.chord);
   const dupes = chords.filter((c, i) => chords.indexOf(c) !== i);
   eq(dupes.join(", "), "", "duplicate chords");

@@ -18,29 +18,32 @@ ctrl + alt - j : yabai -m window --swap south
 ctrl + alt - k : yabai -m window --swap north
 ctrl + alt - l : yabai -m window --swap east
 
-# ── Resize window (grow/shrink toward that edge) ──
-ctrl + shift - h : yabai -m window --resize left:-40:0
+# ── Resize window: h/l move the split between windows west/east ──
+# A window with a neighbour on that side grows; one at that screen edge
+# has no such edge, so the || shrinks it from the other side instead.
+ctrl + shift - h : yabai -m window --resize left:-40:0 || yabai -m window --resize right:-40:0
 ctrl + shift - j : yabai -m window --resize bottom:0:40
 ctrl + shift - k : yabai -m window --resize top:0:-40
-ctrl + shift - l : yabai -m window --resize right:40:0
+ctrl + shift - l : yabai -m window --resize right:40:0 || yabai -m window --resize left:40:0
 
 # ── Layout ──
 hyper - f : yabai -m window --toggle zoom-fullscreen            # maximize (zoom) current window
 hyper - t : yabai -m window --toggle float --grid 4:4:1:1:2:2   # float + center
 hyper - e : yabai -m space --balance                            # rebalance bsp split sizes
 
-# ── Spaces: cmd+digit to switch, cmd+shift+digit to move a window along ──
-# Kept as they were; another ticket replaces them.
-cmd - 1 : yabai -m space --focus 1
-cmd - 2 : yabai -m space --focus 2
-cmd - 3 : yabai -m space --focus 3
-cmd - 8 : yabai -m space --focus 4
-cmd - 9 : yabai -m space --focus 5
-cmd - 0 : yabai -m space --focus 6
+# ── Finder: open, focus or next window ──
+hyper - d : ~/.config/skhd/scripts/go.sh "Finder"
 
+# ── Send the focused window to space N (0 = 10); you stay where you are ──
+# Works without yabai's scripting addition. Switching spaces is left to
+# Mission Control: the Desktop N hotkeys always slide.
 shift + cmd - 1 : yabai -m window --space 1
 shift + cmd - 2 : yabai -m window --space 2
 shift + cmd - 3 : yabai -m window --space 3
-shift + cmd - 7 : yabai -m window --space 4
-shift + cmd - 8 : yabai -m window --space 5
-shift + cmd - 9 : yabai -m window --space 6
+shift + cmd - 4 : yabai -m window --space 4
+shift + cmd - 5 : yabai -m window --space 5
+shift + cmd - 6 : yabai -m window --space 6
+shift + cmd - 7 : yabai -m window --space 7
+shift + cmd - 8 : yabai -m window --space 8
+shift + cmd - 9 : yabai -m window --space 9
+shift + cmd - 0 : yabai -m window --space 10
