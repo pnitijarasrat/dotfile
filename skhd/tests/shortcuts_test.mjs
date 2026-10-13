@@ -92,22 +92,7 @@ test("no bare-alt, warp, display, rotate, mirror or restart bindings", () => {
   }
 });
 
-// Pinned apps by space (chosen in #111, applied in #126): ⌘0 is space 10.
-const pinned = { 1: "Ghostty", 2: "Google Chrome", 3: "Claude", 4: "LINE", 9: "Spotify", 10: "life-tracker" };
-const go = "~/.config/skhd/scripts/go.sh";
 const digit = (n) => String(n % 10);
-
-test("cmd+1–0 go to space N, then launch, focus or cycle its pinned app", () => {
-  for (let n = 1; n <= 10; n++) {
-    const expected =
-      n === 10
-        ? "~/.config/skhd/scripts/life-tracker.sh"
-        : pinned[n]
-          ? `${go} -s ${n} "${pinned[n]}"`
-          : `${go} -s ${n}`;
-    eq(commandFor(["cmd"], digit(n)), expected, `cmd - ${digit(n)}`);
-  }
-});
 
 test("shift+cmd+1–0 send the focused window to space N without following it", () => {
   for (let n = 1; n <= 10; n++) {
@@ -116,24 +101,23 @@ test("shift+cmd+1–0 send the focused window to space N without following it", 
 });
 
 test("Hyper+D opens, focuses or cycles Finder", () => {
-  eq(commandFor(["hyper"], "d"), `${go} "Finder"`, "hyper - d");
+  eq(commandFor(["hyper"], "d"), '~/.config/skhd/scripts/go.sh "Finder"', "hyper - d");
 });
 
-test("no space binding uses yabai space --focus (needs the scripting addition)", () => {
+test("no go-to-space bindings: spaces are switched in Mission Control", () => {
   for (const b of bindings) {
+    if (/^cmd-\d$/.test(b.chord)) throw new Error(`${b.chord} is bound`);
     if (b.command.includes("space --focus")) throw new Error(`${b.chord} uses space --focus`);
   }
 });
 
-test("yabairc pins each app to its space", () => {
-  const rules = [...read("yabai/yabairc").matchAll(/^yabai -m rule --add app="\^(.+)\$" space=(\d+)$/gm)];
-  const got = Object.fromEntries(rules.map((m) => [m[2], m[1]]));
-  eq(JSON.stringify(got), JSON.stringify(pinned), "pin rules");
+test("yabairc pins no app to a space", () => {
+  if (/space=\d/.test(read("yabai/yabairc"))) throw new Error("yabairc has a space= rule");
 });
 
-test("every binding is a window verb, a space binding or Finder", () => {
-  // 4 focus + 4 swap + 4 resize + 3 layout + 10 go + 10 move + Finder.
-  eq(bindings.length, 36, "binding count");
+test("every binding is a window verb, a move-to-space binding or Finder", () => {
+  // 4 focus + 4 swap + 4 resize + 3 layout + 10 move + Finder.
+  eq(bindings.length, 26, "binding count");
   const chords = bindings.map((b) => b.chord);
   const dupes = chords.filter((c, i) => chords.indexOf(c) !== i);
   eq(dupes.join(", "), "", "duplicate chords");

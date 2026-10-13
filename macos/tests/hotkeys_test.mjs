@@ -60,11 +60,11 @@ test("screenshots on Hyper+3 / 4 / 5", () => {
   expect("184", true, [53, 23, hyper]);
 });
 
-test("Desktop 1-10 (118-127) on ctrl+alt+shift + 1-0", () => {
+test("Desktop 1-10 (118-127) off: spaces are switched in Mission Control", () => {
   const digits = [18, 19, 20, 21, 23, 22, 26, 28, 25, 29]; // keycodes for 1..9, 0
   digits.forEach((code, i) => {
     const digit = (i + 1) % 10;
-    expect(String(118 + i), true, [48 + digit, code, meh]);
+    expect(String(118 + i), false, [48 + digit, code, meh]);
   });
 });
 

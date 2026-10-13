@@ -71,15 +71,12 @@ The window Shortcuts follow the modifier scheme in #113:
 | Swap window | ⌃⌥+hjkl |
 | Resize window | ⌃⇧+hjkl |
 | Zoom / float + center / balance | Hyper+F / T / E |
-| Go to space N, then launch, focus or cycle its pinned app | ⌘+1–0 |
 | Send the focused window to space N (you stay put) | ⇧⌘+1–0 |
 | Finder: launch, focus or cycle | Hyper+D |
 
-⌘0 is space 10. Pinned apps (#126, rules in `yabairc`): Ghostty 1, Chrome 2, Claude 3, LINE 4, Spotify 9, life-tracker 0. Spaces 5–8 have none. ⌘N and Hyper+D share `skhd/scripts/go.sh`: it opens the app if it's closed, focuses it if it's open, and goes to its next window if it's already frontmost. It switches space by sending the hidden Desktop N chord, so `macos/hotkeys.sh` must have run. ⌘0 runs `skhd/scripts/life-tracker.sh`, which first starts life-tracker's server (`~/project/life-tracker/bin/life-tracker`) if nothing answers on port 4173.
+⇧⌘0 is space 10. Hyper+D runs `skhd/scripts/go.sh`: it opens Finder if it's closed, focuses it if it's open, and goes to its next window if it's already frontmost. There are no go-to-space Shortcuts and no apps pinned to spaces: switch spaces in Mission Control (#126), since the macOS Desktop N hotkeys always slide.
 
-Set up once by hand: make 10 spaces in Mission Control, and install life-tracker as a Chrome app (open `http://127.0.0.1:4173` in Chrome, then ⋮ → Cast, save, and share → Install page as app), named `life-tracker`.
-
-Check the bindings with `node skhd/tests/shortcuts_test.mjs`, and the scripts with `node skhd/tests/go_test.mjs` (stubbed, nothing on screen moves).
+Check the bindings with `node skhd/tests/shortcuts_test.mjs`, and the script with `node skhd/tests/go_test.mjs` (stubbed, nothing on screen moves).
 
 ## macOS Shortcuts
 

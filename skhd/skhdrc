@@ -29,25 +29,12 @@ hyper - f : yabai -m window --toggle zoom-fullscreen            # maximize (zoom
 hyper - t : yabai -m window --toggle float --grid 4:4:1:1:2:2   # float + center
 hyper - e : yabai -m space --balance                            # rebalance bsp split sizes
 
-# ── Finder: open, focus or next window; not pinned to a space ──
+# ── Finder: open, focus or next window ──
 hyper - d : ~/.config/skhd/scripts/go.sh "Finder"
 
-# ── Go to space N (cmd+1–0, 0 = space 10) and launch, focus or cycle its ──
-# pinned app. go.sh sends the hidden Desktop N chord from macos/hotkeys.sh,
-# so SIP stays on. Pins live in yabairc; spaces 5–8 have no app.
-cmd - 1 : ~/.config/skhd/scripts/go.sh -s 1 "Ghostty"
-cmd - 2 : ~/.config/skhd/scripts/go.sh -s 2 "Google Chrome"
-cmd - 3 : ~/.config/skhd/scripts/go.sh -s 3 "Claude"
-cmd - 4 : ~/.config/skhd/scripts/go.sh -s 4 "LINE"
-cmd - 5 : ~/.config/skhd/scripts/go.sh -s 5
-cmd - 6 : ~/.config/skhd/scripts/go.sh -s 6
-cmd - 7 : ~/.config/skhd/scripts/go.sh -s 7
-cmd - 8 : ~/.config/skhd/scripts/go.sh -s 8
-cmd - 9 : ~/.config/skhd/scripts/go.sh -s 9 "Spotify"
-cmd - 0 : ~/.config/skhd/scripts/life-tracker.sh   # starts its server first if it's down
-
-# ── Send the focused window to space N; you stay where you are ──
-# Works without yabai's scripting addition.
+# ── Send the focused window to space N (0 = 10); you stay where you are ──
+# Works without yabai's scripting addition. Switching spaces is left to
+# Mission Control: the Desktop N hotkeys always slide.
 shift + cmd - 1 : yabai -m window --space 1
 shift + cmd - 2 : yabai -m window --space 2
 shift + cmd - 3 : yabai -m window --space 3

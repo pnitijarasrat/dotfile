@@ -6,7 +6,7 @@
 |---|---|
 | Switch input source (ABC ⇄ Thai), id 60 | ⌘Space |
 | Screenshot of the screen / an area / toolbar, ids 28 / 30 / 184 | Hyper+3 / 4 / 5 |
-| Switch to Desktop 1–10, ids 118–127 | ⌃⌥⇧ + 1–0 (hidden: no Karabiner layer sends ⌃⌥⇧ without ⌘, so only skhd sends these) |
+| Switch to Desktop 1–10, ids 118–127 | off: spaces are switched in Mission Control, since these always slide |
 | Move focus to next window, id 27 | off |
 
 Spotlight (id 64) stays off ⌘Space. The clipboard screenshot variants (ids 29 and 31, ⌃⇧⌘3/4) are left alone. Screenshots already go to the clipboard.
