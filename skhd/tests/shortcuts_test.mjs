@@ -66,11 +66,13 @@ test("swap window on ctrl+alt+hjkl", () => {
 });
 
 test("resize window on ctrl+shift+hjkl", () => {
+  // h/l move the shared vertical edge: grow if there's a neighbour that way,
+  // otherwise the window is at that screen edge, so shrink from the other side.
   const resize = {
-    h: "left:-40:0",
+    h: "left:-40:0 || yabai -m window --resize right:-40:0",
     j: "bottom:0:40",
     k: "top:0:-40",
-    l: "right:40:0",
+    l: "right:40:0 || yabai -m window --resize left:40:0",
   };
   for (const [key, arg] of Object.entries(resize)) {
     eq(commandFor(["ctrl", "shift"], key), `yabai -m window --resize ${arg}`, `ctrl + shift - ${key}`);
