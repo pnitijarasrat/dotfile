@@ -15,3 +15,7 @@ spicetify/Extensions/
 
 # Claude Code writes the mod API's types beside a mod each time it loads it
 claude/*/.claude-plugin/types/
+
+# The Switch writes the active Theme, per machine
+themes/active
+ghostty/active-theme

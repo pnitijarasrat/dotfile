@@ -9,6 +9,9 @@ shell-integration-features = no-cursor
 
 # Vintage theme: Work surface (docs/theme-spec.md)
 theme=vintage
+# A Switch (`theme <name>`, themes/theme.mjs) writes the active Theme here; Ghostty loads it
+# after this file, so it overrides the line above. Absent until the first Switch.
+config-file=?active-theme
 # work_grid
 split-divider-color=#C0C0C0
 
