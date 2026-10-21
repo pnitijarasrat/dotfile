@@ -1,8 +1,10 @@
-// Checks for the Ghostty Vintage theme (#13, #44, #78).
+// Checks for the Ghostty Vintage theme (#13, #44, #78), and each Theme's
+// Ghostty theme (#132).
 // Run: node ghostty/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { themes } from "../../themes/generate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -25,11 +27,6 @@ function eq(actual, expected, what) {
   }
 }
 
-// Every role the Theme defines, with its hex, from the Vintage Theme source
-// file, themes/vintage.json.
-const vintage = JSON.parse(read("themes/vintage.json"));
-const roles = Object.assign({}, ...Object.values(vintage.palettes));
-
 // Ghostty config lines as { key, value, comment }, where comment is the
 // line just above (Ghostty has no trailing comments).
 function parse(text) {
@@ -44,14 +41,22 @@ function parse(text) {
   return entries;
 }
 
-const theme = parse(read("ghostty/themes/vintage"));
 const configText = read("ghostty/config");
 const config = parse(configText);
 
-function role(name) {
-  if (!roles[name]) throw new Error(`role ${name} is not in the Theme`);
-  return roles[name];
+// Every role a Theme defines, with its hex, from its Theme source file.
+function roles(theme) {
+  const all = Object.assign({}, ...Object.values(theme.palettes));
+  return (name) => {
+    if (!all[name]) throw new Error(`role ${name} is not in ${theme.name}`);
+    return all[name];
+  };
 }
+
+// The Vintage Theme source file, themes/vintage.json, which the config's
+// fonts and split divider come from.
+const vintage = JSON.parse(read("themes/vintage.json"));
+const role = roles(vintage);
 
 // Every theme line, with the spec role it takes.
 const keyRoles = [
@@ -64,19 +69,26 @@ const keyRoles = [
   ...Array.from({ length: 16 }, (_, n) => ["palette", `ansi_${n}`]),
 ];
 
-test("theme sets the light Work surface and the Windows VGA ANSI colors", () => {
-  eq(theme.length, keyRoles.length, "theme lines");
-  keyRoles.forEach(([key, name], i) => {
-    const entry = theme[i];
-    eq(entry.key, key, `line ${i + 1} key`);
-    const expected = key === "palette" ? `${name.replace("ansi_", "")}=${role(name)}` : role(name);
-    eq(entry.value, expected, `${key} (${name})`);
-  });
-});
+for (const { id, theme } of themes(root)) {
+  const themeRole = roles(theme);
+  const path = `ghostty/themes/${id}`;
 
-test("each theme line is commented with its role name", () => {
-  keyRoles.forEach(([key, name], i) => eq(theme[i].comment, name, `comment above ${key} ${theme[i].value}`));
-});
+  test(`${id}: theme sets the Work surface and the ANSI colors`, () => {
+    const lines = parse(read(path));
+    eq(lines.length, keyRoles.length, `${path} lines`);
+    keyRoles.forEach(([key, name], i) => {
+      const entry = lines[i];
+      eq(entry.key, key, `line ${i + 1} key`);
+      const expected = key === "palette" ? `${name.replace("ansi_", "")}=${themeRole(name)}` : themeRole(name);
+      eq(entry.value, expected, `${key} (${name})`);
+    });
+  });
+
+  test(`${id}: each theme line is commented with its role name`, () => {
+    const lines = parse(read(path));
+    keyRoles.forEach(([key, name], i) => eq(lines[i].comment, name, `comment above ${key} ${lines[i].value}`));
+  });
+}
 
 test("split divider is work_grid", () => {
   const entry = config.find((e) => e.key === "split-divider-color");

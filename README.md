@@ -11,6 +11,8 @@
 
 The **Vintage theme** is the first **Theme**. Its role values and fonts live in one place, the Vintage Theme source file `themes/vintage.json` (#131); `docs/theme-spec.md` names the roles and says where each goes. Every tool's Vintage test reads its expected values from the source file. Check the source file against the spec with `node themes/tests/vintage_test.mjs`.
 
+`node themes/generate.mjs` generates each tool's theme files from every Theme source file in `themes/` (#132); so far that's Ghostty's. Generated files are committed: don't edit them by hand. `node themes/tests/generate_test.mjs` fails if one is stale, and checks the generator against a small fixture Theme.
+
 ## VSCode
 
 VSCode's user settings live in `vscode/settings.json` (#18). Symlink them into place, moving any existing file aside first:
@@ -33,9 +35,9 @@ Check the theme against `themes/vintage.json` and `docs/theme-spec.md` (palette,
 
 ## Ghostty
 
-The terminal theme is a hand-written `vintage` theme in `ghostty/themes/vintage`, selected by `ghostty/config` (#13, #44). Starship, ccstatusline and ranger take their colors from it.
+The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44). Each Theme gets its own `ghostty/themes/<name>`. Starship, ccstatusline and ranger take their colors from it.
 
-Check the theme and config against `themes/vintage.json` and `docs/theme-spec.md` with `node ghostty/tests/vintage_test.mjs`.
+Check each Theme's Ghostty theme against its source file, and the config against `themes/vintage.json` and `docs/theme-spec.md`, with `node ghostty/tests/vintage_test.mjs`.
 
 ## Raycast
 

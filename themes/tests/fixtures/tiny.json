@@ -1,0 +1,32 @@
+{
+  "name": "Tiny",
+  "work_description": "a fixture: dark grey on cream",
+  "palettes": {
+    "work": {
+      "work_bg": "#FFF8E7",
+      "work_fg": "#333333",
+      "work_cursor": "#111111",
+      "work_cursor_text": "#EEEEEE",
+      "work_selection": "#AACCEE",
+      "work_selection_text": "#222222"
+    },
+    "ansi": {
+      "ansi_0": "#000001",
+      "ansi_1": "#000011",
+      "ansi_2": "#000021",
+      "ansi_3": "#000031",
+      "ansi_4": "#000041",
+      "ansi_5": "#000051",
+      "ansi_6": "#000061",
+      "ansi_7": "#000071",
+      "ansi_8": "#000081",
+      "ansi_9": "#000091",
+      "ansi_10": "#0000A1",
+      "ansi_11": "#0000B1",
+      "ansi_12": "#0000C1",
+      "ansi_13": "#0000D1",
+      "ansi_14": "#0000E1",
+      "ansi_15": "#0000F1"
+    }
+  }
+}
