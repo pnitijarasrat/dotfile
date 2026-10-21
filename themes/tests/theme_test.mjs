@@ -1,8 +1,8 @@
-// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133). Runs it
-// against a scratch copy of the repo with Ghostty's reload stubbed, so no open
-// window changes.
+// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135).
+// Runs it against a scratch copy of the repo with Ghostty's reload stubbed, so
+// no open window changes.
 // Run: node themes/tests/theme_test.mjs
-import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -38,6 +38,8 @@ function scratch() {
   copyFileSync(join(repo, "themes/tests/fixtures/tiny.json"), join(root, "themes/tiny.json"));
   copyFileSync(join(repo, "ghostty/themes/vintage"), join(root, "ghostty/themes/vintage"));
   copyFileSync(join(repo, "themes/tests/fixtures/tiny.ghostty"), join(root, "ghostty/themes/tiny"));
+  mkdirSync(join(root, "vscode"));
+  copyFileSync(join(repo, "vscode/settings.json"), join(root, "vscode/settings.json"));
   return root;
 }
 
@@ -47,6 +49,13 @@ function theme(root, ...args) {
   const result = run({ root, args, reload: () => reloads++ });
   return { ...result, reloads };
 }
+
+// The committed VSCode settings with only the color theme changed to label.
+const settings = (label) =>
+  readFileSync(join(repo, "vscode/settings.json"), "utf8").replace(
+    '"workbench.colorTheme": "Vintage",',
+    `"workbench.colorTheme": "${label}",`,
+  );
 
 const read = (root, path) => (existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : undefined);
 
@@ -60,6 +69,27 @@ test("switching records the active Theme, points Ghostty at it and reloads Ghost
   rmSync(root, { recursive: true });
 });
 
+test("switching selects the Theme in VSCode's settings by its name, changing nothing else", () => {
+  const root = scratch();
+  theme(root, "tiny");
+  eq(read(root, "vscode/settings.json"), settings("Tiny"), "vscode/settings.json after theme tiny");
+  theme(root, "vintage");
+  eq(read(root, "vscode/settings.json"), settings("Vintage"), "vscode/settings.json after theme vintage");
+  rmSync(root, { recursive: true });
+});
+
+test("a VSCode settings.json with no color theme line fails the Switch and changes nothing", () => {
+  const root = scratch();
+  writeFileSync(join(root, "vscode/settings.json"), "{}\n");
+  const result = theme(root, "tiny");
+  eq(result.code, 1, "exit code");
+  eq(result.out, 'vscode/settings.json has no "workbench.colorTheme" line\n', "output");
+  eq(read(root, "themes/active"), undefined, "themes/active");
+  eq(read(root, "ghostty/active-theme"), undefined, "ghostty/active-theme");
+  eq(result.reloads, 0, "Ghostty reloads");
+  rmSync(root, { recursive: true });
+});
+
 test("an unknown Theme changes nothing and lists the available Themes", () => {
   const root = scratch();
   theme(root, "tiny");
@@ -68,6 +98,7 @@ test("an unknown Theme changes nothing and lists the available Themes", () => {
   eq(result.out, "No Theme named dracula. Available Themes:\n  tiny\n  vintage\n", "output");
   eq(read(root, "themes/active"), "tiny\n", "themes/active");
   eq(read(root, "ghostty/active-theme"), "theme = tiny\n", "ghostty/active-theme");
+  eq(read(root, "vscode/settings.json"), settings("Tiny"), "vscode/settings.json");
   eq(result.reloads, 0, "Ghostty reloads");
   rmSync(root, { recursive: true });
 });

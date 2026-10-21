@@ -1,9 +1,9 @@
-// Checks for the Theme generator, themes/generate.mjs (#132).
+// Checks for the Theme generator, themes/generate.mjs (#132, #135).
 // Run: node themes/tests/generate_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generate, ghostty } from "../generate.mjs";
+import { generate, ghostty, vscode, vscodeExtension } from "../generate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -26,7 +26,7 @@ function eq(actual, expected, what) {
   }
 }
 
-// A small Theme with only the roles Ghostty takes, and its Ghostty theme
+// A small Theme with the roles Ghostty and VSCode take, and its Ghostty theme
 // written by hand.
 const tiny = JSON.parse(read("themes/tests/fixtures/tiny.json"));
 
@@ -46,9 +46,53 @@ test("refuses a Theme missing a role Ghostty takes", () => {
   if (!message.includes("work_cursor")) throw new Error(`expected an error naming work_cursor, got ${JSON.stringify(message)}`);
 });
 
+test("generates a VSCode color theme for any Theme source file", () => {
+  const text = vscode(tiny);
+  if (!text.startsWith("// Tiny theme for VSCode")) throw new Error(`header: ${text.split("\n")[0]}`);
+  if (text.includes("{{")) throw new Error("a placeholder is left in");
+  if (!text.includes('"name": "Tiny",')) throw new Error("name isn't Tiny");
+  if (!text.includes('"type": "light",')) throw new Error("type isn't light");
+  // Spot checks against the fixture's own values.
+  for (const line of [
+    '"editor.background": "#FFF8E7", // work_bg',
+    '"titleBar.activeBackground": "#202060", // frame_title',
+    '"terminal.ansiBrightWhite": "#0000F1" // ansi_15',
+    '"settings": { "foreground": "#A01010", "fontStyle": "" } // syntax_error',
+  ]) {
+    if (!text.includes(line)) throw new Error(`missing ${line}`);
+  }
+});
+
+test("a Theme with a dark Frame gets a dark VSCode theme", () => {
+  const dark = { ...tiny, palettes: { ...tiny.palettes, frame: { ...tiny.palettes.frame, frame_face: "#202020" } } };
+  if (!vscode(dark).includes('"type": "dark",')) throw new Error("type isn't dark");
+});
+
+test("the VSCode extension contributes one color theme per Theme", () => {
+  const json = JSON.parse(vscodeExtension([{ id: "tiny", theme: tiny }, { id: "vintage", theme: { name: "Vintage", palettes: { frame: { frame_face: "#C0C0C0" } } } }]));
+  eq(JSON.stringify(json.contributes.themes), JSON.stringify([
+    { label: "Tiny", uiTheme: "vs", path: "./themes/tiny-color-theme.json" },
+    { label: "Vintage", uiTheme: "vs", path: "./themes/vintage-color-theme.json" },
+  ]), "contributes.themes");
+});
+
+test("refuses a Theme missing a role VSCode takes", () => {
+  const { frame_title, ...frame } = tiny.palettes.frame;
+  const broken = { ...tiny, palettes: { ...tiny.palettes, frame } };
+  let message = "";
+  try {
+    vscode(broken);
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("frame_title")) throw new Error(`expected an error naming frame_title, got ${JSON.stringify(message)}`);
+});
+
 test("every committed generated file is what the generator produces", () => {
   const files = generate(root);
-  if (!files.some((f) => f.path === "ghostty/themes/vintage")) throw new Error("generator doesn't produce ghostty/themes/vintage");
+  for (const path of ["ghostty/themes/vintage", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json"]) {
+    if (!files.some((f) => f.path === path)) throw new Error(`generator doesn't produce ${path}`);
+  }
   for (const { path, text } of files) {
     if (read(path) !== text) throw new Error(`${path} is stale: run node themes/generate.mjs`);
   }

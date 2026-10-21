@@ -41,6 +41,39 @@ export function ghostty(id, theme) {
   ].join("\n");
 }
 
+// VSCode's color theme for a Theme: themes/templates/vscode-color-theme.jsonc,
+// which is Vintage's with each value a {{role}}, plus {{name}} and {{type}}.
+// Its prose comments describe Vintage.
+export function vscode(theme) {
+  const role = roles(theme);
+  const vars = { name: JSON.stringify(theme.name).slice(1, -1), type: vscodeType(theme) };
+  return template("vscode-color-theme.jsonc").replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? role(name));
+}
+
+// The workbench is mostly Frame, so a Theme is light or dark by its frame_face.
+function vscodeType(theme) {
+  const [r, g, b] = roles(theme)("frame_face").match(/\w\w/g).map((hex) => parseInt(hex, 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 127 ? "light" : "dark";
+}
+
+// The local VSCode extension's package.json, contributing every Theme's color
+// theme under the Theme's name.
+export function vscodeExtension(all) {
+  const entry = ({ id, theme }) =>
+    [
+      "      {",
+      `        "label": ${JSON.stringify(theme.name)},`,
+      `        "uiTheme": "${vscodeType(theme) === "light" ? "vs" : "vs-dark"}",`,
+      `        "path": "./themes/${id}-color-theme.json"`,
+      "      }",
+    ].join("\n");
+  return template("vscode-package.json").replace("{{themes}}", all.map(entry).join(",\n"));
+}
+
+function template(file) {
+  return readFileSync(join(dirname(fileURLToPath(import.meta.url)), "templates", file), "utf8");
+}
+
 // Every Theme source file in themes/, as { id, theme }, where id is its file
 // name without .json.
 export function themes(root) {
@@ -55,7 +88,12 @@ export function themes(root) {
 
 // Every generated file, as { path, text } with path relative to root.
 export function generate(root) {
-  return themes(root).map(({ id, theme }) => ({ path: `ghostty/themes/${id}`, text: ghostty(id, theme) }));
+  const all = themes(root);
+  return [
+    ...all.map(({ id, theme }) => ({ path: `ghostty/themes/${id}`, text: ghostty(id, theme) })),
+    ...all.map(({ id, theme }) => ({ path: `vscode/vintage-theme/themes/${id}-color-theme.json`, text: vscode(theme) })),
+    { path: "vscode/vintage-theme/package.json", text: vscodeExtension(all) },
+  ];
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
