@@ -4,10 +4,11 @@ Hand-off for an agent re-theming a web app (any framework) to the **Vintage them
 
 Read these first, in full:
 
-- `~/.config/docs/theme-spec.md`: the **Theme spec**, the only source of hex values, fonts and **Purist fidelity**. If the local file is missing, use `https://raw.githubusercontent.com/pnitijarasrat/dotfile/main/docs/theme-spec.md`.
+- `~/.config/docs/theme-spec.md`: the **Theme spec**, the roles, fonts and **Purist fidelity**. If the local file is missing, use `https://raw.githubusercontent.com/pnitijarasrat/dotfile/main/docs/theme-spec.md`.
+- `~/.config/themes/vintage.json`: the Vintage Theme source file, the only source of hex values and font names. If the local file is missing, use `https://raw.githubusercontent.com/pnitijarasrat/dotfile/main/themes/vintage.json`.
 - `~/.config/CONTEXT.md`: the vocabulary (**Frame**, **Work surface**, **Frame data colors**). Use these words in your code comments and report.
 
-Take every hex value from the spec's tables. This file decides _where_ each role goes in a web app; the spec decides _what color_ it is.
+Take every hex value from the source file. This file decides _where_ each role goes in a web app; the source file decides _what color_ it is.
 
 ## The model: the app is a maximized Win95 window
 
@@ -50,9 +51,9 @@ Focus: a `1px dotted var(--frame_text)` outline inset inside the control, as Win
 ## Steps
 
 1. **Inventory.** Find every place the app sets a color, font, radius, shadow, opacity or blur: stylesheets, CSS-in-JS, Tailwind classes and config, component-library theme objects (MUI `createTheme`, shadcn/Radix CSS variables, Chakra, Bootstrap Sass variables), inline `style`, SVG `fill`/`stroke`, `<meta name="theme-color">`, and canvas/chart configs. Done when you have a list of files and a list of every distinct value.
-2. **Tokens.** Add one global block of CSS custom properties, one per spec role, named exactly by role (`--frame_face`, `--work_bg`, `--frame_data_red`, ...), plus `--raised` and `--sunken`. Copy values from the spec's tables. If the app has a theme config (Tailwind `theme.colors`, a library theme object, existing CSS variables), point that config at these properties so components pick them up through the library rather than through overrides. Done when every role you will use exists exactly once.
+2. **Tokens.** Add one global block of CSS custom properties, one per spec role, named exactly by role (`--frame_face`, `--work_bg`, `--frame_data_red`, ...), plus `--raised` and `--sunken`. Copy values from the source file. If the app has a theme config (Tailwind `theme.colors`, a library theme object, existing CSS variables), point that config at these properties so components pick them up through the library rather than through overrides. Done when every role you will use exists exactly once.
 3. **Map.** Go through the inventory and replace every value with a role token chosen from the table above. Done when a search for raw colors outside the token block (`#[0-9a-fA-F]{3,8}\b`, `rgb(`, `rgba(`, `hsl(`, named colors like `white`/`gray`, Tailwind palette classes like `bg-gray-100`, `text-blue-600`) finds nothing.
-4. **Purist fidelity.** Across the whole app: `border-radius: 0`; every `box-shadow` is a hard inset bevel or nothing; no `opacity` below 1 on surfaces, no `backdrop-filter`, no `rgba`/`transparent` overlays (a modal's backdrop is no backdrop, or `frame_desktop`); no gradients; no icon fonts and no emoji (use plain characters or small pixel PNG/SVG icons). Set `color-scheme: light` and `accent-color: var(--frame_selection)` so native checkboxes, radios and date pickers follow. Remove dark-mode variants: the theme has one look. Done when searches for `border-radius`, `rounded`, `blur`, `opacity`, `gradient`, `shadow` and `dark:` turn up only the bevels.
+4. **Purist fidelity.** Across the whole app: `border-radius: 0`; every `box-shadow` is a hard inset bevel or nothing; no `opacity` below 1 on surfaces, no `backdrop-filter`, no `rgba`/`transparent` overlays (a modal's backdrop is no backdrop, or `frame_desktop`); no gradients; no icon fonts and no emoji (use plain characters or small pixel PNG/SVG icons). Set `color-scheme: light` and `accent-color: var(--frame_selection)` so native checkboxes, radios and date pickers follow. Remove dark-mode variants: the Vintage theme has no dark variant. Done when searches for `border-radius`, `rounded`, `blur`, `opacity`, `gradient`, `shadow` and `dark:` turn up only the bevels.
 5. **Fonts.**
    - Frame: `font-family: "Microsoft Sans Serif", Tahoma, sans-serif; font-size: 14px;`. Where the design needs bold, use `Tahoma` bold, since Microsoft Sans Serif has none.
    - Work surface: copy `~/.config/fonts/FSEX302.ttf` (Fixedsys Excelsior, CC0) into the app's static assets, load it with `@font-face`, and use `font-family: "Fixedsys Excelsior", Menlo, Thonburi, monospace; font-size: 16px; line-height: 16px;`. Its em is 16 px, so it is crisp only at multiples of 8px. Set `font-variant-ligatures: none` and `font-synthesis: none`.

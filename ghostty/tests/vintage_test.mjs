@@ -25,11 +25,10 @@ function eq(actual, expected, what) {
   }
 }
 
-// Every role the spec defines, with its hex, from the tables in
-// docs/theme-spec.md (`role` | `#hex`, and `ansi_N` `#hex` in the ANSI table).
-const roles = Object.fromEntries(
-  [...read("docs/theme-spec.md").matchAll(/`([a-z0-9_]+)`\s*\|?\s*`(#[0-9A-F]{6})`/g)].map((m) => [m[1], m[2]]),
-);
+// Every role the Theme defines, with its hex, from the Vintage Theme source
+// file, themes/vintage.json.
+const vintage = JSON.parse(read("themes/vintage.json"));
+const roles = Object.assign({}, ...Object.values(vintage.palettes));
 
 // Ghostty config lines as { key, value, comment }, where comment is the
 // line just above (Ghostty has no trailing comments).
@@ -50,7 +49,7 @@ const configText = read("ghostty/config");
 const config = parse(configText);
 
 function role(name) {
-  if (!roles[name]) throw new Error(`role ${name} is not in the spec`);
+  if (!roles[name]) throw new Error(`role ${name} is not in the Theme`);
   return roles[name];
 }
 
@@ -96,8 +95,8 @@ test("Purist fidelity and the JetBrains Mono NL font", () => {
     "background-opacity": ["1"],
     "background-blur": ["false"],
     "window-decoration": ["none"],
-    "font-family": ['"JetBrains Mono NL"', '"Menlo"', '"Thonburi"'],
-    "font-size": ["14"],
+    "font-family": vintage.fonts.work.family.map((name) => `"${name}"`),
+    "font-size": [String(vintage.fonts.work.ghostty_size)],
     "font-feature": ["-calt, -liga"],
     "font-style-bold": ["false"],
     "font-style-italic": ["false"],

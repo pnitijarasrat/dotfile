@@ -25,11 +25,10 @@ function eq(actual, expected, what) {
   }
 }
 
-// Every role the spec defines, with its hex, from the tables in
-// docs/theme-spec.md (`role` | `#hex`).
-const roles = Object.fromEntries(
-  [...read("docs/theme-spec.md").matchAll(/`([a-z0-9_]+)`\s*\|?\s*`(#[0-9A-F]{6})`/g)].map((m) => [m[1], m[2]]),
-);
+// Every role the Theme defines, with its hex, from the Vintage Theme source
+// file, themes/vintage.json.
+const vintage = JSON.parse(read("themes/vintage.json"));
+const roles = Object.assign({}, ...Object.values(vintage.palettes));
 
 const manifestPath = "chrome/vintage-theme/manifest.json";
 let manifest = {};
@@ -90,7 +89,7 @@ test("is an MV3 theme named Vintage", () => {
 
 test("every color key takes its spec role", () => {
   for (const [key, role] of Object.entries(keyRoles)) {
-    if (!roles[role]) throw new Error(`role ${role} is not in the spec`);
+    if (!roles[role]) throw new Error(`role ${role} is not in the Theme`);
     eq(hex(colors[key]), roles[role], `${key} (${role})`);
   }
 });
@@ -106,27 +105,27 @@ test("Purist fidelity: no images, tints or properties", () => {
 });
 
 test("active window: navy tab strip with white tab titles, grey tab and toolbar with black text", () => {
-  eq(hex(colors.frame), "#000080", "frame");
-  eq(hex(colors.tab_background_text), "#FFFFFF", "tab_background_text");
-  eq(hex(colors.toolbar), "#C0C0C0", "toolbar");
+  eq(hex(colors.frame), roles.frame_title, "frame");
+  eq(hex(colors.tab_background_text), roles.frame_title_text, "tab_background_text");
+  eq(hex(colors.toolbar), roles.frame_face, "toolbar");
   for (const key of ["tab_text", "toolbar_text", "toolbar_button_icon", "bookmark_text"]) {
-    eq(hex(colors[key]), "#000000", key);
+    eq(hex(colors[key]), roles.frame_text, key);
   }
 });
 
 test("inactive window: grey tab strip with grey tab titles", () => {
-  eq(hex(colors.frame_inactive), "#808080", "frame_inactive");
-  eq(hex(colors.background_tab_inactive), "#808080", "background_tab_inactive");
-  eq(hex(colors.tab_background_text_inactive), "#C0C0C0", "tab_background_text_inactive");
+  eq(hex(colors.frame_inactive), roles.frame_title_inactive, "frame_inactive");
+  eq(hex(colors.background_tab_inactive), roles.frame_title_inactive, "background_tab_inactive");
+  eq(hex(colors.tab_background_text_inactive), roles.frame_title_inactive_text, "tab_background_text_inactive");
 });
 
 test("omnibox is white with black text", () => {
-  eq(hex(colors.omnibox_background), "#FFFFFF", "omnibox_background");
-  eq(hex(colors.omnibox_text), "#000000", "omnibox_text");
+  eq(hex(colors.omnibox_background), roles.frame_window, "omnibox_background");
+  eq(hex(colors.omnibox_text), roles.frame_text, "omnibox_text");
 });
 
 test("New Tab page is the flat teal Classic desktop with readable text and links", () => {
-  eq(hex(colors.ntp_background), "#008080", "ntp_background");
+  eq(hex(colors.ntp_background), roles.frame_desktop, "ntp_background");
   expectReadable("ntp_text", "ntp_background");
   expectReadable("ntp_link", "ntp_background");
 });

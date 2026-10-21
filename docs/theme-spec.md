@@ -1,107 +1,111 @@
 # Theme spec: Vintage theme
 
-The locked **Theme spec** for the **Vintage theme**: a Windows 95 Classic **Frame** around light, K-95-style **Work surfaces** in Windows VGA colors, plus the odd black LCD **Display**. Vocabulary follows `CONTEXT.md`.
+The locked **Theme spec** for the **Vintage theme**, the first **Theme**: a Windows 95 Classic **Frame** around light, K-95-style **Work surfaces** in Windows VGA colors, plus the odd black LCD **Display**. Vocabulary follows `CONTEXT.md`.
 
 This is the hand-off document for re-theming. To theme one tool, read this file and that tool's ticket. To theme a web app, follow `docs/web-theme.md`. Where an earlier decision was later changed, this file gives only the final value. If the built SketchyBar code and an issue disagree, this file follows the code.
 
-Sources: palettes [#5](https://github.com/pnitijarasrat/dotfile/issues/5), light Work surface [#43](https://github.com/pnitijarasrat/dotfile/issues/43) / `docs/adr/0001-light-k95-work-surface.md`, Display [#63](https://github.com/pnitijarasrat/dotfile/issues/63) / `docs/adr/0002-display-surface.md`, fonts [#6](https://github.com/pnitijarasrat/dotfile/issues/6) / JetBrains Mono [#78](https://github.com/pnitijarasrat/dotfile/issues/78) / `docs/adr/0003-jetbrains-mono-work-surface.md`, per-tool decisions and popups [#7](https://github.com/pnitijarasrat/dotfile/issues/7), role names and palette sources [#8](https://github.com/pnitijarasrat/dotfile/issues/8), SketchyBar taskbar [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11). Map: [#2](https://github.com/pnitijarasrat/dotfile/issues/2).
+Sources: Theme source file [#131](https://github.com/pnitijarasrat/dotfile/issues/131) / `docs/adr/0004-themes-and-switching.md`, palettes [#5](https://github.com/pnitijarasrat/dotfile/issues/5), light Work surface [#43](https://github.com/pnitijarasrat/dotfile/issues/43) / `docs/adr/0001-light-k95-work-surface.md`, Display [#63](https://github.com/pnitijarasrat/dotfile/issues/63) / `docs/adr/0002-display-surface.md`, fonts [#6](https://github.com/pnitijarasrat/dotfile/issues/6) / JetBrains Mono [#78](https://github.com/pnitijarasrat/dotfile/issues/78) / `docs/adr/0003-jetbrains-mono-work-surface.md`, per-tool decisions and popups [#7](https://github.com/pnitijarasrat/dotfile/issues/7), role names and palette sources [#8](https://github.com/pnitijarasrat/dotfile/issues/8), SketchyBar taskbar [#9](https://github.com/pnitijarasrat/dotfile/issues/9) / [#11](https://github.com/pnitijarasrat/dotfile/pull/11). Map: [#2](https://github.com/pnitijarasrat/dotfile/issues/2).
 
 ## Role names
 
 Every color has a snake_case role name. Use it as the variable name where the tool's format has variables, and as a comment where it only allows comments. Variables are lowercase (`frame_face`, not `FRAME_FACE`), as in `sketchybar/color.sh`.
 
-One hex value can play several roles. For example, `#000080` is `frame_title`, `frame_selection`, `work_selection` and `frame_data_blue`. Choose the role by what the element means, not by its color.
+One value can play several roles. For example, `frame_title`, `frame_selection`, `work_selection` and `frame_data_blue` are all the same navy. Choose the role by what the element means, not by its color.
+
+## Values
+
+Every role's hex value lives in one place: the Vintage **Theme source file**, `themes/vintage.json` ([#131](https://github.com/pnitijarasrat/dotfile/issues/131)). The tables here name the roles and what each is for; take the values from the source file. It also holds the font families and the Work surface sizes that the [Fonts](#fonts) section sets per tool. Every tool's test reads its expected values from that file, and `node themes/tests/vintage_test.mjs` checks that it holds exactly the roles this spec names and the fonts it sets.
 
 ## Frame palette
 
 Win95 Classic greys with a flat navy title bar (no gradient). Used by menu bars, borders, the launcher, app chrome, menus and pickers.
 
-| Role | Hex | Use |
-|---|---|---|
-| `frame_face` | `#C0C0C0` | face of windows, bars, menus, scrollbars; menu bar background |
-| `frame_highlight` | `#FFFFFF` | outer top-left bevel |
-| `frame_light` | `#E0E0E0` | inner top-left bevel; pushed-in button face |
-| `frame_shadow` | `#808080` | inner bottom-right bevel |
-| `frame_dark_shadow` | `#000000` | outer bottom-right bevel |
-| `frame_title` | `#000080` | active title bar |
-| `frame_title_text` | `#FFFFFF` | active title text |
-| `frame_title_inactive` | `#808080` | inactive title bar |
-| `frame_title_inactive_text` | `#C0C0C0` | inactive title text |
-| `frame_text` | `#000000` | text on Frame; menu bar text |
-| `frame_gray_text` | `#808080` | disabled and secondary text |
-| `frame_window` | `#FFFFFF` | edit fields and lists inside the Frame |
-| `frame_selection` | `#000080` | selected item |
-| `frame_selection_text` | `#FFFFFF` | selected item text |
-| `frame_tooltip` | `#FFFFE1` | tooltips |
-| `frame_desktop` | `#008080` | desktop (teal) |
-| `frame_desktop_text` | `#FFFFFF` | text on the desktop (icon labels) |
+| Role | Use |
+|---|---|
+| `frame_face` | face of windows, bars, menus, scrollbars; menu bar background |
+| `frame_highlight` | outer top-left bevel |
+| `frame_light` | inner top-left bevel; pushed-in button face |
+| `frame_shadow` | inner bottom-right bevel |
+| `frame_dark_shadow` | outer bottom-right bevel |
+| `frame_title` | active title bar |
+| `frame_title_text` | active title text |
+| `frame_title_inactive` | inactive title bar |
+| `frame_title_inactive_text` | inactive title text |
+| `frame_text` | text on Frame; menu bar text |
+| `frame_gray_text` | disabled and secondary text |
+| `frame_window` | edit fields and lists inside the Frame |
+| `frame_selection` | selected item |
+| `frame_selection_text` | selected item text |
+| `frame_tooltip` | tooltips |
+| `frame_desktop` | desktop (teal) |
+| `frame_desktop_text` | text on the desktop (icon labels) |
 
 ## Work surface palette
 
 A light, K-95-style canvas: navy text on white with Windows VGA colors, as in Kermit 95 on Windows. Used by terminals, editors, TUI apps and inline code popups. It's always light: there's no dark variant, and it doesn't follow macOS appearance.
 
-| Role | Hex | Use |
-|---|---|---|
-| `work_bg` | `#FFFFFF` | background |
-| `work_fg` | `#000080` | foreground |
-| `work_cursor` | `#000000` | cursor |
-| `work_cursor_text` | `#FFFFFF` | text under the cursor |
-| `work_cursorline` | `#FFFFE1` | current line |
-| `work_selection` | `#000080` | selection background |
-| `work_selection_text` | `#FFFFFF` | selection text |
-| `work_line_number` | `#808080` | line numbers |
-| `work_grid` | `#C0C0C0` | gridlines, rulers, split lines |
-| `work_popup_border` | `#808080` | 1px border of inline code popups |
+| Role | Use |
+|---|---|
+| `work_bg` | background |
+| `work_fg` | foreground |
+| `work_cursor` | cursor |
+| `work_cursor_text` | text under the cursor |
+| `work_cursorline` | current line |
+| `work_selection` | selection background |
+| `work_selection_text` | selection text |
+| `work_line_number` | line numbers |
+| `work_grid` | gridlines, rulers, split lines |
+| `work_popup_border` | 1px border of inline code popups |
 
 ### ANSI (Windows VGA)
 
 | | black | red | green | yellow | blue | magenta | cyan | white |
 |---|---|---|---|---|---|---|---|---|
-| normal | `ansi_0` `#000000` | `ansi_1` `#800000` | `ansi_2` `#008000` | `ansi_3` `#808000` | `ansi_4` `#000080` | `ansi_5` `#800080` | `ansi_6` `#008080` | `ansi_7` `#C0C0C0` |
-| bright | `ansi_8` `#808080` | `ansi_9` `#FF0000` | `ansi_10` `#00FF00` | `ansi_11` `#FFFF00` | `ansi_12` `#0000FF` | `ansi_13` `#FF00FF` | `ansi_14` `#00FFFF` | `ansi_15` `#FFFFFF` |
+| normal | `ansi_0` | `ansi_1` | `ansi_2` | `ansi_3` | `ansi_4` | `ansi_5` | `ansi_6` | `ansi_7` |
+| bright | `ansi_8` | `ansi_9` | `ansi_10` | `ansi_11` | `ansi_12` | `ansi_13` | `ansi_14` | `ansi_15` |
 
 Bright yellow, green, cyan and white can't be read as text on white, so the brights mostly show up as backgrounds (K-95's yellow-on-blue bar). Bold isn't bright (see [Fonts](#fonts)).
 
 ### Syntax roles
 
-| Role | Hex |
+| Role | Use |
 |---|---|
-| `syntax_comment` | `#808080` (**not** italic) |
-| `syntax_keyword` | `#808000` |
-| `syntax_string` | `#008000` |
-| `syntax_number` | `#800080` |
-| `syntax_function` | `#008080` |
-| `syntax_type` | `#000000` |
-| `syntax_constant` | `#804000` |
-| `syntax_operator` | `#000080` |
-| `syntax_error` | `#800000` |
-| `syntax_warning` | `#808000` |
+| `syntax_comment` | comments (**not** italic) |
+| `syntax_keyword` | keywords |
+| `syntax_string` | strings |
+| `syntax_number` | numbers |
+| `syntax_function` | functions |
+| `syntax_type` | types |
+| `syntax_constant` | constants |
+| `syntax_operator` | operators |
+| `syntax_error` | errors |
+| `syntax_warning` | warnings |
 
-Syntax roles use dark VGA shades (plus `#804000` for constants, the same as `frame_data_orange`), which read on white. Nothing is italic, including comments. Emphasis comes from color only.
+Syntax roles use dark VGA shades (plus `syntax_constant`, the same brown as `frame_data_orange`), which read on white. Nothing is italic, including comments. Emphasis comes from color only.
 
 ## Frame data colors
 
 Win95 dark VGA. Use these wherever red, green, yellow and so on appear on Frame grey. Examples: status bar diagnostics in Neovim and VSCode, Raycast data slots, SketchyBar.
 
-| Role | Hex |
+| Role | Use |
 |---|---|
-| `frame_data_red` | `#800000` |
-| `frame_data_green` | `#008000` |
-| `frame_data_yellow` | `#808000` |
-| `frame_data_blue` | `#000080` |
-| `frame_data_magenta` | `#800080` |
-| `frame_data_cyan` | `#008080` |
-| `frame_data_orange` | `#804000` |
+| `frame_data_red` | red data |
+| `frame_data_green` | green data |
+| `frame_data_yellow` | yellow data |
+| `frame_data_blue` | blue data |
+| `frame_data_magenta` | magenta data |
+| `frame_data_cyan` | cyan data |
+| `frame_data_orange` | orange data |
 
 ## Display palette
 
 A black LCD readout in the **Frame**, like the time and track displays in Windows' Media Rack: lit cyan text over unlit "ghost" segments, inside a sunken bevel. Every value is a VGA color already in the ANSI table. Text is the Work surface font (still Fixedsys Excelsior at 16px until [#80](https://github.com/pnitijarasrat/dotfile/issues/80)); there's no seven-segment font. Used by Spotify's player bar (#63) and Claude Code's Event Viewer (#92).
 
-| Role | Hex | Use |
-|---|---|---|
-| `display_bg` | `#000000` | LCD background (same as `ansi_0`) |
-| `display_fg` | `#00FFFF` | lit text (same as `ansi_14`) |
-| `display_ghost` | `#008080` | unlit ghost segments (`88:88`) and dim lines (same as `ansi_6`) |
+| Role | Use |
+|---|---|
+| `display_bg` | LCD background (same as `ansi_0`) |
+| `display_fg` | lit text (same as `ansi_14`) |
+| `display_ghost` | unlit ghost segments (`88:88`) and dim lines (same as `ansi_6`) |
 
 ## Fonts
 
@@ -131,6 +135,8 @@ Neovim's statusline belongs to the Frame, but it's drawn by the terminal, so it 
 | Chrome | has no font setting: the tab strip, toolbar and bookmarks keep the macOS system font (see [Known exceptions](#known-exceptions)) |
 
 ## Purist fidelity
+
+The **Vintage theme**'s own rules. Each **Theme** carries its own rules for corners, blur and icons ([ADR 0004](adr/0004-themes-and-switching.md)); these bind the Vintage theme.
 
 - Opaque everywhere: no transparency, no blur.
 - Square corners everywhere the tool allows it.
@@ -176,7 +182,7 @@ Every place where a tool departs from this spec gets **both** a row here **and**
 | VSCode | editor selection | `ansi_11` background, `frame_light` when the editor isn't focused; selected text keeps its token colors (not `work_selection` with `work_selection_text`). Peek match highlights are `ansi_11` too, and so are the matched letters on the completion list's selected row | VSCode only applies `editor.selectionForeground` in high-contrast themes (#19), and the dark syntax colors can't be read on navy (#46). The terminal and the completion list, which honor their selection foreground, keep `work_selection` |
 | VSCode | panel body | `work_bg` with `work_fg` titles (not `frame_face`) | the panel's lists (problems, terminal tabs) use the global `foreground`, which is `frame_text` (it reads on both Frame grey and the white `work_bg`); editor text stays `work_fg`. VSCode has no `panel.foreground`. The panel mostly holds the terminal (#20, #46) |
 | VSCode | status bar problems counter | `frame_text` (not Frame data colors) | VSCode has no color key for it; Frame data colors apply to the items VSCode marks as error or warning (#20) |
-| Raycast | purple data slot | `frame_data_magenta` `#800080` (same as the magenta slot) | Raycast has separate purple and magenta slots, but the Frame data colors have no purple; magenta is the nearest. No inline comment: the file is strict JSON (#21) |
+| Raycast | purple data slot | `frame_data_magenta` (same as the magenta slot) | Raycast has separate purple and magenta slots, but the Frame data colors have no purple; magenta is the nearest. No inline comment: the file is strict JSON (#21) |
 | Neovim | `winborder = "single"` | set only on Neovim 0.11+; on 0.10 the hover, signature help and diagnostic floats get `border = "single"` directly, and blink.cmp sets it per popup | `winborder` doesn't exist before 0.11, and the installed Neovim is 0.10.0. Same result (#16) |
 | Spotify | big playlist, album and artist titles | Tahoma Bold **24** (not 14) | Spotify draws them at about 96px; at 14 they'd be lost in the header, and 24 keeps them sized like a Win95 heading (#55) |
 

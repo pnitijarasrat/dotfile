@@ -1,5 +1,5 @@
 # Vintage theme: Work surface (light, K-95-style: navy on white, Windows VGA ANSI)
-# Roles and values from docs/theme-spec.md
+# Roles from docs/theme-spec.md, values from themes/vintage.json
 # Ghostty has no trailing comments, so each role name is on the line above its value
 # work_bg
 background = #FFFFFF

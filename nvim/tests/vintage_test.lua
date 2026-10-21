@@ -41,6 +41,19 @@ local function read(path)
   return s
 end
 
+-- Every role the Theme defines, with its hex, from the Vintage Theme source
+-- file, themes/vintage.json (lowercased, as hex() prints).
+local roles = {}
+for _, palette in pairs(vim.json.decode(read("../themes/vintage.json")).palettes) do
+  for name, value in pairs(palette) do
+    roles[name] = value:lower()
+  end
+end
+
+-- Neovim still has the dark IBM 5153 Work surface (the spec marks the light
+-- one "to do again"), so the literals below are its own values, not the
+-- Theme's. Only the roles it still shares with the Theme come from `roles`.
+
 vim.cmd.colorscheme("vintage")
 
 test("sets colors_name", function()
@@ -55,9 +68,9 @@ end)
 test("editor groups follow the spec", function()
   eq(hex(get("CursorLine").bg), "#161616", "CursorLine bg")
   eq(hex(get("LineNr").fg), "#7e7e7e", "LineNr fg")
-  eq(hex(get("Visual").bg), "#000080", "Visual bg")
-  eq(hex(get("Visual").fg), "#ffffff", "Visual fg")
-  eq(hex(get("Search").bg), "#000080", "Search bg")
+  eq(hex(get("Visual").bg), roles.work_selection, "Visual bg")
+  eq(hex(get("Visual").fg), roles.work_selection_text, "Visual fg")
+  eq(hex(get("Search").bg), roles.work_selection, "Search bg")
   eq(hex(get("Cursor").bg), "#4edc4e", "Cursor bg")
   eq(hex(get("WinSeparator").fg), "#4e4e4e", "WinSeparator fg")
   eq(hex(get("ColorColumn").bg), "#4e4e4e", "ColorColumn bg")
@@ -106,15 +119,15 @@ test("LSP and diagnostic groups link to roles", function()
   eq(get("DiagnosticUnderlineError").sp and hex(get("DiagnosticUnderlineError").sp), "#dc4e4e", "underline sp")
 end)
 
-test("inline code popups are Work surface with a #808080 border", function()
+test("inline code popups are Work surface with a work_popup_border", function()
   for _, group in ipairs({ "NormalFloat", "Pmenu", "BlinkCmpMenu", "BlinkCmpDoc", "BlinkCmpSignatureHelp" }) do
     eq(hex(get(group).bg), "#000000", group .. " bg")
   end
   for _, group in ipairs({ "FloatBorder", "BlinkCmpMenuBorder", "BlinkCmpDocBorder", "BlinkCmpSignatureHelpBorder" }) do
-    eq(hex(get(group).fg), "#808080", group .. " fg")
+    eq(hex(get(group).fg), roles.work_popup_border, group .. " fg")
     eq(hex(get(group).bg), "#000000", group .. " bg")
   end
-  eq(hex(get("PmenuSel").bg), "#000080", "PmenuSel bg")
+  eq(hex(get("PmenuSel").bg), roles.work_selection, "PmenuSel bg")
 end)
 
 test("every highlight uses roles, not raw hex", function()

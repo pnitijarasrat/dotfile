@@ -1,5 +1,6 @@
 -- Vintage theme: the editor as a Work surface (IBM 5153 on black).
--- Role names and values come from docs/theme-spec.md; highlights below refer
+-- Role names come from docs/theme-spec.md; the values are still the old dark
+-- ones, not the Theme's in themes/vintage.json. Highlights below refer
 -- to roles only. The Frame chrome (statusline, tab line, pickers) is #17.
 local p = {
   -- Work surface

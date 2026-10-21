@@ -51,11 +51,10 @@ const theme = parseJsonc(read("vscode/vintage-theme/themes/vintage-color-theme.j
 const settings = parseJsonc(read("vscode/settings.json"));
 const colors = theme.colors;
 
-// Every role the spec defines, with its hex, from the tables in
-// docs/theme-spec.md (`role` | `#hex`, and `ansi_N` `#hex` in the ANSI table).
-const roles = Object.fromEntries(
-  [...read("docs/theme-spec.md").matchAll(/`([a-z0-9_]+)`\s*\|?\s*`(#[0-9A-F]{6})`/g)].map((m) => [m[1], m[2]]),
-);
+// Every role the Theme defines, with its hex, from the Vintage Theme source
+// file, themes/vintage.json.
+const vintage = JSON.parse(read("themes/vintage.json"));
+const roles = Object.assign({}, ...Object.values(vintage.palettes));
 
 // Keys allowed to be fully transparent: they turn a shadow off.
 const noShadow = new Set(["widget.shadow", "scrollbar.shadow"]);
@@ -109,7 +108,7 @@ test("activity bar, sidebar, tabs and panel titles are Frame grey with black tex
     "tab.inactiveBackground",
     "panelSectionHeader.background",
   ]) {
-    expect(key, "#C0C0C0");
+    expect(key, roles.frame_face);
   }
   for (const key of [
     "activityBar.foreground",
@@ -120,37 +119,37 @@ test("activity bar, sidebar, tabs and panel titles are Frame grey with black tex
     "tab.inactiveForeground",
     "panelSectionHeader.foreground",
   ]) {
-    expect(key, "#000000");
+    expect(key, roles.frame_text);
   }
 });
 
 test("the active tab is clearly distinguished", () => {
   // The modern UI ignores tab.activeBackground.
   eq(settings["workbench.experimental.modernUI"], false, "workbench.experimental.modernUI");
-  expect("tab.activeBackground", "#E0E0E0");
-  expect("tab.activeBorderTop", "#000080");
+  expect("tab.activeBackground", roles.frame_light);
+  expect("tab.activeBorderTop", roles.frame_selection);
 });
 
 test("scrollbars use Frame greys", () => {
-  expect("scrollbarSlider.background", "#808080");
-  expect("scrollbarSlider.hoverBackground", "#808080");
+  expect("scrollbarSlider.background", roles.frame_shadow);
+  expect("scrollbarSlider.hoverBackground", roles.frame_shadow);
 });
 
 test("custom title bar: navy active, grey inactive", () => {
   eq(settings["window.titleBarStyle"], "custom", "window.titleBarStyle");
-  expect("titleBar.activeBackground", "#000080");
-  expect("titleBar.activeForeground", "#FFFFFF");
-  expect("titleBar.inactiveBackground", "#808080");
-  expect("titleBar.inactiveForeground", "#C0C0C0");
+  expect("titleBar.activeBackground", roles.frame_title);
+  expect("titleBar.activeForeground", roles.frame_title_text);
+  expect("titleBar.inactiveBackground", roles.frame_title_inactive);
+  expect("titleBar.inactiveForeground", roles.frame_title_inactive_text);
 });
 
 test("status bar is Frame grey with Frame data colors", () => {
-  expect("statusBar.background", "#C0C0C0");
-  expect("statusBar.foreground", "#000000");
-  expect("statusBarItem.errorBackground", "#C0C0C0");
-  expect("statusBarItem.errorForeground", "#800000");
-  expect("statusBarItem.warningBackground", "#C0C0C0");
-  expect("statusBarItem.warningForeground", "#808000");
+  expect("statusBar.background", roles.frame_face);
+  expect("statusBar.foreground", roles.frame_text);
+  expect("statusBarItem.errorBackground", roles.frame_face);
+  expect("statusBarItem.errorForeground", roles.frame_data_red);
+  expect("statusBarItem.warningBackground", roles.frame_face);
+  expect("statusBarItem.warningForeground", roles.frame_data_yellow);
 });
 
 test("menus and pickers are Frame: grey, black text, navy selection", () => {
@@ -161,10 +160,10 @@ test("menus and pickers are Frame: grey, black text, navy selection", () => {
     ["notifications.background", "notifications.foreground", "list.activeSelectionBackground", "list.activeSelectionForeground"],
   ];
   for (const [bg, fg, sel, selText] of frame) {
-    expect(bg, "#C0C0C0");
-    expect(fg, "#000000");
-    expect(sel, "#000080");
-    expect(selText, "#FFFFFF");
+    expect(bg, roles.frame_face);
+    expect(fg, roles.frame_text);
+    expect(sel, roles.frame_selection);
+    expect(selText, roles.frame_selection_text);
   }
 });
 
@@ -237,9 +236,11 @@ test("token colors use the syntax roles, with no italic or bold (#46)", () => {
 });
 
 test("the editor and terminal use the Work surface font (#79)", () => {
+  // Names with spaces are quoted: 'JetBrains Mono NL', Menlo, Thonburi.
+  const family = vintage.fonts.work.family.map((name) => (name.includes(" ") ? `'${name}'` : name)).join(", ");
   for (const prefix of ["editor", "terminal.integrated"]) {
-    eq(settings[`${prefix}.fontFamily`], "'JetBrains Mono NL', Menlo, Thonburi", `${prefix}.fontFamily`);
-    eq(settings[`${prefix}.fontSize`], 11, `${prefix}.fontSize`);
+    eq(settings[`${prefix}.fontFamily`], family, `${prefix}.fontFamily`);
+    eq(settings[`${prefix}.fontSize`], vintage.fonts.work.vscode_size, `${prefix}.fontSize`);
     eq(settings[`${prefix}.fontWeight`], "normal", `${prefix}.fontWeight`);
   }
   // JetBrains Mono NL has a real bold face; bold looks the same as normal text (ADR 0003).
