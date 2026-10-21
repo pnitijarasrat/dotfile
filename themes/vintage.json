@@ -1,0 +1,92 @@
+{
+  "name": "Vintage",
+  "palettes": {
+    "frame": {
+      "frame_face": "#C0C0C0",
+      "frame_highlight": "#FFFFFF",
+      "frame_light": "#E0E0E0",
+      "frame_shadow": "#808080",
+      "frame_dark_shadow": "#000000",
+      "frame_title": "#000080",
+      "frame_title_text": "#FFFFFF",
+      "frame_title_inactive": "#808080",
+      "frame_title_inactive_text": "#C0C0C0",
+      "frame_text": "#000000",
+      "frame_gray_text": "#808080",
+      "frame_window": "#FFFFFF",
+      "frame_selection": "#000080",
+      "frame_selection_text": "#FFFFFF",
+      "frame_tooltip": "#FFFFE1",
+      "frame_desktop": "#008080",
+      "frame_desktop_text": "#FFFFFF"
+    },
+    "work": {
+      "work_bg": "#FFFFFF",
+      "work_fg": "#000080",
+      "work_cursor": "#000000",
+      "work_cursor_text": "#FFFFFF",
+      "work_cursorline": "#FFFFE1",
+      "work_selection": "#000080",
+      "work_selection_text": "#FFFFFF",
+      "work_line_number": "#808080",
+      "work_grid": "#C0C0C0",
+      "work_popup_border": "#808080"
+    },
+    "ansi": {
+      "ansi_0": "#000000",
+      "ansi_1": "#800000",
+      "ansi_2": "#008000",
+      "ansi_3": "#808000",
+      "ansi_4": "#000080",
+      "ansi_5": "#800080",
+      "ansi_6": "#008080",
+      "ansi_7": "#C0C0C0",
+      "ansi_8": "#808080",
+      "ansi_9": "#FF0000",
+      "ansi_10": "#00FF00",
+      "ansi_11": "#FFFF00",
+      "ansi_12": "#0000FF",
+      "ansi_13": "#FF00FF",
+      "ansi_14": "#00FFFF",
+      "ansi_15": "#FFFFFF"
+    },
+    "syntax": {
+      "syntax_comment": "#808080",
+      "syntax_keyword": "#808000",
+      "syntax_string": "#008000",
+      "syntax_number": "#800080",
+      "syntax_function": "#008080",
+      "syntax_type": "#000000",
+      "syntax_constant": "#804000",
+      "syntax_operator": "#000080",
+      "syntax_error": "#800000",
+      "syntax_warning": "#808000"
+    },
+    "frame_data": {
+      "frame_data_red": "#800000",
+      "frame_data_green": "#008000",
+      "frame_data_yellow": "#808000",
+      "frame_data_blue": "#000080",
+      "frame_data_magenta": "#800080",
+      "frame_data_cyan": "#008080",
+      "frame_data_orange": "#804000"
+    },
+    "display": {
+      "display_bg": "#000000",
+      "display_fg": "#00FFFF",
+      "display_ghost": "#008080"
+    }
+  },
+  "fonts": {
+    "work": {
+      "family": ["JetBrains Mono NL", "Menlo", "Thonburi"],
+      "ghostty_size": 14,
+      "vscode_size": 11
+    },
+    "frame": {
+      "family": "Microsoft Sans Serif",
+      "size": 14,
+      "bold": "Tahoma Bold"
+    }
+  }
+}

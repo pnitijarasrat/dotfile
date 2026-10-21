@@ -25,11 +25,10 @@ function eq(actual, expected, what) {
   }
 }
 
-// Every role the spec defines, with its hex, from the tables in
-// docs/theme-spec.md (`role` | `#hex`).
-const roles = Object.fromEntries(
-  [...read("docs/theme-spec.md").matchAll(/`([a-z0-9_]+)`\s*\|?\s*`(#[0-9A-F]{6})`/g)].map((m) => [m[1], m[2]]),
-);
+// Every role the Theme defines, with its hex, from the Vintage Theme source
+// file, themes/vintage.json.
+const vintage = JSON.parse(read("themes/vintage.json"));
+const roles = Object.assign({}, ...Object.values(vintage.palettes));
 
 const themePath = "raycast/vintage.rctheme.json";
 let theme = {};
@@ -66,7 +65,7 @@ test("is a light theme named Vintage", () => {
 
 test("launcher is Frame grey with black text and navy selection; data slots use the Frame data colors", () => {
   for (const [slot, role] of Object.entries(slotRoles)) {
-    if (!roles[role]) throw new Error(`role ${role} is not in the spec`);
+    if (!roles[role]) throw new Error(`role ${role} is not in the Theme`);
     eq(colors[slot], roles[role], `${slot} (${role})`);
   }
 });

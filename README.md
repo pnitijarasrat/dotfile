@@ -7,6 +7,10 @@
 - **SketchyBar** uses Microsoft Sans Serif and Tahoma Bold (for Start and the task button), both bundled with macOS. Its icons are PNGs in `sketchybar/icons/`, so it needs no Nerd Font.
 - **Nerd Fonts:** none are needed. Hack, DejaVuSansM and Meslo were removed after #9. JetBrains Mono Nerd Font is still installed but unused (it was only for iTerm2, which is gone) and can be removed; keep the plain JetBrains Mono NL, which the Work surface uses.
 
+## Themes
+
+The **Vintage theme** is the first **Theme**. Its role values and fonts live in one place, the Vintage Theme source file `themes/vintage.json` (#131); `docs/theme-spec.md` names the roles and says where each goes. Every tool's Vintage test reads its expected values from the source file. Check the source file against the spec with `node themes/tests/vintage_test.mjs`.
+
 ## VSCode
 
 VSCode's user settings live in `vscode/settings.json` (#18). Symlink them into place, moving any existing file aside first:
@@ -17,7 +21,7 @@ cd ~/Library/Application\ Support/Code/User
 ln -sf ~/.config/vscode/settings.json settings.json
 ```
 
-The editor font settings follow the Work surface fonts in `docs/theme-spec.md`.
+The editor font settings follow the Work surface fonts in `docs/theme-spec.md` and `themes/vintage.json`.
 
 The color theme is a local extension, "Vintage", in `vscode/vintage-theme` (#19). Symlink it into VSCode's extensions folder, then reload VSCode (`Developer: Reload Window`). `settings.json` already selects it with `workbench.colorTheme`:
 
@@ -25,19 +29,19 @@ The color theme is a local extension, "Vintage", in `vscode/vintage-theme` (#19)
 ln -sfn ~/.config/vscode/vintage-theme ~/.vscode/extensions/pnitijarasrat.vintage
 ```
 
-Check the theme against `docs/theme-spec.md` (palette, and the color keys the installed VSCode knows) with `node vscode/tests/vintage_test.mjs`.
+Check the theme against `themes/vintage.json` and `docs/theme-spec.md` (palette, and the color keys the installed VSCode knows) with `node vscode/tests/vintage_test.mjs`.
 
 ## Ghostty
 
 The terminal theme is a hand-written `vintage` theme in `ghostty/themes/vintage`, selected by `ghostty/config` (#13, #44). Starship, ccstatusline and ranger take their colors from it.
 
-Check the theme and config against `docs/theme-spec.md` with `node ghostty/tests/vintage_test.mjs`.
+Check the theme and config against `themes/vintage.json` and `docs/theme-spec.md` with `node ghostty/tests/vintage_test.mjs`.
 
 ## Raycast
 
 The launcher theme is "Vintage", in `raycast/vintage.rctheme.json` (#21). Raycast keeps its own copy of imported themes and can't read the file directly. Run `node raycast/import.mjs` to open the theme in Raycast (the same `raycast://theme` link as "Add to Raycast" on themes.ray.so), add it, then select **Vintage** in Settings → Appearance. Re-run it after changing the file. Custom themes need Raycast Pro.
 
-Check the theme against `docs/theme-spec.md` with `node raycast/tests/vintage_test.mjs`.
+Check the theme against `themes/vintage.json` and `docs/theme-spec.md` with `node raycast/tests/vintage_test.mjs`.
 
 "Restart yabai" and "Restart skhd" are Script Commands in `raycast/scripts/` (#125). Check them with `node raycast/tests/scripts_test.mjs`.
 
@@ -45,7 +49,7 @@ Check the theme against `docs/theme-spec.md` with `node raycast/tests/vintage_te
 
 The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37). It also makes the New Tab page the flat teal Classic desktop (#38). Incognito windows keep Chrome's own dark look: Chrome doesn't apply themes there. Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme` (the file picker hides `.config`; press Cmd+Shift+. to show it, or Cmd+Shift+G to type the path). To reload after changing `manifest.json`, run **Load unpacked** on the same folder again. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
 
-Check the theme against `docs/theme-spec.md` (palette, and the color keys the installed Chrome knows) with `node chrome/tests/vintage_test.mjs`.
+Check the theme against `themes/vintage.json` and `docs/theme-spec.md` (palette, and the color keys the installed Chrome knows) with `node chrome/tests/vintage_test.mjs`.
 
 ## Claude Code
 

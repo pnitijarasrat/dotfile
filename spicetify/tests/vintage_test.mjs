@@ -27,11 +27,10 @@ function eq(actual, expected, what) {
 
 const spec = read("docs/theme-spec.md");
 
-// Every role the spec defines, with its hex, from the tables in
-// docs/theme-spec.md (`role` | `#hex`).
-const roles = Object.fromEntries(
-  [...spec.matchAll(/`([a-z0-9_]+)`\s*\|?\s*`(#[0-9A-F]{6})`/g)].map((m) => [m[1], m[2]]),
-);
+// Every role the Theme defines, with its hex, from the Vintage Theme source
+// file, themes/vintage.json.
+const vintage = JSON.parse(read("themes/vintage.json"));
+const roles = Object.assign({}, ...Object.values(vintage.palettes));
 
 // Reads an ini file into { section: { key: value } }, skipping ; comments
 // (whole-line and inline).
@@ -89,7 +88,7 @@ test("color scheme is a [Vintage] section", () => {
 
 test("every slot takes its spec role", () => {
   for (const [slot, role] of Object.entries(slotRoles)) {
-    if (!roles[role]) throw new Error(`role ${role} is not in the spec`);
+    if (!roles[role]) throw new Error(`role ${role} is not in the Theme`);
     eq(`#${(scheme[slot] ?? "").toUpperCase()}`, roles[role], `${slot} (${role})`);
   }
 });
@@ -120,7 +119,7 @@ test("every hex token is named by its spec role and has its value", () => {
   const tokens = [...tokenBlock.matchAll(/--([a-z0-9_]+):\s*(#[0-9A-Fa-f]{6})\s*;/g)];
   if (!tokens.length) throw new Error("no hex tokens");
   for (const [, name, value] of tokens) {
-    if (!roles[name]) throw new Error(`--${name} is not a spec role`);
+    if (!roles[name]) throw new Error(`--${name} is not a Theme role`);
     eq(value.toUpperCase(), roles[name], `--${name}`);
   }
 });
@@ -574,7 +573,7 @@ const playFace = `${rack} [data-testid=control-button-playpause]:not([aria-disab
 test("the spec's Display roles are VGA values, and the stylesheet's tokens", () => {
   const vga = { display_bg: "ansi_0", display_fg: "ansi_14", display_ghost: "ansi_6" };
   for (const [role, ansi] of Object.entries(vga)) {
-    if (!roles[role]) throw new Error(`role ${role} is not in the spec`);
+    if (!roles[role]) throw new Error(`role ${role} is not in the Theme`);
     eq(roles[role], roles[ansi], `${role} (${ansi})`);
     if (!new RegExp(`--${role}:`).test(tokenBlock)) throw new Error(`--${role} is not in the token block`);
   }
