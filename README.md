@@ -13,6 +13,18 @@ The **Vintage theme** is the first **Theme**. Its role values and fonts live in 
 
 `node themes/generate.mjs` generates each tool's theme files from every Theme source file in `themes/` (#132); so far that's Ghostty's. Generated files are committed: don't edit them by hand. `node themes/tests/generate_test.mjs` fails if one is stale, and checks the generator against a small fixture Theme.
 
+`theme <name>` makes a **Switch** (#133): `<name>` becomes the active Theme and open Ghostty windows reload and recolor in place. So far only Ghostty switches; the other tools stay Vintage. `theme` with no name prints the active Theme; an unknown name changes nothing and lists the Themes in `themes/`. Put it on PATH once with `ln -sf ~/.config/themes/theme.mjs ~/.local/bin/theme`. It records the active Theme in `themes/active` and Ghostty's pointer in `ghostty/active-theme`, both ignored by git (`docs/adr/0006-switch-records-the-active-theme-outside-git.md`). Check it with `node themes/tests/theme_test.mjs`.
+
+Vintage is the only real Theme so far. To watch a Switch, add the test fixture as a Theme for a moment:
+
+```sh
+cp ~/.config/themes/tests/fixtures/tiny.json ~/.config/themes/tiny.json
+node ~/.config/themes/generate.mjs
+theme tiny      # open Ghostty windows turn the fixture's cream and dark grey
+theme vintage
+rm ~/.config/themes/tiny.json ~/.config/ghostty/themes/tiny
+```
+
 ## VSCode
 
 VSCode's user settings live in `vscode/settings.json` (#18). Symlink them into place, moving any existing file aside first:
@@ -35,7 +47,7 @@ Check the theme against `themes/vintage.json` and `docs/theme-spec.md` (palette,
 
 ## Ghostty
 
-The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44). Each Theme gets its own `ghostty/themes/<name>`. Starship, ccstatusline and ranger take their colors from it.
+The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44) until the first Switch, which overrides it through `ghostty/active-theme` (#133). Each Theme gets its own `ghostty/themes/<name>`. Starship, ccstatusline and ranger take their colors from it.
 
 Check each Theme's Ghostty theme against its source file, and the config against `themes/vintage.json` and `docs/theme-spec.md`, with `node ghostty/tests/vintage_test.mjs`.
 

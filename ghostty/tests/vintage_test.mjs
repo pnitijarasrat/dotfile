@@ -1,5 +1,5 @@
-// Checks for the Ghostty Vintage theme (#13, #44, #78), and each Theme's
-// Ghostty theme (#132).
+// Checks for the Ghostty Vintage theme (#13, #44, #78), each Theme's
+// Ghostty theme (#132), and the Switch's override (#133).
 // Run: node ghostty/tests/vintage_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -94,6 +94,10 @@ test("split divider is work_grid", () => {
   const entry = config.find((e) => e.key === "split-divider-color");
   eq(entry?.value, role("work_grid"), "split-divider-color");
   eq(entry?.comment, "work_grid", "comment above split-divider-color");
+});
+
+test("a Switch's active-theme file can override the theme line", () => {
+  eq(config.filter((e) => e.key === "config-file").map((e) => e.value).join(" | "), "?active-theme", "config-file");
 });
 
 test("bold is not bright and synthetic bold stays off", () => {
