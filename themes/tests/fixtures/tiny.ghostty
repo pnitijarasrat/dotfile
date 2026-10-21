@@ -1,0 +1,52 @@
+# Tiny theme: Work surface (a fixture: dark grey on cream)
+# Roles from docs/theme-spec.md, values from themes/tiny.json
+# Ghostty has no trailing comments, so each role name is on the line above its value
+# work_bg
+background = #FFF8E7
+# work_fg
+foreground = #333333
+
+# work_cursor
+cursor-color = #111111
+# work_cursor_text
+cursor-text = #EEEEEE
+# work_selection
+selection-background = #AACCEE
+# work_selection_text
+selection-foreground = #222222
+
+# Normal colors (0-7)
+# ansi_0
+palette = 0=#000001
+# ansi_1
+palette = 1=#000011
+# ansi_2
+palette = 2=#000021
+# ansi_3
+palette = 3=#000031
+# ansi_4
+palette = 4=#000041
+# ansi_5
+palette = 5=#000051
+# ansi_6
+palette = 6=#000061
+# ansi_7
+palette = 7=#000071
+
+# Bright colors (8-15)
+# ansi_8
+palette = 8=#000081
+# ansi_9
+palette = 9=#000091
+# ansi_10
+palette = 10=#0000A1
+# ansi_11
+palette = 11=#0000B1
+# ansi_12
+palette = 12=#0000C1
+# ansi_13
+palette = 13=#0000D1
+# ansi_14
+palette = 14=#0000E1
+# ansi_15
+palette = 15=#0000F1
