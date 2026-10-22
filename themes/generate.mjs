@@ -150,6 +150,60 @@ export function chrome(theme) {
   return template("chrome-manifest.json").replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? rgb(name));
 }
 
+// Starship's segment symbols: the plain word, and the Nerd Font icon a Theme
+// whose rules allow icons shows in its place.
+const starshipSymbols = [
+  ["c", "C ", "\ue61e "],
+  ["dart", "dart ", "\ue798 "],
+  ["dotnet", ".NET ", "\u{f0aae} "],
+  ["git_branch", "git ", "\uf418 "],
+  ["golang", "go ", "\ue627 "],
+  ["java", "java ", "\ue256 "],
+  ["lua", "lua ", "\ue620 "],
+  ["nodejs", "nodejs ", "\ue718 "],
+  ["php", "php ", "\ue608 "],
+  ["python", "py ", "\ue235 "],
+];
+
+// Starship's prompt for a Theme (#154): the same segments for every Theme, in
+// named ANSI colors so Ghostty's theme colors them. A Theme whose rules allow
+// icons gets Nerd Font icons on the directory, branch and runtimes; one that
+// doesn't gets words, and keeps Starship's own directory.
+export function starship(id, theme) {
+  const icons = theme.rules?.icons;
+  if (typeof icons !== "boolean") throw new Error(`${theme.name} doesn't say in its Theme rules whether it has icons`);
+  return [
+    `# ${theme.name} theme's Starship prompt (#154): named ANSI colors, inherited from Ghostty.`,
+    `# Generated from themes/${id}.json; icons follow its rules.icons.`,
+    "add_newline = true",
+    "",
+    "[character]",
+    'success_symbol = "[>](bold green)"',
+    'error_symbol = "[>](bold red)"',
+    'vimcmd_symbol = "[<](bold green)"',
+    "",
+    ...(icons
+      ? ["[directory]", 'format = "[\uf07c $path]($style)[$read_only]($read_only_style) "', 'read_only = " \u{f033e}"', ""]
+      : []),
+    "[git_commit]",
+    `tag_symbol = "${icons ? " \uf412 " : " tag "}"`,
+    "",
+    "[git_status]",
+    'ahead = ">"',
+    'behind = "<"',
+    'diverged = "<>"',
+    'renamed = "r"',
+    'deleted = "x"',
+    "",
+    "[os.symbols]",
+    "",
+    "[package]",
+    "disabled = true",
+    "",
+    ...starshipSymbols.flatMap(([module, word, icon]) => [`[${module}]`, `symbol = "${icons ? icon : word}"`, ""]),
+  ].join("\n");
+}
+
 function template(file) {
   return readFileSync(join(dirname(fileURLToPath(import.meta.url)), "templates", file), "utf8");
 }
@@ -175,6 +229,7 @@ export function generate(root) {
     ...all.map(({ id, theme }) => ({ path: `vscode/vintage-theme/themes/${id}-color-theme.json`, text: vscode(theme) })),
     { path: "vscode/vintage-theme/package.json", text: vscodeExtension(all) },
     ...all.map(({ id, theme }) => ({ path: `chrome/${id}-theme/manifest.json`, text: chrome(theme) })),
+    ...all.map(({ id, theme }) => ({ path: `starship/themes/${id}.toml`, text: starship(id, theme) })),
   ];
 }
 

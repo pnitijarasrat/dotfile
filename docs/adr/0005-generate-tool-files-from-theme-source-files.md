@@ -15,4 +15,4 @@ The generated files stay committed, so the repo works without running anything a
 
 - Generated files aren't edited by hand: change the Theme source file and run `node themes/generate.mjs`.
 - Each tool's test runs once per Theme, against that Theme's source file, independently of the generator's own mapping.
-- Starship, ccstatusline and ranger take named ANSI colors from Ghostty, so they need no generated output.
+- Starship, ccstatusline and ranger take named ANSI colors from Ghostty, so they need no generated colors. Starship's prompt is generated anyway, since its icons follow each Theme's rules (#154).
