@@ -51,10 +51,14 @@ function scratch() {
   return { home, project };
 }
 
-// The prompt a new zsh draws with ~/.zshrc sourcing starship/init.zsh: zsh
-// runs every precmd function, then expands PROMPT, which runs starship.
-function prompt({ home, project }) {
-  const script = 'source ~/.config/starship/init.zsh; for f in $precmd_functions; do $f; done; print -r -- "${(e)PROMPT}"';
+// Draws a prompt as zsh does: runs every precmd function, then expands
+// PROMPT, which runs starship.
+const draw = 'for f in $precmd_functions; do $f; done; print -r -- "${(e)PROMPT}"';
+
+// What a zsh with ~/.zshrc sourcing starship/init.zsh prints while running
+// commands, which default to drawing one prompt.
+function prompt({ home, project }, commands = [draw]) {
+  const script = ["source ~/.config/starship/init.zsh", ...commands].join("\n");
   const env = { HOME: home, PATH: process.env.PATH, TERM: "xterm-256color" };
   const { stdout, stderr, status } = spawnSync("zsh", ["-f", "-c", script], { cwd: project, env, encoding: "utf8" });
   if (status !== 0) throw new Error(`zsh failed: ${stderr}`);
@@ -64,6 +68,17 @@ function prompt({ home, project }) {
 
 const point = ({ home }, name) => writeFileSync(join(home, ".config/starship/active-theme"), `${name}\n`);
 const hasIcons = (text) => [folder, branch, node].every((icon) => text.includes(icon));
+
+function eqVintage(text, what) {
+  if (!text.includes("git main") || hasIcons(text)) throw new Error(`${what}: expected Vintage's prompt, got ${JSON.stringify(text)}`);
+}
+
+// Every setting Starship draws a prompt with, its own defaults included.
+function settings(config) {
+  const { stdout, status, stderr } = spawnSync("starship", ["print-config"], { env: { ...process.env, STARSHIP_CONFIG: config }, encoding: "utf8" });
+  if (status !== 0) throw new Error(`starship print-config failed: ${stderr}`);
+  return stdout;
+}
 
 test("the committed starship.toml is Vintage's prompt, so a fresh checkout shows it", () => {
   eq(realpathSync(join(root, "starship.toml")), realpathSync(join(root, "starship/themes/vintage.toml")), "starship.toml");
@@ -75,6 +90,10 @@ test("Vintage's prompt keeps > and words, with no Nerd Font icons or emoji", () 
   for (const line of ['success_symbol = "[>](bold green)"', 'error_symbol = "[>](bold red)"', 'vimcmd_symbol = "[<](bold green)"', '[git_branch]\nsymbol = "git "', '[nodejs]\nsymbol = "nodejs "']) {
     if (!text.includes(line)) throw new Error(`starship/themes/vintage.toml has no ${JSON.stringify(line)}`);
   }
+});
+
+test("Vintage's prompt is the one from before the Switch, setting for setting (#154)", () => {
+  eq(settings(join(root, "starship/themes/vintage.toml")), settings(join(root, "starship/tests/fixtures/before.toml")), "Vintage's Starship settings");
 });
 
 test("each Theme's prompt has Nerd Font icons on the directory, branch and runtime exactly when its rules.icons says so", () => {
@@ -92,23 +111,15 @@ test("before any Switch, the prompt is Vintage's", () => {
   const s = scratch();
   const text = prompt(s);
   rmSync(s.home, { recursive: true });
-  if (!text.includes("git main") || hasIcons(text)) throw new Error(`expected Vintage's prompt, got ${JSON.stringify(text)}`);
+  eqVintage(text, "prompt before any Switch");
 });
 
 test("a new prompt after a Switch is the new Theme's, in the same shell", () => {
   const s = scratch();
   point(s, "marigold");
-  const script = [
-    "source ~/.config/starship/init.zsh",
-    'for f in $precmd_functions; do $f; done; print -r -- "${(e)PROMPT}"',
-    "print -r -- ---",
-    "print vintage > ~/.config/starship/active-theme",
-    'for f in $precmd_functions; do $f; done; print -r -- "${(e)PROMPT}"',
-  ].join("\n");
-  const env = { HOME: s.home, PATH: process.env.PATH, TERM: "xterm-256color" };
-  const { stdout } = spawnSync("zsh", ["-f", "-c", script], { cwd: s.project, env, encoding: "utf8" });
+  const text = prompt(s, [draw, "print -r -- ---", "print vintage > ~/.config/starship/active-theme", draw]);
   rmSync(s.home, { recursive: true });
-  const [marigold, vintage] = stdout.split("---");
+  const [marigold, vintage] = text.split("---");
   eq(hasIcons(marigold), true, "first prompt, under Marigold, has icons");
   eq(hasIcons(vintage), false, "next prompt, under Vintage, has icons");
 });
@@ -118,7 +129,7 @@ test("the prompt stays Vintage's if the active Theme's prompt was never generate
   point(s, "missing");
   const text = prompt(s);
   rmSync(s.home, { recursive: true });
-  if (!text.includes("git main") || hasIcons(text)) throw new Error(`expected Vintage's prompt, got ${JSON.stringify(text)}`);
+  eqVintage(text, "prompt under a Theme never generated");
 });
 
 if (failures.length) {
