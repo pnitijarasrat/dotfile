@@ -1,14 +1,36 @@
 {
   "name": "Tiny",
   "work_description": "a fixture: dark grey on cream",
+  "shadows": true,
   "palettes": {
+    "frame": {
+      "frame_face": "#EEEEDD",
+      "frame_highlight": "#FFFFFF",
+      "frame_light": "#F6F6EE",
+      "frame_shadow": "#999988",
+      "frame_dark_shadow": "#111111",
+      "frame_title": "#202060",
+      "frame_title_text": "#FFFFF0",
+      "frame_title_inactive": "#999988",
+      "frame_title_inactive_text": "#EEEEDD",
+      "frame_text": "#222222",
+      "frame_gray_text": "#777777",
+      "frame_window": "#FFFFFF",
+      "frame_selection": "#3030A0",
+      "frame_selection_text": "#FFFFF1",
+      "frame_tooltip": "#FFFFD0"
+    },
     "work": {
       "work_bg": "#FFF8E7",
       "work_fg": "#333333",
       "work_cursor": "#111111",
       "work_cursor_text": "#EEEEEE",
       "work_selection": "#AACCEE",
-      "work_selection_text": "#222222"
+      "work_selection_text": "#222222",
+      "work_cursorline": "#FFF0D0",
+      "work_line_number": "#999999",
+      "work_grid": "#DDDDDD",
+      "work_popup_border": "#888888"
     },
     "ansi": {
       "ansi_0": "#000001",
@@ -27,6 +49,27 @@
       "ansi_13": "#0000D1",
       "ansi_14": "#0000E1",
       "ansi_15": "#0000F1"
+    },
+    "syntax": {
+      "syntax_comment": "#777770",
+      "syntax_keyword": "#605000",
+      "syntax_string": "#106010",
+      "syntax_number": "#601060",
+      "syntax_function": "#106060",
+      "syntax_type": "#202020",
+      "syntax_constant": "#704010",
+      "syntax_operator": "#333330",
+      "syntax_error": "#A01010",
+      "syntax_warning": "#806000"
+    },
+    "frame_data": {
+      "frame_data_red": "#A00000",
+      "frame_data_green": "#00A000",
+      "frame_data_yellow": "#A0A000",
+      "frame_data_blue": "#0000A0",
+      "frame_data_magenta": "#A000A0",
+      "frame_data_cyan": "#00A0A0",
+      "frame_data_orange": "#A05000"
     }
   }
 }
