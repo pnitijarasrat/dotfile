@@ -21,3 +21,9 @@ export frame_data_blue="0xff0000a0"
 export frame_data_magenta="0xffa000a0"
 export frame_data_cyan="0xff00a0a0"
 export frame_data_orange="0xffa05000"
+
+# JankyBorders: style from the radius rule, width and colors from the Theme's borders.
+export border_style="round"
+export border_width="3.0"
+export border_active_color="$frame_selection"
+export border_inactive_color="$frame_dark_shadow"

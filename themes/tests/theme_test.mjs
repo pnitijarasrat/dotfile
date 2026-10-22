@@ -123,13 +123,20 @@ test("SketchyBar stays Vintage if the active Theme's Frame palette was never gen
   rmSync(root, { recursive: true });
 });
 
-test("switching points JankyBorders at the Theme's Frame palette", () => {
+// The options bordersrc gives JankyBorders' borders.
+const borders = (root) => shell(root, 'bash "$HOME/.config/borders/bordersrc"');
+
+// Vintage's borders as bordersrc gave them before Themes could reshape them (#15).
+const vintageBorders = "style=square\nwidth=4.0\nhidpi=on\nactive_color=0xffc0c0c0\ninactive_color=0xff808080\n";
+
+test("switching gives JankyBorders the Theme's style, width and colors (#152)", () => {
   const root = scratch();
+  eq(borders(root), vintageBorders, "borders before any Switch");
   theme(root, "tiny");
-  const options = shell(root, 'bash "$HOME/.config/borders/bordersrc"');
-  for (const option of ["active_color=0xffeeeedd", "inactive_color=0xff999988"]) {
-    if (!options.split("\n").includes(option)) throw new Error(`borders wasn't given ${option}: ${options}`);
-  }
+  // The fixture's: rounded corners, width 3, frame_selection and frame_dark_shadow.
+  eq(borders(root), "style=round\nwidth=3.0\nhidpi=on\nactive_color=0xff3030a0\ninactive_color=0xff111111\n", "borders after theme tiny");
+  theme(root, "vintage");
+  eq(borders(root), vintageBorders, "borders after theme vintage");
   rmSync(root, { recursive: true });
 });
 
