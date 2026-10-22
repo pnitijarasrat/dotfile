@@ -46,6 +46,34 @@ test("refuses a Theme missing a role Ghostty takes", () => {
   if (!message.includes("work_cursor")) throw new Error(`expected an error naming work_cursor, got ${JSON.stringify(message)}`);
 });
 
+test("a Theme with square corners drops Ghostty's window frame", () => {
+  const square = ghostty("tiny", { ...tiny, rules: { opacity: 1, blur: 0, radius: 0, icons: false } });
+  const window = square.slice(square.indexOf("# Window shape"));
+  eq(window, [
+    "# Window shape, from the Theme rules",
+    "# opacity",
+    "background-opacity = 1",
+    "# blur",
+    "background-blur = 0",
+    "# radius: square corners, no window frame",
+    "window-decoration = none",
+    "# radius",
+    "macos-titlebar-style = transparent",
+    "",
+  ].join("\n"), "window shape");
+});
+
+test("refuses a Theme without Theme rules for Ghostty", () => {
+  const { rules, ...broken } = tiny;
+  let message = "";
+  try {
+    ghostty("tiny", broken);
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("rules")) throw new Error(`expected an error naming rules, got ${JSON.stringify(message)}`);
+});
+
 test("generates a SketchyBar Frame palette for any Theme source file", () => {
   eq(sketchybar("tiny", tiny), read("themes/tests/fixtures/tiny.sketchybar"), "sketchybar/themes/tiny.sh");
 });
@@ -89,6 +117,29 @@ test("refuses a Theme that doesn't say whether it has shadows", () => {
     message = err.message;
   }
   if (!message.includes("shadows")) throw new Error(`expected an error naming shadows, got ${JSON.stringify(message)}`);
+});
+
+test("VSCode's selection, match highlights and matched completion letters are the role the Theme chooses", () => {
+  // tiny chooses work_selection, #AACCEE.
+  for (const line of [
+    '"editor.selectionBackground": "#AACCEE", // work_selection',
+    '"peekViewEditor.matchHighlightBackground": "#AACCEE", // work_selection',
+    '"peekViewResult.matchHighlightBackground": "#AACCEE", // work_selection',
+    '"editorSuggestWidget.focusHighlightForeground": "#AACCEE", // work_selection',
+  ]) {
+    if (!vscode(tiny).includes(line)) throw new Error(`missing ${line}`);
+  }
+});
+
+test("refuses a Theme that doesn't choose VSCode's selection role", () => {
+  const { vscode: _, ...broken } = tiny;
+  let message = "";
+  try {
+    vscode(broken);
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("selection")) throw new Error(`expected an error naming selection, got ${JSON.stringify(message)}`);
 });
 
 test("the VSCode extension contributes one color theme per Theme", () => {

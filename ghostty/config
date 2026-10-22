@@ -15,10 +15,10 @@ config-file=?active-theme
 # work_grid
 split-divider-color=#C0C0C0
 
-# Purist fidelity: opaque, no blur, square corners (visible tabs are lost, splits stay)
-background-opacity=1
-background-blur=false
-window-decoration=none
+# The window's shape (opacity, blur, corners and title bar) comes from the Theme's
+# Ghostty theme, ghostty/themes/<name>, generated from its Theme rules: setting it
+# here would win over every Theme. Vintage's square corners lose visible tabs;
+# splits stay.
 
 # JetBrains Mono NL, falling back to Menlo, then Thonburi
 font-family="JetBrains Mono NL"

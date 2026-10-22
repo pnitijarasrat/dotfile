@@ -1,6 +1,6 @@
 # Tiny theme: Work surface (a fixture: dark grey on cream)
 # Roles from docs/theme-spec.md, values from themes/tiny.json
-# Ghostty has no trailing comments, so each role name is on the line above its value
+# Ghostty has no trailing comments, so each role or rule name is on the line above its value
 # work_bg
 background = #FFF8E7
 # work_fg
@@ -50,3 +50,13 @@ palette = 13=#0000D1
 palette = 14=#0000E1
 # ansi_15
 palette = 15=#0000F1
+
+# Window shape, from the Theme rules
+# opacity
+background-opacity = 0.9
+# blur
+background-blur = 10
+# radius: rounded corners, no title bar
+window-decoration = auto
+# radius
+macos-titlebar-style = hidden

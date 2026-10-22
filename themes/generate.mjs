@@ -14,16 +14,23 @@ function roles(theme) {
   };
 }
 
-// Ghostty's theme for a Theme: the Work surface and ANSI colors, each line
-// commented with its role name (Ghostty has no trailing comments).
+// Ghostty's theme for a Theme: the Work surface and ANSI colors, then the
+// window's shape from its Theme rules (#151), each line commented with its
+// role or rule name (Ghostty has no trailing comments). A theme file can set
+// any option, so the window settings live here, not in ghostty/config.
 export function ghostty(id, theme) {
+  if (!theme.rules) throw new Error(`${theme.name} has no Theme rules`);
   const role = roles(theme);
   const line = (key, name, value = role(name)) => `# ${name}\n${key} = ${value}`;
   const palette = (n) => line("palette", `ansi_${n}`, `${n}=${role(`ansi_${n}`)}`);
+  const { opacity, blur, radius } = theme.rules;
+  // Ghostty can't set a corner radius. Rounded corners keep macOS's window
+  // frame and hide its title bar; square ones drop the frame altogether.
+  const rounded = radius > 0;
   return [
     `# ${theme.name} theme: Work surface (${theme.work_description})`,
     `# Roles from docs/theme-spec.md, values from themes/${id}.json`,
-    "# Ghostty has no trailing comments, so each role name is on the line above its value",
+    "# Ghostty has no trailing comments, so each role or rule name is on the line above its value",
     line("background", "work_bg"),
     line("foreground", "work_fg"),
     "",
@@ -37,6 +44,12 @@ export function ghostty(id, theme) {
     "",
     "# Bright colors (8-15)",
     ...[8, 9, 10, 11, 12, 13, 14, 15].map(palette),
+    "",
+    "# Window shape, from the Theme rules",
+    line("background-opacity", "opacity", opacity),
+    line("background-blur", "blur", blur),
+    line("window-decoration", `radius: ${rounded ? "rounded corners, no title bar" : "square corners, no window frame"}`, rounded ? "auto" : "none"),
+    line("macos-titlebar-style", "radius", rounded ? "hidden" : "transparent"),
     "",
   ].join("\n");
 }
@@ -75,15 +88,20 @@ export function sketchybar(id, theme) {
 // VSCode's color theme for a Theme: themes/templates/vscode-color-theme.jsonc,
 // which is Vintage's with each value a {{role}}, plus {{name}} and {{type}}.
 // Its prose comments describe Vintage. Lines set to {{no_shadow}} turn a shadow
-// off; a Theme with shadows drops them and keeps VSCode's own.
+// off; a Theme with shadows drops them and keeps VSCode's own. $selection is
+// the role the Theme's vscode.selection chooses for the editor selection, match
+// highlights and matched completion letters (ADR 0011).
 export function vscode(theme) {
   if (typeof theme.shadows !== "boolean") throw new Error(`${theme.name} doesn't say whether it has shadows`);
+  const selection = theme.vscode?.selection;
+  if (!selection) throw new Error(`${theme.name} doesn't say which role VSCode's selection takes`);
   const role = roles(theme);
   const vars = { name: JSON.stringify(theme.name).slice(1, -1), type: vscodeType(theme), no_shadow: "#00000000" };
   return template("vscode-color-theme.jsonc")
     .split("\n")
     .filter((line) => !(theme.shadows && line.includes("{{no_shadow}}")))
     .join("\n")
+    .replaceAll("$selection", selection)
     .replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? role(name));
 }
 

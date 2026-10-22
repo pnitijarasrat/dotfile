@@ -1,6 +1,6 @@
 # Vintage theme: Work surface (light, K-95-style: navy on white, Windows VGA ANSI)
 # Roles from docs/theme-spec.md, values from themes/vintage.json
-# Ghostty has no trailing comments, so each role name is on the line above its value
+# Ghostty has no trailing comments, so each role or rule name is on the line above its value
 # work_bg
 background = #FFFFFF
 # work_fg
@@ -50,3 +50,13 @@ palette = 13=#FF00FF
 palette = 14=#00FFFF
 # ansi_15
 palette = 15=#FFFFFF
+
+# Window shape, from the Theme rules
+# opacity
+background-opacity = 1
+# blur
+background-blur = 0
+# radius: square corners, no window frame
+window-decoration = none
+# radius
+macos-titlebar-style = transparent
