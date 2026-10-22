@@ -2,6 +2,7 @@
   "name": "Vintage",
   "work_description": "light, K-95-style: navy on white, Windows VGA ANSI",
   "shadows": false,
+  "macos": { "appearance": "light", "accent": "graphite", "highlight": "blue" },
   "palettes": {
     "frame": {
       "frame_face": "#C0C0C0",
