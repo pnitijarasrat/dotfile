@@ -252,6 +252,10 @@ for (const { id, theme: source } of themes(root)) {
   });
 }
 
+test("Vintage's color theme is light (#46)", () => {
+  eq(parseJsonc(read("vscode/vintage-theme/themes/vintage-color-theme.json")).type, "light", "theme type");
+});
+
 test("the editor and terminal use the Work surface font (#79)", () => {
   // Names with spaces are quoted: 'JetBrains Mono NL', Menlo, Thonburi.
   const family = vintage.fonts.work.family.map((name) => (name.includes(" ") ? `'${name}'` : name)).join(", ");
