@@ -41,6 +41,36 @@ export function ghostty(id, theme) {
   ].join("\n");
 }
 
+// SketchyBar's Frame palette for a Theme, which JankyBorders shares (#136):
+// shell variables named after their roles, as 0xAARRGGBB.
+export function sketchybar(id, theme) {
+  const role = roles(theme);
+  const line = (name, comment) => {
+    const assignment = `export ${name}="0xff${role(name).slice(1).toLowerCase()}"`;
+    return comment ? `${assignment.padEnd(37)} # ${comment}` : assignment;
+  };
+  return [
+    "#!/bin/sh",
+    "",
+    `# ${theme.name} theme Frame palette, shared with JankyBorders (borders/bordersrc). Variable names`,
+    "# are the Theme spec's role names (#8); one hex can play several roles.",
+    `# Roles from docs/theme-spec.md, values from themes/${id}.json`,
+    line("frame_face"),
+    line("frame_highlight", "outer top-left bevel"),
+    line("frame_light", "inner top-left bevel; pushed-in button face"),
+    line("frame_shadow", "inner bottom-right bevel"),
+    line("frame_dark_shadow", "outer bottom-right bevel"),
+    line("frame_text"),
+    line("frame_gray_text"),
+    line("frame_selection"),
+    line("frame_selection_text"),
+    "",
+    "# Frame data colors: data on grey, where Work surface brights are unreadable.",
+    ...["red", "green", "yellow", "blue", "magenta", "cyan", "orange"].map((color) => line(`frame_data_${color}`)),
+    "",
+  ].join("\n");
+}
+
 // VSCode's color theme for a Theme: themes/templates/vscode-color-theme.jsonc,
 // which is Vintage's with each value a {{role}}, plus {{name}} and {{type}}.
 // Its prose comments describe Vintage. Lines set to {{no_shadow}} turn a shadow
@@ -97,6 +127,7 @@ export function generate(root) {
   const all = themes(root);
   return [
     ...all.map(({ id, theme }) => ({ path: `ghostty/themes/${id}`, text: ghostty(id, theme) })),
+    ...all.map(({ id, theme }) => ({ path: `sketchybar/themes/${id}.sh`, text: sketchybar(id, theme) })),
     ...all.map(({ id, theme }) => ({ path: `vscode/vintage-theme/themes/${id}-color-theme.json`, text: vscode(theme) })),
     { path: "vscode/vintage-theme/package.json", text: vscodeExtension(all) },
   ];

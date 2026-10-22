@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generate, ghostty, vscode, vscodeExtension } from "../generate.mjs";
+import { generate, ghostty, sketchybar, vscode, vscodeExtension } from "../generate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -44,6 +44,10 @@ test("refuses a Theme missing a role Ghostty takes", () => {
     message = err.message;
   }
   if (!message.includes("work_cursor")) throw new Error(`expected an error naming work_cursor, got ${JSON.stringify(message)}`);
+});
+
+test("generates a SketchyBar Frame palette for any Theme source file", () => {
+  eq(sketchybar("tiny", tiny), read("themes/tests/fixtures/tiny.sketchybar"), "sketchybar/themes/tiny.sh");
 });
 
 test("generates a VSCode color theme for any Theme source file", () => {
@@ -109,7 +113,7 @@ test("refuses a Theme missing a role VSCode takes", () => {
 
 test("every committed generated file is what the generator produces", () => {
   const files = generate(root);
-  for (const path of ["ghostty/themes/vintage", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json"]) {
+  for (const path of ["ghostty/themes/vintage", "sketchybar/themes/vintage.sh", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json"]) {
     if (!files.some((f) => f.path === path)) throw new Error(`generator doesn't produce ${path}`);
   }
   for (const { path, text } of files) {

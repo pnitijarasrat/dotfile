@@ -19,3 +19,4 @@ claude/*/.claude-plugin/types/
 # The Switch writes the active Theme, per machine
 themes/active
 ghostty/active-theme
+sketchybar/active-theme

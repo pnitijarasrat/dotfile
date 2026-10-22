@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Tiny theme Frame palette, shared with JankyBorders (borders/bordersrc). Variable names
+# are the Theme spec's role names (#8); one hex can play several roles.
+# Roles from docs/theme-spec.md, values from themes/tiny.json
+export frame_face="0xffeeeedd"
+export frame_highlight="0xffffffff"   # outer top-left bevel
+export frame_light="0xfff6f6ee"       # inner top-left bevel; pushed-in button face
+export frame_shadow="0xff999988"      # inner bottom-right bevel
+export frame_dark_shadow="0xff111111" # outer bottom-right bevel
+export frame_text="0xff222222"
+export frame_gray_text="0xff777777"
+export frame_selection="0xff3030a0"
+export frame_selection_text="0xfffffff1"
+
+# Frame data colors: data on grey, where Work surface brights are unreadable.
+export frame_data_red="0xffa00000"
+export frame_data_green="0xff00a000"
+export frame_data_yellow="0xffa0a000"
+export frame_data_blue="0xff0000a0"
+export frame_data_magenta="0xffa000a0"
+export frame_data_cyan="0xff00a0a0"
+export frame_data_orange="0xffa05000"
