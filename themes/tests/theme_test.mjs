@@ -1,4 +1,4 @@
-// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138).
+// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138, #153).
 // Runs it against a scratch copy of the repo with each tool's reload and every
 // macOS command stubbed, so no open window, bar or system setting changes.
 // Run: node themes/tests/theme_test.mjs
@@ -77,12 +77,16 @@ function shell(root, command) {
 // frame_face as SketchyBar's color.sh sets it.
 const frameFace = (root) => shell(root, '. "$HOME/.config/sketchybar/color.sh"; echo "$frame_face"');
 
-// The committed VSCode settings with only the color theme changed to label.
-const settings = (label) =>
-  readFileSync(join(repo, "vscode/settings.json"), "utf8").replace(
-    '"workbench.colorTheme": "Vintage",',
-    `"workbench.colorTheme": "${label}",`,
-  );
+// The committed VSCode settings, with only the lines a Switch owns changed:
+// the color theme to label, and the title bar and modern UI if given.
+const settings = (label, { titleBar = "custom", modernUI = false } = {}) =>
+  readFileSync(join(repo, "vscode/settings.json"), "utf8")
+    .replace('"workbench.colorTheme": "Vintage",', `"workbench.colorTheme": "${label}",`)
+    .replace('"window.titleBarStyle": "custom",', `"window.titleBarStyle": "${titleBar}",`)
+    .replace('"workbench.experimental.modernUI": false,', `"workbench.experimental.modernUI": ${modernUI},`);
+
+// The VSCode shape Marigold and the fixture share: modern UI and the native title bar.
+const modern = { titleBar: "native", modernUI: true };
 
 const read = (root, path) => (existsSync(join(root, path)) ? readFileSync(join(root, path), "utf8") : undefined);
 
@@ -96,12 +100,22 @@ test("switching records the active Theme, points Ghostty at it and reloads every
   rmSync(root, { recursive: true });
 });
 
-test("switching selects the Theme in VSCode's settings by its name, changing nothing else", () => {
+test("switching selects the Theme in VSCode's settings by its name and sets its modern UI and title bar, changing nothing else (#153)", () => {
   const root = scratch();
   theme(root, "tiny");
-  eq(read(root, "vscode/settings.json"), settings("Tiny"), "vscode/settings.json after theme tiny");
+  eq(read(root, "vscode/settings.json"), settings("Tiny", modern), "vscode/settings.json after theme tiny");
   theme(root, "vintage");
   eq(read(root, "vscode/settings.json"), settings("Vintage"), "vscode/settings.json after theme vintage");
+  rmSync(root, { recursive: true });
+});
+
+test("Marigold turns VSCode's modern UI on with the native title bar; Vintage leaves settings.json as committed (#153)", () => {
+  const root = scratch();
+  copyFileSync(join(repo, "themes/marigold.json"), join(root, "themes/marigold.json"));
+  theme(root, "marigold");
+  eq(read(root, "vscode/settings.json"), settings("Marigold", modern), "vscode/settings.json after theme marigold");
+  theme(root, "vintage");
+  eq(read(root, "vscode/settings.json"), readFileSync(join(repo, "vscode/settings.json"), "utf8"), "vscode/settings.json after theme vintage");
   rmSync(root, { recursive: true });
 });
 
@@ -170,17 +184,45 @@ test("switching says VSCode needs a reload if the Theme is new, and gives Chrome
   rmSync(root, { recursive: true });
 });
 
-test("a VSCode settings.json with no color theme line fails the Switch and changes nothing", () => {
-  const root = scratch();
-  writeFileSync(join(root, "vscode/settings.json"), "{}\n");
-  const result = theme(root, "tiny");
-  eq(result.code, 1, "exit code");
-  eq(result.out, 'vscode/settings.json has no "workbench.colorTheme" line\n', "output");
-  eq(read(root, "themes/active"), undefined, "themes/active");
-  eq(read(root, "ghostty/active-theme"), undefined, "ghostty/active-theme");
-  eq(read(root, "sketchybar/active-theme"), undefined, "sketchybar/active-theme");
-  eq(result.reloads, "", "reloads");
-  rmSync(root, { recursive: true });
+test("a VSCode settings.json missing a line the Switch rewrites fails the Switch and changes nothing (#153)", () => {
+  for (const key of ["workbench.colorTheme", "window.titleBarStyle", "workbench.experimental.modernUI"]) {
+    const root = scratch();
+    const without = read(root, "vscode/settings.json").split("\n").filter((line) => !line.includes(`"${key}"`)).join("\n");
+    writeFileSync(join(root, "vscode/settings.json"), without);
+    const result = theme(root, "tiny");
+    eq(result.code, 1, `exit code without ${key}`);
+    eq(result.out, `vscode/settings.json has no "${key}" line\n`, `output without ${key}`);
+    eq(read(root, "vscode/settings.json"), without, "vscode/settings.json");
+    eq(read(root, "themes/active"), undefined, "themes/active");
+    eq(read(root, "ghostty/active-theme"), undefined, "ghostty/active-theme");
+    eq(read(root, "sketchybar/active-theme"), undefined, "sketchybar/active-theme");
+    eq(result.reloads, "", "reloads");
+    eq(result.commands.length, 0, "commands");
+    rmSync(root, { recursive: true });
+  }
+});
+
+test("a Theme that doesn't say how VSCode is shaped fails the Switch and changes nothing (#153)", () => {
+  const tiny = JSON.parse(readFileSync(join(repo, "themes/tests/fixtures/tiny.json"), "utf8"));
+  const broken = [
+    [undefined, "Tiny doesn't say how VSCode is shaped\n"],
+    [{ ...tiny.vscode, modern_ui: undefined }, "Tiny's VSCode modern_ui undefined isn't true or false\n"],
+    [{ ...tiny.vscode, modern_ui: "yes" }, 'Tiny\'s VSCode modern_ui "yes" isn\'t true or false\n'],
+    [{ ...tiny.vscode, title_bar: "hidden" }, 'Tiny\'s VSCode title_bar "hidden" isn\'t native or custom\n'],
+  ];
+  for (const [declared, message] of broken) {
+    const root = scratch();
+    const before = read(root, "vscode/settings.json");
+    writeFileSync(join(root, "themes/tiny.json"), JSON.stringify({ ...tiny, vscode: declared }));
+    const result = theme(root, "tiny");
+    eq(result.code, 1, `exit code for ${JSON.stringify(declared)}`);
+    eq(result.out, message, `output for ${JSON.stringify(declared)}`);
+    eq(read(root, "vscode/settings.json"), before, "vscode/settings.json");
+    eq(read(root, "themes/active"), undefined, "themes/active");
+    eq(result.reloads, "", "reloads");
+    eq(result.commands.length, 0, "commands");
+    rmSync(root, { recursive: true });
+  }
 });
 
 test("a Theme that doesn't say how macOS looks fails the Switch and changes nothing", () => {
@@ -213,7 +255,7 @@ test("an unknown Theme changes nothing and lists the available Themes", () => {
   eq(result.out, "No Theme named dracula. Available Themes:\n  tiny\n  vintage\n", "output");
   eq(read(root, "themes/active"), "tiny\n", "themes/active");
   eq(read(root, "ghostty/active-theme"), "theme = tiny\n", "ghostty/active-theme");
-  eq(read(root, "vscode/settings.json"), settings("Tiny"), "vscode/settings.json");
+  eq(read(root, "vscode/settings.json"), settings("Tiny", modern), "vscode/settings.json");
   eq(result.reloads, "", "reloads");
   rmSync(root, { recursive: true });
 });

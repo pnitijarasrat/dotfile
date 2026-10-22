@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Makes a Switch (#133): `theme <name>` makes <name> the active Theme.
 // Run: theme <name>, or theme to print the active Theme.
-// So far Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch, as
+// So far Ghostty, VSCode (#135, #153), SketchyBar and JankyBorders (#136) switch, as
 // do macOS's appearance, accent and highlight (#138); Chrome (#137) can't, so
 // it prints Chrome's manual step.
 import { spawnSync } from "node:child_process";
@@ -13,8 +13,16 @@ import { themes } from "./generate.mjs";
 // The active Theme before any Switch: the one ghostty/config selects.
 const DEFAULT = "vintage";
 
-// The color theme line of VSCode's settings, with its key and value.
-const colorTheme = /("workbench\.colorTheme": )"[^"]*"/;
+// The lines of VSCode's settings a Switch owns (ADR 0008), each with the value
+// it takes from a Theme: the color theme, and the shape the Theme gives VSCode.
+const vscodeSettings = {
+  "workbench.colorTheme": (theme) => theme.name,
+  "window.titleBarStyle": (theme) => theme.vscode.title_bar,
+  "workbench.experimental.modernUI": (theme) => theme.vscode.modern_ui,
+};
+
+// A line of VSCode's settings, with its key and its string or boolean value.
+const settingsLine = (key) => new RegExp(`("${key.replaceAll(".", "\\.")}": )("[^"]*"|true|false)`);
 
 // macOS accents as System Settings stores them in AppleAccentColor.
 const accents = { graphite: -1, red: 0, orange: 1, yellow: 2, green: 3, blue: 4, purple: 5, pink: 6 };
@@ -42,6 +50,14 @@ function macosProblem({ name, macos }) {
   if (!Object.hasOwn(highlights, highlight)) {
     return `${name}'s macOS highlight ${JSON.stringify(highlight)} isn't one of ${Object.keys(highlights).join(", ")}`;
   }
+}
+
+// Why a Theme's VSCode shape can't be set, if it can't.
+function vscodeProblem({ name, vscode }) {
+  if (!vscode) return `${name} doesn't say how VSCode is shaped`;
+  const { modern_ui, title_bar } = vscode;
+  if (typeof modern_ui !== "boolean") return `${name}'s VSCode modern_ui ${JSON.stringify(modern_ui)} isn't true or false`;
+  if (!["native", "custom"].includes(title_bar)) return `${name}'s VSCode title_bar ${JSON.stringify(title_bar)} isn't native or custom`;
 }
 
 // The commands that set macOS to a Theme's appearance, accent and highlight.
@@ -74,19 +90,22 @@ export function run({ root, args, reload, system }) {
   }
   // Checked before anything is written, so a failed Switch changes nothing.
   const { theme } = all.find(({ id }) => id === name);
-  const problem = macosProblem(theme);
+  const problem = macosProblem(theme) ?? vscodeProblem(theme);
   if (problem) return { code: 1, out: `${problem}\n` };
   const settingsFile = join(root, "vscode/settings.json");
   const settings = readFileSync(settingsFile, "utf8");
-  if (!colorTheme.test(settings)) {
-    return { code: 1, out: 'vscode/settings.json has no "workbench.colorTheme" line\n' };
-  }
+  const missing = Object.keys(vscodeSettings).find((key) => !settingsLine(key).test(settings));
+  if (missing) return { code: 1, out: `vscode/settings.json has no "${missing}" line\n` };
   writeFileSync(activeFile, `${name}\n`);
   // ghostty/config loads this after its own theme line, so it wins.
   writeFileSync(join(root, "ghostty/active-theme"), `theme = ${name}\n`);
-  // VSCode has no include, so its pointer is the color theme line of the
-  // tracked settings.json (ADR 0008). VSCode applies it to open windows.
-  writeFileSync(settingsFile, settings.replace(colorTheme, (_, key) => key + JSON.stringify(theme.name)));
+  // VSCode has no include, so its pointer is the lines it owns in the tracked
+  // settings.json (ADR 0008). VSCode applies them to open windows.
+  const switched = Object.entries(vscodeSettings).reduce(
+    (text, [key, value]) => text.replace(settingsLine(key), (_, start) => start + JSON.stringify(value(theme))),
+    settings,
+  );
+  writeFileSync(settingsFile, switched);
   // sketchybar/color.sh, which JankyBorders' bordersrc also sources, loads
   // this after its own default.
   writeFileSync(join(root, "sketchybar/active-theme"), `active_theme=${name}\n`);
