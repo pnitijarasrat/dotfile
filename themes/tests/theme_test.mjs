@@ -1,4 +1,4 @@
-// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138, #153).
+// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138, #153, #154).
 // Runs it against a scratch copy of the repo with each tool's reload and every
 // macOS command stubbed, so no open window, bar or system setting changes.
 // Run: node themes/tests/theme_test.mjs
@@ -47,6 +47,7 @@ function scratch() {
   copyFileSync(join(repo, "themes/tests/fixtures/tiny.sketchybar"), join(root, "sketchybar/themes/tiny.sh"));
   mkdirSync(join(root, "borders"));
   copyFileSync(join(repo, "borders/bordersrc"), join(root, "borders/bordersrc"));
+  mkdirSync(join(root, "starship"));
   return root;
 }
 
@@ -97,6 +98,15 @@ test("switching records the active Theme, points Ghostty at it and reloads every
   eq(read(root, "themes/active"), "tiny\n", "themes/active");
   eq(read(root, "ghostty/active-theme"), "theme = tiny\n", "ghostty/active-theme");
   eq(result.reloads, "ghostty,sketchybar,borders", "reloads");
+  rmSync(root, { recursive: true });
+});
+
+test("switching points Starship at the Theme's prompt (#154)", () => {
+  const root = scratch();
+  theme(root, "tiny");
+  eq(read(root, "starship/active-theme"), "tiny\n", "starship/active-theme after theme tiny");
+  theme(root, "vintage");
+  eq(read(root, "starship/active-theme"), "vintage\n", "starship/active-theme after theme vintage");
   rmSync(root, { recursive: true });
 });
 
@@ -196,6 +206,7 @@ test("a VSCode settings.json missing a line the Switch rewrites fails the Switch
     eq(read(root, "themes/active"), undefined, "themes/active");
     eq(read(root, "ghostty/active-theme"), undefined, "ghostty/active-theme");
     eq(read(root, "sketchybar/active-theme"), undefined, "sketchybar/active-theme");
+    eq(read(root, "starship/active-theme"), undefined, "starship/active-theme");
     eq(result.reloads, "", "reloads");
     eq(result.commands.length, 0, "commands");
     rmSync(root, { recursive: true });

@@ -1,0 +1,57 @@
+# Tiny theme's Starship prompt (#154): named ANSI colors, inherited from Ghostty.
+# Generated from themes/tiny.json; icons follow its rules.icons.
+add_newline = true
+
+[character]
+success_symbol = "[>](bold green)"
+error_symbol = "[>](bold red)"
+vimcmd_symbol = "[<](bold green)"
+
+[directory]
+format = "[ $path]($style)[$read_only]($read_only_style) "
+read_only = " 󰌾"
+
+[git_commit]
+tag_symbol = "  "
+
+[git_status]
+ahead = ">"
+behind = "<"
+diverged = "<>"
+renamed = "r"
+deleted = "x"
+
+[os.symbols]
+
+[package]
+disabled = true
+
+[c]
+symbol = " "
+
+[dart]
+symbol = " "
+
+[dotnet]
+symbol = "󰪮 "
+
+[git_branch]
+symbol = " "
+
+[golang]
+symbol = " "
+
+[java]
+symbol = " "
+
+[lua]
+symbol = " "
+
+[nodejs]
+symbol = " "
+
+[php]
+symbol = " "
+
+[python]
+symbol = " "

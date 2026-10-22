@@ -1,9 +1,9 @@
-// Checks for the Theme generator, themes/generate.mjs (#132, #135, #137).
+// Checks for the Theme generator, themes/generate.mjs (#132, #135, #137, #154).
 // Run: node themes/tests/generate_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { chrome, generate, ghostty, sketchybar, vscode, vscodeExtension } from "../generate.mjs";
+import { chrome, generate, ghostty, sketchybar, starship, vscode, vscodeExtension } from "../generate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -207,9 +207,31 @@ test("refuses a Theme missing a role Chrome takes", () => {
   if (!message.includes("frame_desktop")) throw new Error(`expected an error naming frame_desktop, got ${JSON.stringify(message)}`);
 });
 
+test("generates a Starship prompt with Nerd Font icons for a Theme whose rules allow them (#154)", () => {
+  eq(starship("tiny", tiny), read("themes/tests/fixtures/tiny.starship"), "starship/themes/tiny.toml");
+});
+
+test("a Theme without icons gets the plain prompt: no Nerd Font glyphs, no directory icon (#154)", () => {
+  const plain = starship("tiny", { ...tiny, rules: { ...tiny.rules, icons: false } });
+  if (/[^\x00-\x7f]/.test(plain)) throw new Error(`expected only ASCII, got ${JSON.stringify(plain)}`);
+  if (plain.includes("[directory]")) throw new Error("expected no [directory] section");
+  if (!plain.includes('[git_branch]\nsymbol = "git "')) throw new Error("expected the branch named git");
+});
+
+test("refuses a Theme that doesn't say whether it has icons, for Starship (#154)", () => {
+  const { icons, ...rules } = tiny.rules;
+  let message = "";
+  try {
+    starship("tiny", { ...tiny, rules });
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("icons")) throw new Error(`expected an error naming icons, got ${JSON.stringify(message)}`);
+});
+
 test("every committed generated file is what the generator produces", () => {
   const files = generate(root);
-  for (const path of ["ghostty/themes/vintage", "sketchybar/themes/vintage.sh", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json", "chrome/vintage-theme/manifest.json"]) {
+  for (const path of ["ghostty/themes/vintage", "sketchybar/themes/vintage.sh", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json", "chrome/vintage-theme/manifest.json", "starship/themes/vintage.toml"]) {
     if (!files.some((f) => f.path === path)) throw new Error(`generator doesn't produce ${path}`);
   }
   for (const { path, text } of files) {

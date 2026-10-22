@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 // Makes a Switch (#133): `theme <name>` makes <name> the active Theme.
 // Run: theme <name>, or theme to print the active Theme.
-// So far Ghostty, VSCode (#135, #153), SketchyBar and JankyBorders (#136) switch, as
-// do macOS's appearance, accent and highlight (#138); Chrome (#137) can't, so
-// it prints Chrome's manual step.
+// So far Ghostty, VSCode (#135, #153), SketchyBar, JankyBorders (#136) and
+// Starship (#154) switch, as do macOS's appearance, accent and highlight
+// (#138); Chrome (#137) can't, so it prints Chrome's manual step.
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -109,6 +109,9 @@ export function run({ root, args, reload, system }) {
   // sketchybar/color.sh, which JankyBorders' bordersrc also sources, loads
   // this after its own default.
   writeFileSync(join(root, "sketchybar/active-theme"), `active_theme=${name}\n`);
+  // starship/init.zsh reads this before each prompt, so a new prompt is the
+  // Theme's; Starship has nothing running to reload.
+  writeFileSync(join(root, "starship/active-theme"), `${name}\n`);
   for (const tool of ["ghostty", "sketchybar", "borders"]) reload(tool);
   for (const command of macosCommands(theme.macos)) system(...command);
   // VSCode only sees a Theme added to its extension after a reload (ADR 0008),

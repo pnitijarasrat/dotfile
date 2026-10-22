@@ -1,0 +1,53 @@
+# Vintage theme's Starship prompt (#154): named ANSI colors, inherited from Ghostty.
+# Generated from themes/vintage.json; icons follow its rules.icons.
+add_newline = true
+
+[character]
+success_symbol = "[>](bold green)"
+error_symbol = "[>](bold red)"
+vimcmd_symbol = "[<](bold green)"
+
+[git_commit]
+tag_symbol = " tag "
+
+[git_status]
+ahead = ">"
+behind = "<"
+diverged = "<>"
+renamed = "r"
+deleted = "x"
+
+[os.symbols]
+
+[package]
+disabled = true
+
+[c]
+symbol = "C "
+
+[dart]
+symbol = "dart "
+
+[dotnet]
+symbol = ".NET "
+
+[git_branch]
+symbol = "git "
+
+[golang]
+symbol = "go "
+
+[java]
+symbol = "java "
+
+[lua]
+symbol = "lua "
+
+[nodejs]
+symbol = "nodejs "
+
+[php]
+symbol = "php "
+
+[python]
+symbol = "py "
