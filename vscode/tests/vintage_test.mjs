@@ -206,10 +206,20 @@ for (const { id, theme: source } of themes(root)) {
     expect("editorLineNumber.foreground", roles.work_line_number);
     expect("editorRuler.foreground", roles.work_grid);
     expect("editorIndentGuide.background1", roles.work_grid);
-    // Deviation: selected text keeps its dark token colors, which vanish on
-    // work_selection navy.
-    expect("editor.selectionBackground", roles.ansi_11);
     expect("editor.inactiveSelectionBackground", roles.frame_light);
+  });
+
+  test(`${id}: the selection, match highlights and matched completion letters are the Theme's VSCode selection role (#150)`, () => {
+    const selection = roles[source.vscode.selection];
+    if (!selection) throw new Error(`vscode.selection ${JSON.stringify(source.vscode.selection)} isn't a role`);
+    for (const key of [
+      "editor.selectionBackground",
+      "peekViewEditor.matchHighlightBackground",
+      "peekViewResult.matchHighlightBackground",
+      "editorSuggestWidget.focusHighlightForeground",
+    ]) {
+      expect(key, selection);
+    }
   });
 
   test(`${id}: the terminal is the light Work surface with Windows VGA ANSI colors (#46)`, () => {
@@ -258,6 +268,15 @@ for (const { id, theme: source } of themes(root)) {
 
 test("Vintage's color theme is light (#46)", () => {
   eq(parseJsonc(read("vscode/vintage-theme/themes/vintage-color-theme.json")).type, "light", "theme type");
+});
+
+// Deviation: selected text keeps its token colors, so the selection is a role
+// they read on. Vintage's dark ones vanish on work_selection navy; Marigold's
+// light ones vanish on its pale yellow ansi_11 (#150).
+test("Vintage's VSCode selection is ansi_11; Marigold's is work_selection (#150)", () => {
+  const chosen = Object.fromEntries(themes(root).map(({ id, theme }) => [id, theme.vscode?.selection]));
+  eq(chosen.vintage, "ansi_11", "vintage");
+  eq(chosen.marigold, "work_selection", "marigold");
 });
 
 test("the editor and terminal use the Work surface font (#79)", () => {

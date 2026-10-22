@@ -272,7 +272,7 @@
     "editorSuggestWidget.highlightForeground": "#E8939B", // syntax_keyword
     // Deviation: matched letters on the selected row are ansi_11, not a
     // syntax role; no syntax role reads on work_selection navy.
-    "editorSuggestWidget.focusHighlightForeground": "#F3DAAA", // ansi_11
+    "editorSuggestWidget.focusHighlightForeground": "#3D3423", // work_selection
     "editorSuggestWidgetStatus.foreground": "#5C5652", // work_line_number
     "editorHoverWidget.background": "#161616", // work_bg
     "editorHoverWidget.foreground": "#F5E3DA", // work_fg
@@ -302,8 +302,8 @@
     "peekViewResult.selectionForeground": "#F5E3DA", // work_selection_text
     // Deviation: match highlights keep their text colors, so they're ansi_11
     // like the selection, not work_selection.
-    "peekViewEditor.matchHighlightBackground": "#F3DAAA", // ansi_11
-    "peekViewResult.matchHighlightBackground": "#F3DAAA", // ansi_11
+    "peekViewEditor.matchHighlightBackground": "#3D3423", // work_selection
+    "peekViewResult.matchHighlightBackground": "#3D3423", // work_selection
     "peekViewTitle.background": "#161616", // work_bg
     "peekViewTitleLabel.foreground": "#F5E3DA", // work_fg
     "peekViewTitleDescription.foreground": "#5C5652", // work_line_number
@@ -320,7 +320,7 @@
     // work_selection_text. VSCode only honors editor.selectionForeground in
     // high-contrast themes, so selected text keeps its token colors, and the
     // dark syntax colors vanish on navy. Bright yellow is K-95's highlight.
-    "editor.selectionBackground": "#F3DAAA", // ansi_11
+    "editor.selectionBackground": "#3D3423", // work_selection
     "editor.inactiveSelectionBackground": "#2A2A2A", // frame_light
     "editorGutter.background": "#161616", // work_bg
     "editorLineNumber.foreground": "#5C5652", // work_line_number
