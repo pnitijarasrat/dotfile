@@ -14,16 +14,23 @@ function roles(theme) {
   };
 }
 
-// Ghostty's theme for a Theme: the Work surface and ANSI colors, each line
-// commented with its role name (Ghostty has no trailing comments).
+// Ghostty's theme for a Theme: the Work surface and ANSI colors, then the
+// window's shape from its Theme rules (#151), each line commented with its
+// role or rule name (Ghostty has no trailing comments). A theme file can set
+// any option, so the window settings live here, not in ghostty/config.
 export function ghostty(id, theme) {
+  if (!theme.rules) throw new Error(`${theme.name} has no Theme rules`);
   const role = roles(theme);
   const line = (key, name, value = role(name)) => `# ${name}\n${key} = ${value}`;
   const palette = (n) => line("palette", `ansi_${n}`, `${n}=${role(`ansi_${n}`)}`);
+  const { opacity, blur, radius } = theme.rules;
+  // Ghostty can't set a corner radius. Rounded corners keep macOS's window
+  // frame and hide its title bar; square ones drop the frame altogether.
+  const rounded = radius > 0;
   return [
     `# ${theme.name} theme: Work surface (${theme.work_description})`,
     `# Roles from docs/theme-spec.md, values from themes/${id}.json`,
-    "# Ghostty has no trailing comments, so each role name is on the line above its value",
+    "# Ghostty has no trailing comments, so each role or rule name is on the line above its value",
     line("background", "work_bg"),
     line("foreground", "work_fg"),
     "",
@@ -37,6 +44,12 @@ export function ghostty(id, theme) {
     "",
     "# Bright colors (8-15)",
     ...[8, 9, 10, 11, 12, 13, 14, 15].map(palette),
+    "",
+    "# Window shape, from the Theme rules",
+    line("background-opacity", "opacity", opacity),
+    line("background-blur", "blur", blur),
+    line("window-decoration", `radius: ${rounded ? "rounded corners, no title bar" : "square corners, no window frame"}`, rounded ? "auto" : "none"),
+    line("macos-titlebar-style", "radius", rounded ? "hidden" : "transparent"),
     "",
   ].join("\n");
 }

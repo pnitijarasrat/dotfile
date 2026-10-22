@@ -1,6 +1,6 @@
 # Marigold theme: Work surface (dark: warm peach-white on black, marigold accent)
 # Roles from docs/theme-spec.md, values from themes/marigold.json
-# Ghostty has no trailing comments, so each role name is on the line above its value
+# Ghostty has no trailing comments, so each role or rule name is on the line above its value
 # work_bg
 background = #161616
 # work_fg
@@ -50,3 +50,13 @@ palette = 13=#DDBEE6
 palette = 14=#9DD3C9
 # ansi_15
 palette = 15=#FFF5EE
+
+# Window shape, from the Theme rules
+# opacity
+background-opacity = 0.85
+# blur
+background-blur = 20
+# radius: rounded corners, no title bar
+window-decoration = auto
+# radius
+macos-titlebar-style = hidden

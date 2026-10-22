@@ -50,7 +50,7 @@ Check each Theme's color theme against its Theme source file and `docs/theme-spe
 
 ## Ghostty
 
-The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44) until the first Switch, which overrides it through `ghostty/active-theme` (#133). Each Theme gets its own `ghostty/themes/<name>`. Starship, ccstatusline and ranger take their colors from it.
+The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44) until the first Switch, which overrides it through `ghostty/active-theme` (#133). Each Theme gets its own `ghostty/themes/<name>`, which also sets the window's shape from the Theme's `rules` (#151): Vintage's is opaque and square, Marigold's translucent, blurred and rounded with no title bar. A Switch recolors open windows, but a new opacity needs Ghostty quit and reopened, and a new title bar style only reaches new windows. Starship, ccstatusline and ranger take their colors from it.
 
 Check each Theme's Ghostty theme against its source file, and the config against `themes/vintage.json` and `docs/theme-spec.md`, with `node ghostty/tests/vintage_test.mjs`.
 
