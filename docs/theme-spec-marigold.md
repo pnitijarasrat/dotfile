@@ -83,7 +83,7 @@ None. Wherever Vintage draws a Display, Marigold uses Frame roles: the backgroun
 
 | Setting | Value |
 |---|---|
-| Font | **JetBrainsMono NL Nerd Font**, the same face as Vintage's JetBrains Mono NL plus Nerd Font icons, installed into `~/Library/Fonts`. Fallback → Menlo → Thonburi |
+| Font | **JetBrainsMonoNL Nerd Font**, the same face as Vintage's JetBrains Mono NL plus Nerd Font icons, installed into `~/Library/Fonts`. Fallback → Menlo → Thonburi |
 | Ghostty | `font-size = 14` |
 | VSCode | editor and terminal size 11, as Vintage |
 | Ligatures | off, as Vintage |
