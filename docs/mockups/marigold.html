@@ -1,0 +1,332 @@
+<!doctype html>
+<!-- Marigold theme mockup (#139). Rough and cheap: for reacting to, not a spec.
+     Role values live in MARIGOLD below; the page paints itself from them. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marigold theme mockup</title>
+<style>
+  :root {
+    --mono: "JetBrainsMonoNL Nerd Font", "JetBrains Mono NL", Menlo, monospace;
+    --sans: "SF Pro Text", "SF Pro", -apple-system, system-ui, sans-serif;
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; font: 13px var(--sans);
+    background: #0B0B0B; color: #ddd;
+  }
+  h1, h2 { font-weight: 600; margin: 0 0 8px; }
+  h1 { font-size: 18px; }
+  h2 { font-size: 14px; margin-top: 32px; }
+  .controls { margin: 8px 0 16px; display: flex; gap: 16px; align-items: center; }
+  .controls label { cursor: pointer; }
+
+  /* Desktop: the stage everything floats on */
+  .desktop {
+    position: relative; height: 760px; border-radius: 14px; overflow: hidden;
+    background: var(--frame_desktop);
+  }
+  .desktop.busy {
+    /* A stand-in wallpaper so translucency and blur have something to show */
+    background:
+      radial-gradient(circle at 18% 70%, #F2C45A55 0 120px, transparent 260px),
+      radial-gradient(circle at 70% 30%, #E8908C44 0 90px, transparent 240px),
+      radial-gradient(circle at 85% 85%, #C9A6D644 0 110px, transparent 260px),
+      var(--frame_desktop);
+  }
+
+  /* SketchyBar: floating, translucent, blurred, rounded */
+  .bar {
+    position: absolute; top: 8px; left: 10px; right: 10px; height: 32px;
+    display: flex; align-items: center; gap: 6px; padding: 0 10px;
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--frame_face) 72%, transparent);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--frame_highlight);
+    font: 13px var(--mono); color: var(--frame_text);
+  }
+  .bar .space {
+    min-width: 22px; height: 20px; border-radius: 6px; display: grid; place-items: center;
+    color: var(--frame_gray_text);
+  }
+  .bar .space.on { background: var(--frame_selection); color: var(--frame_selection_text); font-weight: 700; }
+  .bar .app { margin-left: 10px; font-family: var(--sans); font-weight: 600; }
+  .bar .spacer { flex: 1; }
+  .bar .item { padding: 0 6px; }
+  .bar .item .ic { color: var(--frame_selection); margin-right: 5px; }
+  .bar .item.low .ic { color: var(--frame_data_red); }
+
+  /* Windows */
+  .win {
+    position: absolute; border-radius: var(--radius); overflow: hidden;
+    border: 2px solid var(--frame_shadow);
+    box-shadow: 0 18px 50px #000a;
+  }
+  .win.focus { border-color: var(--frame_selection); }
+
+  /* Ghostty */
+  .ghostty {
+    left: 24px; top: 64px; width: 600px; height: 380px;
+    background: color-mix(in srgb, var(--work_bg) 85%, transparent);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    font: 13px/1.45 var(--mono); color: var(--work_fg); padding: 14px 16px;
+    white-space: pre;
+  }
+
+  /* VSCode */
+  .vscode {
+    left: 470px; top: 200px; width: 680px; height: 420px;
+    background: var(--frame_face); display: grid;
+    grid-template-columns: 44px 170px 1fr; grid-template-rows: 30px 1fr 22px;
+    font-family: var(--sans); color: var(--frame_text);
+  }
+  .vscode .title { grid-column: 1 / -1; display: flex; align-items: center; padding-left: 70px; color: var(--frame_gray_text); font-size: 12px; position: relative; }
+  .vscode .title::before { content: "● ● ●"; position: absolute; left: 12px; color: #555; letter-spacing: 2px; font-size: 10px; }
+  .vscode .activity { display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 8px; font: 18px var(--mono); color: var(--frame_gray_text); }
+  .vscode .activity .on { color: var(--frame_text); border-left: 2px solid var(--frame_selection); padding-left: 8px; margin-left: -10px; }
+  .vscode .side { padding: 6px 4px; font-size: 12px; }
+  .vscode .side div { padding: 3px 8px; border-radius: 5px; }
+  .vscode .side .sel { background: var(--frame_light); }
+  .vscode .side .ic { font-family: var(--mono); margin-right: 6px; }
+  .vscode .editor {
+    margin: 0 6px 6px 0; border-radius: 8px; background: var(--work_bg);
+    border: 1px solid var(--frame_highlight);
+    font: 12.5px/1.6 var(--mono); color: var(--work_fg); position: relative; overflow: hidden;
+  }
+  .vscode .tabs { display: flex; font: 12px var(--sans); border-bottom: 1px solid var(--frame_highlight); }
+  .vscode .tabs div { padding: 6px 12px; color: var(--frame_gray_text); }
+  .vscode .tabs .on { color: var(--frame_text); border-bottom: 2px solid var(--frame_selection); }
+  .vscode .code { padding: 6px 0; white-space: pre; }
+  .vscode .ln { display: inline-block; width: 36px; text-align: right; padding-right: 14px; color: var(--work_line_number); }
+  .vscode .cl { background: var(--work_cursorline); display: block; }
+  .vscode .status { grid-column: 1 / -1; display: flex; gap: 14px; align-items: center; padding: 0 10px; font-size: 11px; color: var(--frame_gray_text); }
+  .vscode .status .err { color: var(--frame_data_red); }
+  .vscode .status .warn { color: var(--frame_data_yellow); }
+  .completion {
+    position: absolute; left: 190px; top: 186px; width: 250px;
+    background: var(--work_bg); border: 1px solid var(--work_popup_border); border-radius: 6px;
+    box-shadow: 0 8px 24px #0009; font: 12px/1.7 var(--mono);
+  }
+  .completion div { padding: 0 8px; }
+  .completion .sel { background: var(--frame_light); }
+  .completion .k { color: var(--syntax_function); margin-right: 8px; }
+  .sel-text { background: var(--work_selection); color: var(--work_selection_text); }
+  .cursor { background: var(--work_cursor); color: var(--work_cursor_text); }
+
+  /* Raycast */
+  .raycast {
+    left: 300px; top: 470px; width: 470px; height: 250px;
+    background: color-mix(in srgb, var(--frame_face) 82%, transparent);
+    backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+    border: 1px solid var(--frame_highlight); font-family: var(--sans); color: var(--frame_text);
+  }
+  .raycast .q { padding: 14px 16px; font-size: 16px; border-bottom: 1px solid var(--frame_highlight); }
+  .raycast .q .ph { color: var(--frame_gray_text); }
+  .raycast .row { display: flex; gap: 10px; align-items: center; margin: 2px 6px; padding: 7px 10px; border-radius: 7px; }
+  .raycast .row.sel { background: var(--frame_light); }
+  .raycast .row .ic { font-family: var(--mono); color: var(--frame_selection); width: 16px; }
+  .raycast .row .sub { color: var(--frame_gray_text); margin-left: auto; font-size: 12px; }
+  .raycast .tip { position: absolute; right: 12px; bottom: 10px; background: var(--frame_tooltip); padding: 3px 8px; border-radius: 5px; font-size: 11px; }
+
+  /* Role table */
+  .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 6px; }
+  .sw { display: flex; align-items: center; gap: 8px; font: 12px var(--mono); }
+  .sw i { width: 34px; height: 22px; border-radius: 5px; border: 1px solid #333; flex: none; }
+  .sw .cr { color: #888; margin-left: auto; }
+  .sw .cr.bad { color: #E06C7A; }
+  .note { color: #999; max-width: 900px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h1>Marigold: mockup for #139</h1>
+<p class="note">Dark, black with a marigold accent. Frame and Work surface are one family; no Display. Rounded corners, Nerd Font icons, translucency and blur. Fonts: JetBrainsMonoNL Nerd Font (Work surface), SF Pro (Frame). Every color on this page is a role from the table at the bottom; edit <code>MARIGOLD</code> in the source to try values.</p>
+<div class="controls">
+  <label><input type="checkbox" id="busy" checked> stand-in wallpaper (shows translucency and blur; a solid black desktop hides them)</label>
+</div>
+
+<div class="desktop busy" id="desktop">
+  <div class="bar">
+    <span class="space on">1</span><span class="space">2</span><span class="space">3</span><span class="space">4</span>
+    <span class="app">Ghostty</span>
+    <span class="spacer"></span>
+    <span class="item"><span class="ic">&#xF2DB;</span>72%</span>
+    <span class="item"><span class="ic">󰖩</span>home</span>
+    <span class="item"><span class="ic">󰕾</span>40%</span>
+    <span class="item low"><span class="ic">󰁺</span>14%</span>
+    <span class="item">Thu 22 Oct  14:05</span>
+  </div>
+
+  <div class="win vscode">
+    <div class="title">theme.mjs — .config</div>
+    <div class="activity"><span class="on">&#xEAF0;</span><span>&#xEA6D;</span><span>&#xEA68;</span><span>&#xEAE6;</span></div>
+    <div class="side">
+      <div><span class="ic">&#xF07C;</span>themes</div>
+      <div style="padding-left:20px"><span class="ic">&#xF07B;</span>templates</div>
+      <div style="padding-left:20px" class="sel"><span class="ic" style="color:var(--frame_data_yellow)">&#xE74E;</span>theme.mjs</div>
+      <div style="padding-left:20px"><span class="ic" style="color:var(--frame_data_yellow)">&#xE60B;</span>vintage.json</div>
+      <div style="padding-left:20px"><span class="ic" style="color:var(--frame_data_yellow)">&#xE60B;</span>marigold.json</div>
+      <div><span class="ic">&#xF07B;</span>sketchybar</div>
+    </div>
+    <div class="editor">
+      <div class="tabs"><div class="on">theme.mjs</div><div>marigold.json</div></div>
+      <div class="code"><span class="ln">1</span><span class="c">// Load a Theme source file and check its roles</span>
+<span class="ln">2</span><span class="k">import</span> { readFile } <span class="k">from</span> <span class="s">"node:fs/promises"</span>;
+<span class="ln">3</span>
+<span class="ln">4</span><span class="k">const</span> <span class="n">ROLE_COUNT</span> <span class="o">=</span> <span class="num">74</span>;
+<span class="ln">5</span>
+<span class="ln">6</span><span class="k">export async function</span> <span class="f">loadTheme</span>(name<span class="o">:</span> <span class="t">string</span>) {
+<span class="cl"><span class="ln">7</span>  <span class="k">const</span> raw <span class="o">=</span> <span class="k">await</span> <span class="f">readFile</span>(<span class="s">`themes/${name}.json`</span>, <span class="s">"utf8"</span>);<span class="cursor"> </span></span><span class="ln">8</span>  <span class="k">const</span> theme <span class="o">=</span> <span class="t">JSON</span>.<span class="f">parse</span>(raw);
+<span class="ln">9</span>  <span class="k">if</span> (<span class="o">!</span>theme.<span class="sel-text">palettes</span>) <span class="k">throw new</span> <span class="t">Error</span>(<span class="s">"no palettes"</span>);
+<span class="ln">10</span>  <span class="k">return</span> { ...theme, shadows: <span class="cst">true</span> };
+<span class="ln">11</span>}
+<span class="ln">12</span><span class="err">undefinedThing</span>;  <span class="c">// error squiggle stand-in</span></div>
+      <div class="completion">
+        <div class="sel"><span class="k">󰊕</span>readFile</div>
+        <div><span class="k">󰊕</span>readdir</div>
+        <div><span class="k" style="color:var(--syntax_type)">󰠱</span>ReadStream</div>
+      </div>
+    </div>
+    <div class="status"><span>&#xE0A0; theme/marigold</span><span class="err">&#xF057; 1</span><span class="warn">&#xF071; 2</span><span style="margin-left:auto">Ln 7, Col 74</span><span>UTF-8</span></div>
+  </div>
+
+  <div class="win ghostty focus" id="ghostty"></div>
+
+  <div class="win raycast">
+    <div class="q">the<span class="ph">me marigold…</span></div>
+    <div class="row sel"><span class="ic">&#xF1FC;</span>Switch to Marigold<span class="sub">Script Command</span></div>
+    <div class="row"><span class="ic">&#xF1FC;</span>Switch to Vintage<span class="sub">Script Command</span></div>
+    <div class="row"><span class="ic">&#xF120;</span>Ghostty<span class="sub">Application</span></div>
+    <div class="tip">⏎ Run</div>
+  </div>
+</div>
+
+<h2>Roles</h2>
+<p class="note">Contrast is against the surface the role is drawn on (<code>work_bg</code> for Work surface, ANSI and syntax; <code>frame_face</code> for Frame). Under 4.5:1 is flagged; that's expected for comments, line numbers, gray text and border tones.</p>
+<div id="roles"></div>
+
+<script>
+const MARIGOLD = {
+  frame: {
+    frame_face: "#1E1E1E",            // Frame surface, one step above work_bg
+    frame_highlight: "#383838",       // hairline borders, the lit edge
+    frame_light: "#2A2A2A",           // hover and selected rows
+    frame_shadow: "#111111",          // inactive window border, near-invisible
+    frame_dark_shadow: "#000000",
+    frame_title: "#1E1E1E",           // title bars blend into the Frame
+    frame_title_text: "#F5E3DA",
+    frame_title_inactive: "#1E1E1E",
+    frame_title_inactive_text: "#7A706A",
+    frame_text: "#F5E3DA",            // warm peach-white from the image
+    frame_gray_text: "#8C817B",
+    frame_window: "#161616",          // list boxes and fields, sunk to work_bg
+    frame_selection: "#F2C45A",       // marigold accent
+    frame_selection_text: "#161616",
+    frame_tooltip: "#2A2A2A",
+    frame_desktop: "#161616",
+    frame_desktop_text: "#F5E3DA",
+  },
+  work: {
+    work_bg: "#161616",               // sampled black
+    work_fg: "#F5E3DA",
+    work_cursor: "#F2C45A",
+    work_cursor_text: "#161616",
+    work_cursorline: "#1F1D1A",
+    work_selection: "#3D3423",        // marigold-tinted dark
+    work_selection_text: "#F5E3DA",
+    work_line_number: "#5C5652",
+    work_grid: "#262626",
+    work_popup_border: "#383838",
+  },
+  ansi: {
+    ansi_0: "#2A2A2A",
+    ansi_1: "#E06C7A",                // rose (eyes)
+    ansi_2: "#A8C08A",                // sage (invented)
+    ansi_3: "#F2C45A",                // marigold
+    ansi_4: "#8FA4E0",                // periwinkle (invented, leans lavender)
+    ansi_5: "#C9A6D6",                // lavender (sheet shadows)
+    ansi_6: "#7FBFB4",                // dusty teal (invented)
+    ansi_7: "#D9CEC8",
+    ansi_8: "#5C5652",
+    ansi_9: "#F08C8C",                // pink (hair tips)
+    ansi_10: "#BCD49E",
+    ansi_11: "#F3DAAA",               // flower yellow
+    ansi_12: "#A9BAF0",
+    ansi_13: "#DDBEE6",
+    ansi_14: "#9DD3C9",
+    ansi_15: "#FFF5EE",
+  },
+  syntax: {
+    syntax_comment: "#7A716B",
+    syntax_keyword: "#E8939B",        // rose
+    syntax_string: "#F3DAAA",         // flower yellow
+    syntax_number: "#C9A6D6",         // lavender
+    syntax_function: "#F2C45A",       // marigold
+    syntax_type: "#8FA4E0",           // periwinkle
+    syntax_constant: "#F0B878",       // hair gold
+    syntax_operator: "#B8ACA6",
+    syntax_error: "#F07080",
+    syntax_warning: "#F2C45A",
+  },
+  frame_data: {
+    frame_data_red: "#E06C7A",
+    frame_data_green: "#A8C08A",
+    frame_data_yellow: "#F2C45A",
+    frame_data_blue: "#8FA4E0",
+    frame_data_magenta: "#C9A6D6",
+    frame_data_cyan: "#7FBFB4",
+    frame_data_orange: "#F0B878",
+  },
+};
+
+const all = Object.assign({}, ...Object.values(MARIGOLD));
+for (const [k, v] of Object.entries(all)) document.documentElement.style.setProperty(`--${k}`, v);
+
+// Syntax spans in the editor
+const SPAN = { c: "syntax_comment", k: "syntax_keyword", s: "syntax_string", num: "syntax_number",
+  f: "syntax_function", t: "syntax_type", cst: "syntax_constant", o: "syntax_operator", n: "syntax_constant" };
+for (const [cls, role] of Object.entries(SPAN))
+  document.querySelectorAll(`.code .${cls}`).forEach(e => e.style.color = all[role]);
+document.querySelectorAll(".code .err").forEach(e =>
+  e.style.textDecoration = `wavy underline ${all.syntax_error}`);
+
+// Ghostty: a prompt with icons, some ls output, and the 16 ANSI colors
+const a = n => all[`ansi_${n}`];
+const sp = (c, t, extra = "") => `<span style="color:${c};${extra}">${t}</span>`;
+const prompt = (cmd) =>
+  `${sp(a(4), "\uF07C ~/.config")} ${sp(a(5), "\uE0A0 theme/marigold")} ${sp(a(3), "\uE718 v22")} ${sp(a(8), "took 2s")}\n` +
+  `${sp(a(2), "❯")} ${cmd}\n`;
+const swatchRow = (from) => [...Array(8)].map((_, i) =>
+  `<span style="background:${a(from + i)};color:${from + i === 0 ? a(7) : all.work_bg}"> ${String(from + i).padStart(2)} </span>`).join("");
+document.getElementById("ghostty").innerHTML =
+  prompt("ls") +
+  `${sp(a(4), "\uF07B docs")}  ${sp(a(4), "\uF07B themes")}  ${sp(a(2), "\uE74E generate.mjs")}  \uF48A README.md  ${sp(a(5), "\uF031 fonts")}\n\n` +
+  prompt("git status -s") +
+  `${sp(a(1), " M")} CONTEXT.md\n${sp(a(2), "A ")} docs/mockups/marigold.html\n${sp(a(1), "??")} .claude/\n\n` +
+  prompt("theme marigold") +
+  `${sp(a(3), "\uF00C")} Switched to ${sp(a(3), "Marigold", "font-weight:700")}. ${sp(a(8), "Reload VSCode once.")}\n\n` +
+  swatchRow(0) + "\n" + swatchRow(8) + "\n\n" +
+  `${sp(a(2), "❯")} <span class="cursor"> </span>`;
+
+// Role table with contrast ratios
+const lum = h => { const c = [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
+  .map(x => x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const ratio = (x, y) => { const [p, q] = [lum(x), lum(y)].sort((m, n) => n - m); return (p + 0.05) / (q + 0.05); };
+const roles = document.getElementById("roles");
+for (const [group, vals] of Object.entries(MARIGOLD)) {
+  const h = document.createElement("h2"); h.textContent = group; roles.append(h);
+  const g = document.createElement("div"); g.className = "swatches"; roles.append(g);
+  const bg = group.startsWith("frame") ? all.frame_face : all.work_bg;
+  for (const [k, v] of Object.entries(vals)) {
+    const r = ratio(v, bg);
+    g.insertAdjacentHTML("beforeend",
+      `<div class="sw"><i style="background:${v}"></i>${k}<span>${v}</span><span class="cr ${r < 4.5 ? "bad" : ""}">${r.toFixed(1)}</span></div>`);
+  }
+}
+
+document.getElementById("busy").onchange = e =>
+  document.getElementById("desktop").classList.toggle("busy", e.target.checked);
+</script>
+</body>
+</html>

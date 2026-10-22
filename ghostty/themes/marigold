@@ -1,0 +1,52 @@
+# Marigold theme: Work surface (dark: warm peach-white on black, marigold accent)
+# Roles from docs/theme-spec.md, values from themes/marigold.json
+# Ghostty has no trailing comments, so each role name is on the line above its value
+# work_bg
+background = #161616
+# work_fg
+foreground = #F5E3DA
+
+# work_cursor
+cursor-color = #F2C45A
+# work_cursor_text
+cursor-text = #161616
+# work_selection
+selection-background = #3D3423
+# work_selection_text
+selection-foreground = #F5E3DA
+
+# Normal colors (0-7)
+# ansi_0
+palette = 0=#2A2A2A
+# ansi_1
+palette = 1=#E06C7A
+# ansi_2
+palette = 2=#A8C08A
+# ansi_3
+palette = 3=#F2C45A
+# ansi_4
+palette = 4=#8FA4E0
+# ansi_5
+palette = 5=#C9A6D6
+# ansi_6
+palette = 6=#7FBFB4
+# ansi_7
+palette = 7=#D9CEC8
+
+# Bright colors (8-15)
+# ansi_8
+palette = 8=#5C5652
+# ansi_9
+palette = 9=#F08C8C
+# ansi_10
+palette = 10=#BCD49E
+# ansi_11
+palette = 11=#F3DAAA
+# ansi_12
+palette = 12=#A9BAF0
+# ansi_13
+palette = 13=#DDBEE6
+# ansi_14
+palette = 14=#9DD3C9
+# ansi_15
+palette = 15=#FFF5EE

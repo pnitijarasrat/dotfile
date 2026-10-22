@@ -1,0 +1,91 @@
+{
+  "name": "Marigold",
+  "work_description": "dark: warm peach-white on black, marigold accent",
+  "shadows": true,
+  "macos": { "appearance": "dark", "accent": "yellow", "highlight": "yellow" },
+  "rules": { "opacity": 0.85, "blur": 20, "radius": 10, "icons": true },
+  "palettes": {
+    "frame": {
+      "frame_face": "#1E1E1E",
+      "frame_highlight": "#383838",
+      "frame_light": "#2A2A2A",
+      "frame_shadow": "#111111",
+      "frame_dark_shadow": "#000000",
+      "frame_title": "#1E1E1E",
+      "frame_title_text": "#F5E3DA",
+      "frame_title_inactive": "#1E1E1E",
+      "frame_title_inactive_text": "#7A706A",
+      "frame_text": "#F5E3DA",
+      "frame_gray_text": "#8C817B",
+      "frame_window": "#161616",
+      "frame_selection": "#F2C45A",
+      "frame_selection_text": "#161616",
+      "frame_tooltip": "#2A2A2A",
+      "frame_desktop": "#161616",
+      "frame_desktop_text": "#F5E3DA"
+    },
+    "work": {
+      "work_bg": "#161616",
+      "work_fg": "#F5E3DA",
+      "work_cursor": "#F2C45A",
+      "work_cursor_text": "#161616",
+      "work_cursorline": "#1F1D1A",
+      "work_selection": "#3D3423",
+      "work_selection_text": "#F5E3DA",
+      "work_line_number": "#5C5652",
+      "work_grid": "#262626",
+      "work_popup_border": "#383838"
+    },
+    "ansi": {
+      "ansi_0": "#2A2A2A",
+      "ansi_1": "#E06C7A",
+      "ansi_2": "#A8C08A",
+      "ansi_3": "#F2C45A",
+      "ansi_4": "#8FA4E0",
+      "ansi_5": "#C9A6D6",
+      "ansi_6": "#7FBFB4",
+      "ansi_7": "#D9CEC8",
+      "ansi_8": "#5C5652",
+      "ansi_9": "#F08C8C",
+      "ansi_10": "#BCD49E",
+      "ansi_11": "#F3DAAA",
+      "ansi_12": "#A9BAF0",
+      "ansi_13": "#DDBEE6",
+      "ansi_14": "#9DD3C9",
+      "ansi_15": "#FFF5EE"
+    },
+    "syntax": {
+      "syntax_comment": "#7A716B",
+      "syntax_keyword": "#E8939B",
+      "syntax_string": "#F3DAAA",
+      "syntax_number": "#C9A6D6",
+      "syntax_function": "#F2C45A",
+      "syntax_type": "#8FA4E0",
+      "syntax_constant": "#F0B878",
+      "syntax_operator": "#B8ACA6",
+      "syntax_error": "#F07080",
+      "syntax_warning": "#F2C45A"
+    },
+    "frame_data": {
+      "frame_data_red": "#E06C7A",
+      "frame_data_green": "#A8C08A",
+      "frame_data_yellow": "#F2C45A",
+      "frame_data_blue": "#8FA4E0",
+      "frame_data_magenta": "#C9A6D6",
+      "frame_data_cyan": "#7FBFB4",
+      "frame_data_orange": "#F0B878"
+    }
+  },
+  "fonts": {
+    "work": {
+      "family": ["JetBrainsMonoNL Nerd Font", "Menlo", "Thonburi"],
+      "ghostty_size": 14,
+      "vscode_size": 11
+    },
+    "frame": {
+      "family": "SF Pro",
+      "size": 13,
+      "bold": "SF Pro Text Semibold"
+    }
+  }
+}

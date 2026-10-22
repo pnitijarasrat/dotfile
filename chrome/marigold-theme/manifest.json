@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Marigold",
+  "version": "1.0",
+  "description": "Windows 95 Classic Frame for the Chrome window. See docs/theme-spec.md.",
+  "theme": {
+    "colors": {
+      "frame": [30, 30, 30],
+      "frame_inactive": [30, 30, 30],
+      "background_tab": [30, 30, 30],
+      "background_tab_inactive": [30, 30, 30],
+      "tab_background_text": [245, 227, 218],
+      "tab_background_text_inactive": [122, 112, 106],
+      "toolbar": [30, 30, 30],
+      "tab_text": [245, 227, 218],
+      "toolbar_text": [245, 227, 218],
+      "toolbar_button_icon": [245, 227, 218],
+      "bookmark_text": [245, 227, 218],
+      "omnibox_background": [22, 22, 22],
+      "omnibox_text": [245, 227, 218],
+      "ntp_background": [22, 22, 22],
+      "ntp_text": [245, 227, 218],
+      "ntp_link": [245, 227, 218]
+    }
+  }
+}
