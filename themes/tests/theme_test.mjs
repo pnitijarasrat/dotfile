@@ -78,6 +78,13 @@ test("switching selects the Theme in VSCode's settings by its name, changing not
   rmSync(root, { recursive: true });
 });
 
+test("switching to a Theme other than Vintage says VSCode needs a reload if the Theme is new", () => {
+  const root = scratch();
+  eq(theme(root, "tiny").out, "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n", "output for tiny");
+  eq(theme(root, "vintage").out, "", "output for vintage");
+  rmSync(root, { recursive: true });
+});
+
 test("a VSCode settings.json with no color theme line fails the Switch and changes nothing", () => {
   const root = scratch();
   writeFileSync(join(root, "vscode/settings.json"), "{}\n");

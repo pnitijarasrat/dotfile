@@ -43,11 +43,17 @@ export function ghostty(id, theme) {
 
 // VSCode's color theme for a Theme: themes/templates/vscode-color-theme.jsonc,
 // which is Vintage's with each value a {{role}}, plus {{name}} and {{type}}.
-// Its prose comments describe Vintage.
+// Its prose comments describe Vintage. Lines set to {{no_shadow}} turn a shadow
+// off; a Theme with shadows drops them and keeps VSCode's own.
 export function vscode(theme) {
+  if (typeof theme.shadows !== "boolean") throw new Error(`${theme.name} doesn't say whether it has shadows`);
   const role = roles(theme);
-  const vars = { name: JSON.stringify(theme.name).slice(1, -1), type: vscodeType(theme) };
-  return template("vscode-color-theme.jsonc").replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? role(name));
+  const vars = { name: JSON.stringify(theme.name).slice(1, -1), type: vscodeType(theme), no_shadow: "#00000000" };
+  return template("vscode-color-theme.jsonc")
+    .split("\n")
+    .filter((line) => !(theme.shadows && line.includes("{{no_shadow}}")))
+    .join("\n")
+    .replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? role(name));
 }
 
 // The workbench is mostly Frame, so a Theme is light or dark by its frame_face.

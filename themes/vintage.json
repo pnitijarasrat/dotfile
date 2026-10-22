@@ -1,6 +1,7 @@
 {
   "name": "Vintage",
   "work_description": "light, K-95-style: navy on white, Windows VGA ANSI",
+  "shadows": false,
   "palettes": {
     "frame": {
       "frame_face": "#C0C0C0",

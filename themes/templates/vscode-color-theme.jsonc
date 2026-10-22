@@ -26,8 +26,8 @@
     "focusBorder": "{{frame_text}}", // frame_text (Win95 focus rectangle)
     "selection.background": "{{frame_selection}}", // frame_selection
     "widget.border": "{{frame_shadow}}", // frame_shadow
-    "widget.shadow": "#00000000", // no shadow (Purist fidelity)
-    "scrollbar.shadow": "#00000000", // no shadow (Purist fidelity)
+    "widget.shadow": "{{no_shadow}}", // no shadow (Purist fidelity)
+    "scrollbar.shadow": "{{no_shadow}}", // no shadow (Purist fidelity)
     "sash.hoverBorder": "{{frame_selection}}", // frame_selection
     "progressBar.background": "{{frame_selection}}", // frame_selection
     "badge.background": "{{frame_selection}}", // frame_selection

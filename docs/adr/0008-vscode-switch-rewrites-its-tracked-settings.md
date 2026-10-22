@@ -15,5 +15,5 @@ Checked on VSCode 1.141 (#135): a running VSCode applies the `settings.json` cha
 
 - Narrows ADR 0006's "each tool added to the Switch needs a committed default plus a git-ignored pointer": VSCode's committed default is its pointer.
 - After a Switch away from Vintage, `git status` shows `vscode/settings.json` modified. Switch back to Vintage before committing other settings changes, or commit only the other hunks.
-- After generating a new Theme, reload VSCode once before switching to it.
+- After generating a new Theme, reload VSCode once before switching to it. The Switch can't tell what VSCode has loaded, so `theme <name>` prints that reminder for every Theme but Vintage, which is always there.
 - The template's prose comments describe Vintage; other Themes reuse the same role mapping.

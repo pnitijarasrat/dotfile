@@ -41,7 +41,10 @@ export function run({ root, args, reload }) {
   // tracked settings.json (ADR 0008). VSCode applies it to open windows.
   writeFileSync(settingsFile, settings.replace(colorTheme, (_, key) => key + JSON.stringify(label)));
   reload();
-  return { code: 0, out: "" };
+  // VSCode only sees a Theme added to its extension after a reload (ADR 0008),
+  // and Vintage is always there.
+  if (name === DEFAULT) return { code: 0, out: "" };
+  return { code: 0, out: `If ${label} is new since VSCode's windows opened, run Developer: Reload Window once.\n` };
 }
 
 // Ghostty reloads its config on SIGUSR2. pkill finding no Ghostty is fine:

@@ -33,6 +33,10 @@ test("is the Vintage theme", () => {
   eq(theme.name, "Vintage", "name");
 });
 
+test("has no shadows (Purist fidelity)", () => {
+  eq(theme.shadows, false, "shadows");
+});
+
 test("every role is an uppercase #RRGGBB", () => {
   for (const [role, hex] of Object.entries(roles)) {
     if (!/^#[0-9A-F]{6}$/.test(hex)) throw new Error(`${role} = ${JSON.stringify(hex)}`);

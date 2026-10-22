@@ -1,6 +1,7 @@
 {
   "name": "Tiny",
   "work_description": "a fixture: dark grey on cream",
+  "shadows": true,
   "palettes": {
     "frame": {
       "frame_face": "#EEEEDD",

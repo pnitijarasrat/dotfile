@@ -68,6 +68,25 @@ test("a Theme with a dark Frame gets a dark VSCode theme", () => {
   if (!vscode(dark).includes('"type": "dark",')) throw new Error("type isn't dark");
 });
 
+test("a Theme with shadows keeps VSCode's own; one without turns them off", () => {
+  if (vscode(tiny).includes("shadow\": \"#00000000\"")) throw new Error("tiny's shadows are turned off");
+  const flat = vscode({ ...tiny, shadows: false });
+  for (const key of ["widget.shadow", "scrollbar.shadow"]) {
+    if (!flat.includes(`"${key}": "#00000000"`)) throw new Error(`${key} isn't turned off`);
+  }
+});
+
+test("refuses a Theme that doesn't say whether it has shadows", () => {
+  const { shadows, ...broken } = tiny;
+  let message = "";
+  try {
+    vscode(broken);
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("shadows")) throw new Error(`expected an error naming shadows, got ${JSON.stringify(message)}`);
+});
+
 test("the VSCode extension contributes one color theme per Theme", () => {
   const json = JSON.parse(vscodeExtension([{ id: "tiny", theme: tiny }, { id: "vintage", theme: { name: "Vintage", palettes: { frame: { frame_face: "#C0C0C0" } } } }]));
   eq(JSON.stringify(json.contributes.themes), JSON.stringify([

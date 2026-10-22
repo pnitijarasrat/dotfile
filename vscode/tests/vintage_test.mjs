@@ -107,6 +107,10 @@ for (const { id, theme: source } of themes(root)) {
     });
   }
 
+  test(`${id}: shadows are off only if the Theme has none`, () => {
+    for (const key of noShadow) eq(colors[key], source.shadows ? undefined : "#00000000", key);
+  });
+
   test(`${id}: activity bar, sidebar, tabs and panel titles are Frame grey with black text`, () => {
     for (const key of [
       "activityBar.background",
