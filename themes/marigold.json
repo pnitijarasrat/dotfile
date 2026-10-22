@@ -5,6 +5,7 @@
   "macos": { "appearance": "dark", "accent": "yellow", "highlight": "yellow" },
   "vscode": { "selection": "work_selection" },
   "rules": { "opacity": 0.85, "blur": 20, "radius": 10, "icons": true },
+  "borders": { "width": 2, "active": "frame_selection", "inactive": "frame_shadow" },
   "palettes": {
     "frame": {
       "frame_face": "#1E1E1E",

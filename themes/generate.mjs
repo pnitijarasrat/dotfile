@@ -55,9 +55,17 @@ export function ghostty(id, theme) {
 }
 
 // SketchyBar's Frame palette for a Theme, which JankyBorders shares (#136):
-// shell variables named after their roles, as 0xAARRGGBB.
+// shell variables named after their roles, as 0xAARRGGBB. It ends with
+// JankyBorders' options (#152), so bordersrc reads them instead of asking
+// which Theme is active.
 export function sketchybar(id, theme) {
+  if (!theme.rules) throw new Error(`${theme.name} has no Theme rules`);
+  if (!theme.borders) throw new Error(`${theme.name} has no borders for JankyBorders`);
   const role = roles(theme);
+  const { width, active, inactive } = theme.borders;
+  for (const name of [active, inactive]) {
+    if (!theme.palettes.frame?.[name]) throw new Error(`${theme.name}'s border color ${name} isn't one of its Frame roles`);
+  }
   const line = (name, comment) => {
     const assignment = `export ${name}="0xff${role(name).slice(1).toLowerCase()}"`;
     // Comments line up one space past the longest assignment.
@@ -81,6 +89,12 @@ export function sketchybar(id, theme) {
     "",
     "# Frame data colors: data on grey, where Work surface brights are unreadable.",
     ...["red", "green", "yellow", "blue", "magenta", "cyan", "orange"].map((color) => line(`frame_data_${color}`)),
+    "",
+    "# JankyBorders: style from the radius rule, width and colors from the Theme's borders.",
+    `export border_style="${theme.rules.radius > 0 ? "round" : "square"}"`,
+    `export border_width="${width.toFixed(1)}"`,
+    `export border_active_color="$${active}"`,
+    `export border_inactive_color="$${inactive}"`,
     "",
   ].join("\n");
 }

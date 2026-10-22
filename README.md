@@ -56,9 +56,9 @@ Check each Theme's Ghostty theme against its source file, and the config against
 
 ## SketchyBar and JankyBorders
 
-The bar's Frame palette is `sketchybar/themes/vintage.sh`, generated from `themes/vintage.json` (#136) and loaded by `sketchybar/color.sh`, which JankyBorders' `borders/bordersrc` also sources. A Switch overrides it through `sketchybar/active-theme`; if that Theme's palette was never generated, the bar stays Vintage. Each Theme gets its own `sketchybar/themes/<name>.sh`.
+The bar's Frame palette is `sketchybar/themes/vintage.sh`, generated from `themes/vintage.json` (#136) and loaded by `sketchybar/color.sh`, which JankyBorders' `borders/bordersrc` also sources. A Switch overrides it through `sketchybar/active-theme`; if that Theme's palette was never generated, the bar stays Vintage. Each Theme gets its own `sketchybar/themes/<name>.sh`, which ends with JankyBorders' style, width and colors from the Theme's `borders` and `rules` (#152): Vintage's square and 4 wide, Marigold's rounded and 2 wide with a marigold active border. A Switch reshapes the borders live.
 
-Check each Theme's palette against its source file, and that it holds every role the bar and JankyBorders use, with `node sketchybar/tests/vintage_test.mjs`.
+Check each Theme's palette against its source file, that it holds every role the bar and JankyBorders use, and each Theme's border options against its spec, with `node sketchybar/tests/vintage_test.mjs`.
 
 ## Raycast
 

@@ -78,6 +78,35 @@ test("generates a SketchyBar Frame palette for any Theme source file", () => {
   eq(sketchybar("tiny", tiny), read("themes/tests/fixtures/tiny.sketchybar"), "sketchybar/themes/tiny.sh");
 });
 
+test("a Theme with square corners gives JankyBorders square borders", () => {
+  const square = sketchybar("tiny", { ...tiny, rules: { ...tiny.rules, radius: 0 } });
+  if (!square.includes('export border_style="square"\n')) throw new Error(`no square style in:\n${square}`);
+});
+
+test("refuses a Theme without borders or Theme rules for JankyBorders", () => {
+  const { borders, ...noBorders } = tiny;
+  const { rules, ...noRules } = tiny;
+  for (const [broken, key] of [[noBorders, "borders"], [noRules, "rules"]]) {
+    let message = "";
+    try {
+      sketchybar("tiny", broken);
+    } catch (err) {
+      message = err.message;
+    }
+    if (!message.includes(key)) throw new Error(`expected an error naming ${key}, got ${JSON.stringify(message)}`);
+  }
+});
+
+test("refuses JankyBorders colors that aren't Frame roles of the Theme", () => {
+  let message = "";
+  try {
+    sketchybar("tiny", { ...tiny, borders: { ...tiny.borders, active: "frame_nope" } });
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("frame_nope")) throw new Error(`expected an error naming frame_nope, got ${JSON.stringify(message)}`);
+});
+
 test("generates a VSCode color theme for any Theme source file", () => {
   const text = vscode(tiny);
   if (!text.startsWith("// Tiny theme for VSCode")) throw new Error(`header: ${text.split("\n")[0]}`);

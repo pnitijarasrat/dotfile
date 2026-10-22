@@ -1,14 +1,15 @@
 #!/bin/bash
 
-# Frame palette shared with SketchyBar (role names from docs/theme-spec.md)
+# Frame palette shared with SketchyBar (role names from docs/theme-spec.md),
+# which ends with the active Theme's border style, width and colors (#152)
 source "$HOME/.config/sketchybar/color.sh"
 
 options=(
-  style=square
-  width=4.0
+  style="$border_style"
+  width="$border_width"
   hidpi=on
-  active_color="$frame_face"
-  inactive_color="$frame_shadow"
+  active_color="$border_active_color"
+  inactive_color="$border_inactive_color"
 )
 
 borders "${options[@]}"

@@ -54,10 +54,47 @@ for (const { id, theme } of themes(root)) {
   });
 }
 
-test("JankyBorders: active frame_face, inactive frame_shadow (#15)", () => {
+// Each Theme's JankyBorders, as its spec sets them: Vintage's in
+// docs/theme-spec.md (#15), Marigold's in docs/theme-spec-marigold.md (#152).
+const specs = {
+  vintage: { style: "square", width: 4, active: "frame_face", inactive: "frame_shadow" },
+  marigold: { style: "round", width: 2, active: "frame_selection", inactive: "frame_shadow" },
+};
+
+for (const [id, { style, ...borders }] of Object.entries(specs)) {
+  test(`${id}: its Theme source file's borders are its spec's`, () => {
+    const theme = themes(root).find((t) => t.id === id).theme;
+    eq(JSON.stringify(theme.borders), JSON.stringify(borders), `themes/${id}.json borders`);
+  });
+}
+
+for (const { id, theme } of themes(root)) {
+  test(`${id}: JankyBorders' style, width and colors are its Theme's (#152)`, () => {
+    const options = new Map([...read(`sketchybar/themes/${id}.sh`).matchAll(/^export (border_\w+)="([^"]*)"/gm)].map((m) => [m[1], m[2]]));
+    const { width, active, inactive } = theme.borders;
+    eq(options.get("border_style"), specs[id]?.style, `${id} border_style`);
+    eq(options.get("border_width"), width.toFixed(1), `${id} border_width`);
+    eq(options.get("border_active_color"), `$${active}`, `${id} border_active_color`);
+    eq(options.get("border_inactive_color"), `$${inactive}`, `${id} border_inactive_color`);
+  });
+
+  test(`${id}: defines every border option bordersrc uses, and every role they name`, () => {
+    const text = read(`sketchybar/themes/${id}.sh`);
+    const defined = new Set([...text.matchAll(/^export (\w+)=/gm)].map((m) => m[1]));
+    const needed = [...read("borders/bordersrc").matchAll(/\$\{?(border_\w+)/g)].map((m) => m[1]);
+    const named = [...text.matchAll(/^export border_\w+="\$(\w+)"/gm)].map((m) => m[1]);
+    const missing = [...needed, ...named].filter((name) => !defined.has(name));
+    if (missing.length) throw new Error(`not in sketchybar/themes/${id}.sh: ${missing.join(", ")}`);
+  });
+}
+
+test("bordersrc takes every option but hidpi from the active Theme's palette, not a Theme's name", () => {
   const bordersrc = read("borders/bordersrc");
-  for (const option of ['active_color="$frame_face"', 'inactive_color="$frame_shadow"']) {
-    if (!bordersrc.includes(option)) throw new Error(`bordersrc doesn't set ${option}`);
+  for (const option of ["style", "width", "active_color", "inactive_color"]) {
+    if (!bordersrc.includes(`${option}="$border_${option}"`)) throw new Error(`bordersrc doesn't set ${option} from $border_${option}`);
+  }
+  for (const { id } of themes(root)) {
+    if (bordersrc.includes(id)) throw new Error(`bordersrc names the ${id} Theme`);
   }
 });
 
