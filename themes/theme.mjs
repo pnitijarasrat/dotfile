@@ -42,7 +42,7 @@ export function run({ root, args, reload }) {
   writeFileSync(settingsFile, settings.replace(colorTheme, (_, key) => key + JSON.stringify(label)));
   // sketchybar/color.sh, which JankyBorders' bordersrc also sources, loads
   // this after its own default.
-  writeFileSync(join(root, "sketchybar/active-theme"), `theme=${name}\n`);
+  writeFileSync(join(root, "sketchybar/active-theme"), `active_theme=${name}\n`);
   for (const tool of ["ghostty", "sketchybar", "borders"]) reload(tool);
   // VSCode only sees a Theme added to its extension after a reload (ADR 0008),
   // and Vintage is always there.

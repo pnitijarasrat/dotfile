@@ -113,6 +113,14 @@ test("switching points SketchyBar at the Theme's Frame palette", () => {
   rmSync(root, { recursive: true });
 });
 
+test("SketchyBar stays Vintage if the active Theme's Frame palette was never generated", () => {
+  const root = scratch();
+  theme(root, "tiny");
+  rmSync(join(root, "sketchybar/themes/tiny.sh"));
+  eq(frameFace(root), "0xffc0c0c0\n", "frame_face");
+  rmSync(root, { recursive: true });
+});
+
 test("switching points JankyBorders at the Theme's Frame palette", () => {
   const root = scratch();
   theme(root, "tiny");
@@ -138,6 +146,7 @@ test("a VSCode settings.json with no color theme line fails the Switch and chang
   eq(result.out, 'vscode/settings.json has no "workbench.colorTheme" line\n', "output");
   eq(read(root, "themes/active"), undefined, "themes/active");
   eq(read(root, "ghostty/active-theme"), undefined, "ghostty/active-theme");
+  eq(read(root, "sketchybar/active-theme"), undefined, "sketchybar/active-theme");
   eq(result.reloads, "", "reloads");
   rmSync(root, { recursive: true });
 });

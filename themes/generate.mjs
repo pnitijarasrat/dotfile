@@ -47,6 +47,7 @@ export function sketchybar(id, theme) {
   const role = roles(theme);
   const line = (name, comment) => {
     const assignment = `export ${name}="0xff${role(name).slice(1).toLowerCase()}"`;
+    // Comments line up one space past the longest assignment.
     return comment ? `${assignment.padEnd(37)} # ${comment}` : assignment;
   };
   return [

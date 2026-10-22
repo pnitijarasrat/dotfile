@@ -13,7 +13,7 @@ The **Vintage theme** is the first **Theme**. Its role values and fonts live in 
 
 `node themes/generate.mjs` generates each tool's theme files from every Theme source file in `themes/` (#132); so far that's Ghostty's, VSCode's (#135) and SketchyBar's Frame palette (#136). Generated files are committed: don't edit them by hand. `node themes/tests/generate_test.mjs` fails if one is stale, and checks the generator against a small fixture Theme.
 
-`theme <name>` makes a **Switch** (#133): `<name>` becomes the active Theme, and open Ghostty and VSCode windows, SketchyBar and JankyBorders recolor in place. So far only Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch, the bar keeping its Win95 taskbar layout; the other tools stay Vintage. Neovim never joins: it keeps its own hand-written colorscheme (`docs/adr/0007-neovim-stays-out-of-the-switch.md`). `theme` with no name prints the active Theme; an unknown name changes nothing and lists the Themes in `themes/`. Put it on PATH once with `ln -sf ~/.config/themes/theme.mjs ~/.local/bin/theme`. It records the active Theme in `themes/active`, Ghostty's pointer in `ghostty/active-theme` and SketchyBar's (which JankyBorders shares) in `sketchybar/active-theme`, all ignored by git (`docs/adr/0006-switch-records-the-active-theme-outside-git.md`). VSCode has no include, so the Switch rewrites the `workbench.colorTheme` line of the tracked `vscode/settings.json`, which shows as modified until you switch back to Vintage (`docs/adr/0008-vscode-switch-rewrites-its-tracked-settings.md`). Switching to any Theme but Vintage reminds you that VSCode needs `Developer: Reload Window` once if the Theme is new. Check it with `node themes/tests/theme_test.mjs`.
+`theme <name>` makes a **Switch** (#133): `<name>` becomes the active Theme, and open Ghostty and VSCode windows, SketchyBar and JankyBorders recolor in place. So far only Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch, the bar keeping its taskbar layout; the other tools stay Vintage. Neovim never joins: it keeps its own hand-written colorscheme (`docs/adr/0007-neovim-stays-out-of-the-switch.md`). `theme` with no name prints the active Theme; an unknown name changes nothing and lists the Themes in `themes/`. Put it on PATH once with `ln -sf ~/.config/themes/theme.mjs ~/.local/bin/theme`. It records the active Theme in `themes/active`, Ghostty's pointer in `ghostty/active-theme` and SketchyBar's (which JankyBorders shares) in `sketchybar/active-theme`, all ignored by git (`docs/adr/0006-switch-records-the-active-theme-outside-git.md`). VSCode has no include, so the Switch rewrites the `workbench.colorTheme` line of the tracked `vscode/settings.json`, which shows as modified until you switch back to Vintage (`docs/adr/0008-vscode-switch-rewrites-its-tracked-settings.md`). Switching to any Theme but Vintage reminds you that VSCode needs `Developer: Reload Window` once if the Theme is new. Check it with `node themes/tests/theme_test.mjs`.
 
 Vintage is the only real Theme so far. To watch a Switch, add the test fixture as a Theme for a moment:
 
@@ -52,6 +52,12 @@ Check each Theme's color theme against its Theme source file and `docs/theme-spe
 The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44) until the first Switch, which overrides it through `ghostty/active-theme` (#133). Each Theme gets its own `ghostty/themes/<name>`. Starship, ccstatusline and ranger take their colors from it.
 
 Check each Theme's Ghostty theme against its source file, and the config against `themes/vintage.json` and `docs/theme-spec.md`, with `node ghostty/tests/vintage_test.mjs`.
+
+## SketchyBar and JankyBorders
+
+The bar's Frame palette is `sketchybar/themes/vintage.sh`, generated from `themes/vintage.json` (#136) and loaded by `sketchybar/color.sh`, which JankyBorders' `borders/bordersrc` also sources. A Switch overrides it through `sketchybar/active-theme`; if that Theme's palette was never generated, the bar stays Vintage. Each Theme gets its own `sketchybar/themes/<name>.sh`.
+
+Check each Theme's palette against its source file, and that it holds every role the bar and JankyBorders use, with `node sketchybar/tests/vintage_test.mjs`.
 
 ## Raycast
 
