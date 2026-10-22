@@ -3,7 +3,7 @@
   "work_description": "light, K-95-style: navy on white, Windows VGA ANSI",
   "shadows": false,
   "macos": { "appearance": "light", "accent": "graphite", "highlight": "blue" },
-  "vscode": { "selection": "ansi_11" },
+  "vscode": { "selection": "ansi_11", "modern_ui": false, "title_bar": "custom" },
   "rules": { "opacity": 1, "blur": 0, "radius": 0, "icons": false },
   "borders": { "width": 4, "active": "frame_face", "inactive": "frame_shadow" },
   "palettes": {

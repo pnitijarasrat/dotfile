@@ -3,7 +3,7 @@
   "work_description": "a fixture: dark grey on cream",
   "shadows": true,
   "macos": { "appearance": "dark", "accent": "green", "highlight": "yellow" },
-  "vscode": { "selection": "work_selection" },
+  "vscode": { "selection": "work_selection", "modern_ui": true, "title_bar": "native" },
   "rules": { "opacity": 0.9, "blur": 10, "radius": 6, "icons": true },
   "borders": { "width": 3, "active": "frame_selection", "inactive": "frame_dark_shadow" },
   "palettes": {

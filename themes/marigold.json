@@ -3,7 +3,7 @@
   "work_description": "dark: warm peach-white on black, marigold accent",
   "shadows": true,
   "macos": { "appearance": "dark", "accent": "yellow", "highlight": "yellow" },
-  "vscode": { "selection": "work_selection" },
+  "vscode": { "selection": "work_selection", "modern_ui": true, "title_bar": "native" },
   "rules": { "opacity": 0.85, "blur": 20, "radius": 10, "icons": true },
   "borders": { "width": 2, "active": "frame_selection", "inactive": "frame_shadow" },
   "palettes": {

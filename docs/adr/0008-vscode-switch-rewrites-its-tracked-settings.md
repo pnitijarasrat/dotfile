@@ -1,10 +1,10 @@
-# VSCode's Switch rewrites one line of its tracked settings.json
+# VSCode's Switch rewrites the lines it owns in its tracked settings.json
 
-ADR 0006 has each tool load the active **Theme** from a git-ignored pointer over a committed default. VSCode can't: `settings.json` has no include, and it's tracked in the repo and symlinked into place. So `theme <name>` (#135) rewrites the one `workbench.colorTheme` line of `vscode/settings.json` to the Theme's name, and nothing else. The committed value is `Vintage`, so `theme vintage` leaves the file as committed.
+ADR 0006 has each tool load the active **Theme** from a git-ignored pointer over a committed default. VSCode can't: `settings.json` has no include, and it's tracked in the repo and symlinked into place. So `theme <name>` (#135) rewrites the `workbench.colorTheme` line of `vscode/settings.json` to the Theme's name. Since Themes can reshape a tool (ADR 0011), it also rewrites `window.titleBarStyle` and `workbench.experimental.modernUI` to the `title_bar` and `modern_ui` in the Theme source file's `vscode` block (#153). It touches no other line, and fails before writing anything if one of these three is missing. The committed values are Vintage's, so `theme vintage` leaves the file as committed.
 
 The local extension in `vscode/vintage-theme` contributes every Theme's color theme under the Theme's name. `themes/generate.mjs` writes each color theme from `themes/templates/vscode-color-theme.jsonc`, which is Vintage's with each value a role name, and the extension's `package.json` from `themes/templates/vscode-package.json`.
 
-Checked on VSCode 1.141 (#135): a running VSCode applies the `settings.json` change to open windows, so the Switch is live. A Theme newly added to `package.json` isn't seen until `Developer: Reload Window`; until then switching to it does nothing visible.
+Checked on VSCode 1.141 (#135): a running VSCode applies the `settings.json` change to open windows, so the Switch is live. The modern UI changes live too, but a changed title bar style only shows after VSCode restarts, and VSCode offers to restart when it sees one (checked in the workbench bundle of the VSCode 1.133 installed when #153 was built). A Theme newly added to `package.json` isn't seen until `Developer: Reload Window`; until then switching to it does nothing visible.
 
 ## Considered options
 

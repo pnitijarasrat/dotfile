@@ -4,6 +4,8 @@
     "workbench.colorTheme": "Vintage",
     // Frame (#20): VSCode draws the title bar, so the theme can make it navy,
     // and the context menus, so they are Frame grey instead of native macOS.
+    // The Switch rewrites the color theme, title bar and modern UI lines to the
+    // Theme's (#153); these are Vintage's.
     "window.titleBarStyle": "custom",
     "window.menuStyle": "custom",
     // The experimental modern UI floats the parts as rounded cards and ignores
