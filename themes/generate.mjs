@@ -1,7 +1,7 @@
 // Generates each tool's theme files from the Theme source files in themes/ (#132).
 // Run: node themes/generate.mjs
 // Generated files are committed; themes/tests/generate_test.mjs fails if one is stale.
-import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -107,6 +107,17 @@ export function vscodeExtension(all) {
   return template("vscode-package.json").replace("{{themes}}", all.map(entry).join(",\n"));
 }
 
+// Chrome's theme extension for a Theme: themes/templates/chrome-manifest.json,
+// which is Vintage's with each color a {{role}}, plus {{name}}. Chrome only
+// takes [r, g, b] arrays, so the manifest has no hex and no role comments; its
+// description is Vintage's.
+export function chrome(theme) {
+  const role = roles(theme);
+  const rgb = (name) => `[${role(name).match(/\w\w/g).map((hex) => parseInt(hex, 16)).join(", ")}]`;
+  const vars = { name: JSON.stringify(theme.name).slice(1, -1) };
+  return template("chrome-manifest.json").replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? rgb(name));
+}
+
 function template(file) {
   return readFileSync(join(dirname(fileURLToPath(import.meta.url)), "templates", file), "utf8");
 }
@@ -131,12 +142,15 @@ export function generate(root) {
     ...all.map(({ id, theme }) => ({ path: `sketchybar/themes/${id}.sh`, text: sketchybar(id, theme) })),
     ...all.map(({ id, theme }) => ({ path: `vscode/vintage-theme/themes/${id}-color-theme.json`, text: vscode(theme) })),
     { path: "vscode/vintage-theme/package.json", text: vscodeExtension(all) },
+    ...all.map(({ id, theme }) => ({ path: `chrome/${id}-theme/manifest.json`, text: chrome(theme) })),
   ];
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const root = join(dirname(fileURLToPath(import.meta.url)), "..");
   for (const { path, text } of generate(root)) {
+    // A new Theme's Chrome extension needs its own folder.
+    mkdirSync(dirname(join(root, path)), { recursive: true });
     writeFileSync(join(root, path), text);
     console.log(`wrote ${path}`);
   }

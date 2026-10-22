@@ -1,9 +1,9 @@
-// Checks for the Theme generator, themes/generate.mjs (#132, #135).
+// Checks for the Theme generator, themes/generate.mjs (#132, #135, #137).
 // Run: node themes/tests/generate_test.mjs
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { generate, ghostty, sketchybar, vscode, vscodeExtension } from "../generate.mjs";
+import { chrome, generate, ghostty, sketchybar, vscode, vscodeExtension } from "../generate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -26,8 +26,8 @@ function eq(actual, expected, what) {
   }
 }
 
-// A small Theme with the roles Ghostty and VSCode take, and its Ghostty theme
-// written by hand.
+// A small Theme with the roles Ghostty, SketchyBar, VSCode and Chrome take, and its Ghostty
+// theme, SketchyBar palette and Chrome theme written by hand.
 const tiny = JSON.parse(read("themes/tests/fixtures/tiny.json"));
 
 test("generates a Ghostty theme for any Theme source file", () => {
@@ -111,9 +111,25 @@ test("refuses a Theme missing a role VSCode takes", () => {
   if (!message.includes("frame_title")) throw new Error(`expected an error naming frame_title, got ${JSON.stringify(message)}`);
 });
 
+test("generates a Chrome theme extension for any Theme source file", () => {
+  eq(chrome(tiny), read("themes/tests/fixtures/tiny.chrome.json"), "chrome/tiny-theme/manifest.json");
+});
+
+test("refuses a Theme missing a role Chrome takes", () => {
+  const { frame_desktop, ...frame } = tiny.palettes.frame;
+  const broken = { ...tiny, palettes: { ...tiny.palettes, frame } };
+  let message = "";
+  try {
+    chrome(broken);
+  } catch (err) {
+    message = err.message;
+  }
+  if (!message.includes("frame_desktop")) throw new Error(`expected an error naming frame_desktop, got ${JSON.stringify(message)}`);
+});
+
 test("every committed generated file is what the generator produces", () => {
   const files = generate(root);
-  for (const path of ["ghostty/themes/vintage", "sketchybar/themes/vintage.sh", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json"]) {
+  for (const path of ["ghostty/themes/vintage", "sketchybar/themes/vintage.sh", "vscode/vintage-theme/themes/vintage-color-theme.json", "vscode/vintage-theme/package.json", "chrome/vintage-theme/manifest.json"]) {
     if (!files.some((f) => f.path === path)) throw new Error(`generator doesn't produce ${path}`);
   }
   for (const { path, text } of files) {

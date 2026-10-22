@@ -1,4 +1,4 @@
-// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135).
+// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137).
 // Runs it against a scratch copy of the repo with each tool's reload stubbed,
 // so no open window or bar changes.
 // Run: node themes/tests/theme_test.mjs
@@ -131,10 +131,16 @@ test("switching points JankyBorders at the Theme's Frame palette", () => {
   rmSync(root, { recursive: true });
 });
 
-test("switching to a Theme other than Vintage says VSCode needs a reload if the Theme is new", () => {
+// The manual step that puts a Theme's extension in Chrome, which no Switch can
+// do (docs/research/chrome-theme-switch.md).
+const chromeStep = (root, id) =>
+  `To switch Chrome, open chrome://extensions, turn on Developer mode, click Load unpacked and pick ${root}/chrome/${id}-theme (Cmd+Shift+G types a path).\n`;
+
+test("switching says VSCode needs a reload if the Theme is new, and gives Chrome's manual step", () => {
   const root = scratch();
-  eq(theme(root, "tiny").out, "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n", "output for tiny");
-  eq(theme(root, "vintage").out, "", "output for vintage");
+  const reminder = "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n";
+  eq(theme(root, "tiny").out, reminder + chromeStep(root, "tiny"), "output for tiny");
+  eq(theme(root, "vintage").out, chromeStep(root, "vintage"), "output for vintage");
   rmSync(root, { recursive: true });
 });
 

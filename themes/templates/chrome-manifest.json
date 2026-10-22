@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "{{name}}",
+  "version": "1.0",
+  "description": "Windows 95 Classic Frame for the Chrome window. See docs/theme-spec.md.",
+  "theme": {
+    "colors": {
+      "frame": {{frame_title}},
+      "frame_inactive": {{frame_title_inactive}},
+      "background_tab": {{frame_title}},
+      "background_tab_inactive": {{frame_title_inactive}},
+      "tab_background_text": {{frame_title_text}},
+      "tab_background_text_inactive": {{frame_title_inactive_text}},
+      "toolbar": {{frame_face}},
+      "tab_text": {{frame_text}},
+      "toolbar_text": {{frame_text}},
+      "toolbar_button_icon": {{frame_text}},
+      "bookmark_text": {{frame_text}},
+      "omnibox_background": {{frame_window}},
+      "omnibox_text": {{frame_text}},
+      "ntp_background": {{frame_desktop}},
+      "ntp_text": {{frame_desktop_text}},
+      "ntp_link": {{frame_desktop_text}}
+    }
+  }
+}

@@ -11,9 +11,9 @@
 
 The **Vintage theme** is the first **Theme**. Its role values and fonts live in one place, the Vintage Theme source file `themes/vintage.json` (#131); `docs/theme-spec.md` names the roles and says where each goes. Every tool's Vintage test reads its expected values from the source file. Check the source file against the spec with `node themes/tests/vintage_test.mjs`.
 
-`node themes/generate.mjs` generates each tool's theme files from every Theme source file in `themes/` (#132); so far that's Ghostty's, VSCode's (#135) and SketchyBar's Frame palette (#136). Generated files are committed: don't edit them by hand. `node themes/tests/generate_test.mjs` fails if one is stale, and checks the generator against a small fixture Theme.
+`node themes/generate.mjs` generates each tool's theme files from every Theme source file in `themes/` (#132); so far that's Ghostty's, VSCode's (#135), SketchyBar's Frame palette (#136) and Chrome's theme extension (#137). Generated files are committed: don't edit them by hand. `node themes/tests/generate_test.mjs` fails if one is stale, and checks the generator against a small fixture Theme.
 
-`theme <name>` makes a **Switch** (#133): `<name>` becomes the active Theme, and open Ghostty and VSCode windows, SketchyBar and JankyBorders recolor in place. So far only Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch, the bar keeping its taskbar layout; the other tools stay Vintage. Neovim never joins: it keeps its own hand-written colorscheme (`docs/adr/0007-neovim-stays-out-of-the-switch.md`). `theme` with no name prints the active Theme; an unknown name changes nothing and lists the Themes in `themes/`. Put it on PATH once with `ln -sf ~/.config/themes/theme.mjs ~/.local/bin/theme`. It records the active Theme in `themes/active`, Ghostty's pointer in `ghostty/active-theme` and SketchyBar's (which JankyBorders shares) in `sketchybar/active-theme`, all ignored by git (`docs/adr/0006-switch-records-the-active-theme-outside-git.md`). VSCode has no include, so the Switch rewrites the `workbench.colorTheme` line of the tracked `vscode/settings.json`, which shows as modified until you switch back to Vintage (`docs/adr/0008-vscode-switch-rewrites-its-tracked-settings.md`). Switching to any Theme but Vintage reminds you that VSCode needs `Developer: Reload Window` once if the Theme is new. Check it with `node themes/tests/theme_test.mjs`.
+`theme <name>` makes a **Switch** (#133): `<name>` becomes the active Theme, and open Ghostty and VSCode windows, SketchyBar and JankyBorders recolor in place. So far only Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch, the bar keeping its taskbar layout; the other tools stay Vintage. Neovim never joins: it keeps its own hand-written colorscheme (`docs/adr/0007-neovim-stays-out-of-the-switch.md`). `theme` with no name prints the active Theme; an unknown name changes nothing and lists the Themes in `themes/`. Put it on PATH once with `ln -sf ~/.config/themes/theme.mjs ~/.local/bin/theme`. It records the active Theme in `themes/active`, Ghostty's pointer in `ghostty/active-theme` and SketchyBar's (which JankyBorders shares) in `sketchybar/active-theme`, all ignored by git (`docs/adr/0006-switch-records-the-active-theme-outside-git.md`). VSCode has no include, so the Switch rewrites the `workbench.colorTheme` line of the tracked `vscode/settings.json`, which shows as modified until you switch back to Vintage (`docs/adr/0008-vscode-switch-rewrites-its-tracked-settings.md`). Switching to any Theme but Vintage reminds you that VSCode needs `Developer: Reload Window` once if the Theme is new. No supported route outside Chrome can change its theme, so every Switch prints the step that does: Load unpacked the Theme's `chrome/<name>-theme` in `chrome://extensions` (`docs/adr/0009-chrome-switch-is-a-manual-step.md`). Check it with `node themes/tests/theme_test.mjs`.
 
 Vintage is the only real Theme so far. To watch a Switch, add the test fixture as a Theme for a moment:
 
@@ -21,9 +21,10 @@ Vintage is the only real Theme so far. To watch a Switch, add the test fixture a
 cp ~/.config/themes/tests/fixtures/tiny.json ~/.config/themes/tiny.json
 node ~/.config/themes/generate.mjs
 # In VSCode, run Developer: Reload Window once so it sees the new Theme
-theme tiny      # Ghostty, VSCode, SketchyBar and JankyBorders turn the fixture's cream and dark grey
+theme tiny      # Ghostty, VSCode, SketchyBar and JankyBorders turn the fixture's cream and dark grey; it prints Chrome's step
 theme vintage
 rm ~/.config/themes/tiny.json ~/.config/ghostty/themes/tiny ~/.config/sketchybar/themes/tiny.sh ~/.config/vscode/vintage-theme/themes/tiny-color-theme.json
+rm -r ~/.config/chrome/tiny-theme
 node ~/.config/themes/generate.mjs
 ```
 
@@ -69,9 +70,9 @@ Check the theme against `themes/vintage.json` and `docs/theme-spec.md` with `nod
 
 ## Chrome
 
-The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37). It also makes the New Tab page the flat teal Classic desktop (#38). Incognito windows keep Chrome's own dark look: Chrome doesn't apply themes there. Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme` (the file picker hides `.config`; press Cmd+Shift+. to show it, or Cmd+Shift+G to type the path). To reload after changing `manifest.json`, run **Load unpacked** on the same folder again. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
+The window theme is a local extension, "Vintage", in `chrome/vintage-theme` (#37), generated from `themes/vintage.json` (#137); each Theme gets its own `chrome/<name>-theme`. It also makes the New Tab page the flat teal Classic desktop (#38). Incognito windows keep Chrome's own dark look: Chrome doesn't apply themes there. Load it once: open `chrome://extensions`, turn on **Developer mode**, click **Load unpacked** and pick `~/.config/chrome/vintage-theme` (the file picker hides `.config`; press Cmd+Shift+. to show it, or Cmd+Shift+G to type the path). To reload after regenerating `manifest.json`, run **Load unpacked** on the same folder again. A Switch can't change Chrome's theme: `theme <name>` prints the Load unpacked step for the Theme's folder, and you need it on every Switch, because Chrome uninstalls the theme it replaces. To go back to the default look, use **Reset to default** under Settings → Appearance → Theme.
 
-Check the theme against `themes/vintage.json` and `docs/theme-spec.md` (palette, and the color keys the installed Chrome knows) with `node chrome/tests/vintage_test.mjs`.
+Check each Theme's extension against its source file and `docs/theme-spec.md` (palette, and the color keys the installed Chrome knows) with `node chrome/tests/vintage_test.mjs`.
 
 ## Claude Code
 
