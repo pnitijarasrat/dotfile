@@ -18,7 +18,9 @@
       "frame_window": "#FFFFFF",
       "frame_selection": "#3030A0",
       "frame_selection_text": "#FFFFF1",
-      "frame_tooltip": "#FFFFD0"
+      "frame_tooltip": "#FFFFD0",
+      "frame_desktop": "#305030",
+      "frame_desktop_text": "#FFFFF2"
     },
     "work": {
       "work_bg": "#FFF8E7",

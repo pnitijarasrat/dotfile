@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Makes a Switch (#133): `theme <name>` makes <name> the active Theme.
 // Run: theme <name>, or theme to print the active Theme.
-// So far Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch.
+// So far Ghostty, VSCode (#135), SketchyBar and JankyBorders (#136) switch;
+// Chrome (#137) can't, so it prints Chrome's manual step.
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -46,8 +47,11 @@ export function run({ root, args, reload }) {
   for (const tool of ["ghostty", "sketchybar", "borders"]) reload(tool);
   // VSCode only sees a Theme added to its extension after a reload (ADR 0008),
   // and Vintage is always there.
-  if (name === DEFAULT) return { code: 0, out: "" };
-  return { code: 0, out: `If ${label} is new since VSCode's windows opened, run Developer: Reload Window once.\n` };
+  const vscode = name === DEFAULT ? "" : `If ${label} is new since VSCode's windows opened, run Developer: Reload Window once.\n`;
+  // No supported route outside Chrome can change its theme, and Chrome uninstalls a theme
+  // it switches away from, so every Switch loads the Theme's extension (ADR 0009).
+  const chrome = `To switch Chrome, open chrome://extensions, turn on Developer mode, click Load unpacked and pick ${join(root, "chrome", `${name}-theme`)} (Cmd+Shift+G types a path).\n`;
+  return { code: 0, out: vscode + chrome };
 }
 
 // How each running tool re-reads its config. A tool that isn't running is

@@ -1,8 +1,9 @@
-// Checks for the Chrome Vintage theme (#37, #38).
+// Checks for each Theme's Chrome theme extension (#37, #38, #137).
 // Run: node chrome/tests/vintage_test.mjs
 import { existsSync, readFileSync, realpathSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { themes } from "../../themes/generate.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const read = (path) => readFileSync(join(root, path), "utf8");
@@ -24,18 +25,6 @@ function eq(actual, expected, what) {
     throw new Error(`${what}: expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`);
   }
 }
-
-// Every role the Theme defines, with its hex, from the Vintage Theme source
-// file, themes/vintage.json.
-const vintage = JSON.parse(read("themes/vintage.json"));
-const roles = Object.assign({}, ...Object.values(vintage.palettes));
-
-const manifestPath = "chrome/vintage-theme/manifest.json";
-let manifest = {};
-test("manifest is strict JSON", () => {
-  manifest = JSON.parse(read(manifestPath));
-});
-const colors = manifest.theme?.colors ?? {};
 
 // Chrome only takes [r, g, b] arrays, so compare as hex.
 const hex = (rgb) =>
@@ -76,68 +65,83 @@ const contrast = (a, b) => {
   const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (hi + 0.05) / (lo + 0.05);
 };
-function expectReadable(text, background) {
+function expectReadable(colors, text, background) {
   const ratio = contrast(hex(colors[text]), hex(colors[background]));
   if (ratio < 4.5) throw new Error(`${text} on ${background} is ${ratio.toFixed(2)}:1, under 4.5:1`);
 }
 
-test("is an MV3 theme named Vintage", () => {
-  eq(manifest.manifest_version, 3, "manifest_version");
-  eq(manifest.name, "Vintage", "name");
-  if (typeof manifest.version !== "string") throw new Error("version is not set");
-});
+for (const { id, theme } of themes(root)) {
+  // Every role the Theme defines, with its hex, from its Theme source file.
+  const roles = Object.assign({}, ...Object.values(theme.palettes));
+  let manifest = {};
+  test(`${id}: manifest is strict JSON`, () => {
+    manifest = JSON.parse(read(`chrome/${id}-theme/manifest.json`));
+  });
+  const colors = manifest.theme?.colors ?? {};
 
-test("every color key takes its spec role", () => {
-  for (const [key, role] of Object.entries(keyRoles)) {
-    if (!roles[role]) throw new Error(`role ${role} is not in the Theme`);
-    eq(hex(colors[key]), roles[role], `${key} (${role})`);
-  }
-});
+  test(`${id}: is an MV3 theme named ${theme.name}`, () => {
+    eq(manifest.manifest_version, 3, "manifest_version");
+    eq(manifest.name, theme.name, "name");
+    if (typeof manifest.version !== "string") throw new Error("version is not set");
+  });
 
-test("sets these color keys and nothing else", () => {
-  eq(Object.keys(colors).sort().join(","), Object.keys(keyRoles).sort().join(","), "color keys");
-});
+  test(`${id}: every color key takes its spec role`, () => {
+    for (const [key, role] of Object.entries(keyRoles)) {
+      if (!roles[role]) throw new Error(`role ${role} is not in the Theme`);
+      eq(hex(colors[key]), roles[role], `${key} (${role})`);
+    }
+  });
 
-test("Purist fidelity: no images, tints or properties", () => {
-  for (const part of ["images", "tints", "properties"]) {
-    if (part in (manifest.theme ?? {})) throw new Error(`theme sets ${part}`);
-  }
-});
+  test(`${id}: sets these color keys and nothing else`, () => {
+    eq(Object.keys(colors).sort().join(","), Object.keys(keyRoles).sort().join(","), "color keys");
+  });
 
-test("active window: navy tab strip with white tab titles, grey tab and toolbar with black text", () => {
-  eq(hex(colors.frame), roles.frame_title, "frame");
-  eq(hex(colors.tab_background_text), roles.frame_title_text, "tab_background_text");
-  eq(hex(colors.toolbar), roles.frame_face, "toolbar");
-  for (const key of ["tab_text", "toolbar_text", "toolbar_button_icon", "bookmark_text"]) {
-    eq(hex(colors[key]), roles.frame_text, key);
-  }
-});
+  test(`${id}: Purist fidelity: no images, tints or properties`, () => {
+    for (const part of ["images", "tints", "properties"]) {
+      if (part in (manifest.theme ?? {})) throw new Error(`theme sets ${part}`);
+    }
+  });
 
-test("inactive window: grey tab strip with grey tab titles", () => {
-  eq(hex(colors.frame_inactive), roles.frame_title_inactive, "frame_inactive");
-  eq(hex(colors.background_tab_inactive), roles.frame_title_inactive, "background_tab_inactive");
-  eq(hex(colors.tab_background_text_inactive), roles.frame_title_inactive_text, "tab_background_text_inactive");
-});
+  test(`${id}: active window: frame_title tab strip with frame_title_text tab titles, frame_face tab and toolbar with frame_text`, () => {
+    eq(hex(colors.frame), roles.frame_title, "frame");
+    eq(hex(colors.tab_background_text), roles.frame_title_text, "tab_background_text");
+    eq(hex(colors.toolbar), roles.frame_face, "toolbar");
+    for (const key of ["tab_text", "toolbar_text", "toolbar_button_icon", "bookmark_text"]) {
+      eq(hex(colors[key]), roles.frame_text, key);
+    }
+  });
 
-test("omnibox is white with black text", () => {
-  eq(hex(colors.omnibox_background), roles.frame_window, "omnibox_background");
-  eq(hex(colors.omnibox_text), roles.frame_text, "omnibox_text");
-});
+  test(`${id}: inactive window: frame_title_inactive tab strip with frame_title_inactive_text tab titles`, () => {
+    eq(hex(colors.frame_inactive), roles.frame_title_inactive, "frame_inactive");
+    eq(hex(colors.background_tab_inactive), roles.frame_title_inactive, "background_tab_inactive");
+    eq(hex(colors.tab_background_text_inactive), roles.frame_title_inactive_text, "tab_background_text_inactive");
+  });
 
-test("New Tab page is the flat teal Classic desktop with readable text and links", () => {
-  eq(hex(colors.ntp_background), roles.frame_desktop, "ntp_background");
-  expectReadable("ntp_text", "ntp_background");
-  expectReadable("ntp_link", "ntp_background");
-});
+  test(`${id}: omnibox is frame_window with frame_text`, () => {
+    eq(hex(colors.omnibox_background), roles.frame_window, "omnibox_background");
+    eq(hex(colors.omnibox_text), roles.frame_text, "omnibox_text");
+  });
 
-test("no incognito keys: Chrome ignores themes in Incognito windows", () => {
-  const set = Object.keys(colors).filter((key) => key.includes("incognito"));
-  if (set.length) throw new Error(`sets ${set.join(", ")}, which Chrome ignores`);
-});
+  test(`${id}: New Tab page is the flat frame_desktop with readable text and links`, () => {
+    eq(hex(colors.ntp_background), roles.frame_desktop, "ntp_background");
+    expectReadable(colors, "ntp_text", "ntp_background");
+    expectReadable(colors, "ntp_link", "ntp_background");
+  });
+
+  test(`${id}: no incognito keys: Chrome ignores themes in Incognito windows`, () => {
+    const set = Object.keys(colors).filter((key) => key.includes("incognito"));
+    if (set.length) throw new Error(`sets ${set.join(", ")}, which Chrome ignores`);
+  });
+}
+
+const knownExceptions = read("docs/theme-spec.md").split("## Known exceptions")[1]?.split("\n## ")[0] ?? "";
 
 test("spec lists Incognito under Known exceptions", () => {
-  const known = read("docs/theme-spec.md").split("## Known exceptions")[1]?.split("\n## ")[0] ?? "";
-  if (!/Chrome.*Incognito/.test(known)) throw new Error("Known exceptions doesn't say Chrome ignores the theme in Incognito");
+  if (!/Chrome.*Incognito/.test(knownExceptions)) throw new Error("Known exceptions doesn't say Chrome ignores the theme in Incognito");
+});
+
+test("spec lists Chrome's manual Switch step under Known exceptions", () => {
+  if (!/Chrome.*Switch.*Load unpacked/.test(knownExceptions)) throw new Error("Known exceptions doesn't say a Switch can't change Chrome's theme");
 });
 
 test("spec notes the teal New Tab page in the Chrome row and under Open", () => {
@@ -161,7 +165,7 @@ const framework = `${current}/Google Chrome Framework`;
 if (existsSync(framework)) {
   test("every color key is one Chrome knows", () => {
     const bin = readFileSync(framework);
-    const unknown = Object.keys(colors).filter((key) => bin.indexOf(`\0${key}\0`) === -1);
+    const unknown = Object.keys(keyRoles).filter((key) => bin.indexOf(`\0${key}\0`) === -1);
     if (unknown.length) {
       throw new Error(`unknown keys in Chrome ${basename(realpathSync(current))}: ${unknown.join(", ")}`);
     }

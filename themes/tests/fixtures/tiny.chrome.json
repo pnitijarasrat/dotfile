@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Tiny",
+  "version": "1.0",
+  "description": "Windows 95 Classic Frame for the Chrome window. See docs/theme-spec.md.",
+  "theme": {
+    "colors": {
+      "frame": [32, 32, 96],
+      "frame_inactive": [153, 153, 136],
+      "background_tab": [32, 32, 96],
+      "background_tab_inactive": [153, 153, 136],
+      "tab_background_text": [255, 255, 240],
+      "tab_background_text_inactive": [238, 238, 221],
+      "toolbar": [238, 238, 221],
+      "tab_text": [34, 34, 34],
+      "toolbar_text": [34, 34, 34],
+      "toolbar_button_icon": [34, 34, 34],
+      "bookmark_text": [34, 34, 34],
+      "omnibox_background": [255, 255, 255],
+      "omnibox_text": [34, 34, 34],
+      "ntp_background": [48, 80, 48],
+      "ntp_text": [255, 255, 242],
+      "ntp_link": [255, 255, 242]
+    }
+  }
+}
