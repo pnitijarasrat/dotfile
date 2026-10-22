@@ -12,6 +12,11 @@
   "contributes": {
     "themes": [
       {
+        "label": "Marigold",
+        "uiTheme": "vs-dark",
+        "path": "./themes/marigold-color-theme.json"
+      },
+      {
         "label": "Vintage",
         "uiTheme": "vs",
         "path": "./themes/vintage-color-theme.json"
