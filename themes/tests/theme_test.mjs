@@ -1,6 +1,6 @@
-// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137).
-// Runs it against a scratch copy of the repo with each tool's reload stubbed,
-// so no open window or bar changes.
+// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138).
+// Runs it against a scratch copy of the repo with each tool's reload and every
+// macOS command stubbed, so no open window, bar or system setting changes.
 // Run: node themes/tests/theme_test.mjs
 import { spawnSync } from "node:child_process";
 import { chmodSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
@@ -50,11 +50,13 @@ function scratch() {
   return root;
 }
 
-// Runs `theme` with args in a scratch repo, listing the tools it reloads.
+// Runs `theme` with args in a scratch repo, listing the tools it reloads and
+// the system commands it runs.
 function theme(root, ...args) {
   const reloads = [];
-  const result = run({ root, args, reload: (tool) => reloads.push(tool) });
-  return { ...result, reloads: reloads.join() };
+  const commands = [];
+  const result = run({ root, args, reload: (tool) => reloads.push(tool), system: (...command) => commands.push(command) });
+  return { ...result, reloads: reloads.join(), commands };
 }
 
 // Runs a shell command as if the scratch repo were ~/.config, with a stub
@@ -131,6 +133,23 @@ test("switching points JankyBorders at the Theme's Frame palette", () => {
   rmSync(root, { recursive: true });
 });
 
+// The commands that set macOS to a light or dark appearance, an accent (with
+// the Aqua variant System Settings writes beside it) and a highlight color.
+const macosCommands = (dark, accent, variant, highlight) => [
+  ["defaults", "write", "-g", "AppleAccentColor", "-int", accent],
+  ["defaults", "write", "-g", "AppleAquaColorVariant", "-int", variant],
+  ["defaults", "write", "-g", "AppleHighlightColor", "-string", highlight],
+  ["osascript", "-l", "JavaScript", "-e", 'ObjC.import("Foundation"); for (const name of ["AppleColorPreferencesChangedNotification", "AppleAquaColorVariantChanged"]) $.NSDistributedNotificationCenter.defaultCenter.postNotificationNameObjectUserInfoDeliverImmediately(name, null, null, true)'],
+  ["osascript", "-e", `tell application "System Events" to tell appearance preferences to set dark mode to ${dark}`],
+];
+
+test("switching sets macOS appearance, accent and highlight color to the Theme's", () => {
+  const root = scratch();
+  eq(JSON.stringify(theme(root, "tiny").commands), JSON.stringify(macosCommands(true, "3", "1", "1.000000 0.937255 0.690196 Yellow")), "commands for tiny");
+  eq(JSON.stringify(theme(root, "vintage").commands), JSON.stringify(macosCommands(false, "-1", "6", "0.698039 0.843137 1.000000 Blue")), "commands for vintage");
+  rmSync(root, { recursive: true });
+});
+
 // The manual step that puts a Theme's extension in Chrome, which no Switch can
 // do (docs/research/chrome-theme-switch.md).
 const chromeStep = (root, id) =>
@@ -155,6 +174,28 @@ test("a VSCode settings.json with no color theme line fails the Switch and chang
   eq(read(root, "sketchybar/active-theme"), undefined, "sketchybar/active-theme");
   eq(result.reloads, "", "reloads");
   rmSync(root, { recursive: true });
+});
+
+test("a Theme that doesn't say how macOS looks fails the Switch and changes nothing", () => {
+  const tiny = JSON.parse(readFileSync(join(repo, "themes/tests/fixtures/tiny.json"), "utf8"));
+  const broken = [
+    [undefined, "Tiny doesn't say which appearance, accent and highlight macOS uses\n"],
+    [{ ...tiny.macos, appearance: "dim" }, 'Tiny\'s macOS appearance "dim" isn\'t light or dark\n'],
+    [{ ...tiny.macos, accent: "teal" }, 'Tiny\'s macOS accent "teal" isn\'t one of graphite, red, orange, yellow, green, blue, purple, pink\n'],
+    [{ ...tiny.macos, highlight: "teal" }, 'Tiny\'s macOS highlight "teal" isn\'t one of graphite, red, orange, yellow, green, blue, purple, pink\n'],
+  ];
+  for (const [declared, message] of broken) {
+    const root = scratch();
+    writeFileSync(join(root, "themes/tiny.json"), JSON.stringify({ ...tiny, macos: declared }));
+    const result = theme(root, "tiny");
+    eq(result.code, 1, `exit code for ${JSON.stringify(declared)}`);
+    eq(result.out, message, `output for ${JSON.stringify(declared)}`);
+    eq(read(root, "themes/active"), undefined, "themes/active");
+    eq(read(root, "ghostty/active-theme"), undefined, "ghostty/active-theme");
+    eq(result.reloads, "", "reloads");
+    eq(result.commands.length, 0, "commands");
+    rmSync(root, { recursive: true });
+  }
 });
 
 test("an unknown Theme changes nothing and lists the available Themes", () => {

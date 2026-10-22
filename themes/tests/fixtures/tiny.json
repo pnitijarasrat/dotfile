@@ -2,6 +2,7 @@
   "name": "Tiny",
   "work_description": "a fixture: dark grey on cream",
   "shadows": true,
+  "macos": { "appearance": "dark", "accent": "green", "highlight": "yellow" },
   "palettes": {
     "frame": {
       "frame_face": "#EEEEDD",

@@ -37,6 +37,16 @@ test("has no shadows (Purist fidelity)", () => {
   eq(theme.shadows, false, "shadows");
 });
 
+test("macOS is light, with the accent and highlight the spec sets", () => {
+  eq(theme.macos.appearance, "light", "appearance");
+  const section = spec.split("\n## macOS")[1]?.split("\n## ")[0] ?? "";
+  for (const key of ["appearance", "accent", "highlight"]) {
+    if (!section.includes(`\`${key}\`: \`${theme.macos[key]}\``)) {
+      throw new Error(`the spec's macOS section doesn't set ${key} to ${theme.macos[key]}`);
+    }
+  }
+});
+
 test("every role is an uppercase #RRGGBB", () => {
   for (const [role, hex] of Object.entries(roles)) {
     if (!/^#[0-9A-F]{6}$/.test(hex)) throw new Error(`${role} = ${JSON.stringify(hex)}`);

@@ -14,7 +14,7 @@ One value can play several roles. For example, `frame_title`, `frame_selection`,
 
 ## Values
 
-Every role's hex value lives in one place: the Vintage **Theme source file**, `themes/vintage.json` ([#131](https://github.com/pnitijarasrat/dotfile/issues/131)). The tables here name the roles and what each is for; take the values from the source file. It also holds the font families and the Work surface sizes that the [Fonts](#fonts) section sets per tool. Its `work_description` is a short phrase describing the Work surface, which generated files put in their header comment. Its `shadows` says whether the Theme has drop shadows; Vintage's is `false` (see [Purist fidelity](#purist-fidelity)), and the generator turns VSCode's shadows off for it. Every tool's test reads its expected values from that file, and `node themes/tests/vintage_test.mjs` checks that it holds exactly the roles this spec names and the fonts it sets.
+Every role's hex value lives in one place: the Vintage **Theme source file**, `themes/vintage.json` ([#131](https://github.com/pnitijarasrat/dotfile/issues/131)). The tables here name the roles and what each is for; take the values from the source file. It also holds the font families and the Work surface sizes that the [Fonts](#fonts) section sets per tool. Its `work_description` is a short phrase describing the Work surface, which generated files put in their header comment. Its `shadows` says whether the Theme has drop shadows; Vintage's is `false` (see [Purist fidelity](#purist-fidelity)), and the generator turns VSCode's shadows off for it. Its `macos` sets macOS's appearance, accent and highlight color (see [macOS](#macos)). Every tool's test reads its expected values from that file, and `node themes/tests/vintage_test.mjs` checks that it holds exactly the roles this spec names and the fonts it sets.
 
 ## Frame palette
 
@@ -134,6 +134,14 @@ Neovim's statusline belongs to the Frame, but it's drawn by the terminal, so it 
 | Raycast | has no font setting |
 | Chrome | has no font setting: the tab strip, toolbar and bookmarks keep the macOS system font (see [Known exceptions](#known-exceptions)) |
 
+## macOS
+
+What a Switch sets in System Settings → Appearance, from the source file's `macos` ([#138](https://github.com/pnitijarasrat/dotfile/issues/138), `docs/adr/0010-switch-sets-macos-settings-directly.md`). macOS only offers its own named colors, so no role's hex can be used.
+
+- `appearance`: `light`. The Frame is light grey and the Work surface is always light.
+- `accent`: `graphite`. Win95 controls (push buttons, checkboxes, radio buttons, sliders) are grey with no color of their own, so macOS's grey is the nearest.
+- `highlight`: `blue`. Win95 selects in `frame_selection` navy with white text, but macOS keeps the text color under its highlight, so navy would hide black text. Light blue is the nearest readable one.
+
 ## Purist fidelity
 
 The **Vintage theme**'s own rules. Each **Theme** carries its own rules for corners, blur and icons ([ADR 0004](adr/0004-themes-and-switching.md)); these bind the Vintage theme.
@@ -202,7 +210,7 @@ These don't follow Purist fidelity or the Switch, and that's accepted. They aren
 
 Not yet decided. Tracked in map [#2](https://github.com/pnitijarasrat/dotfile/issues/2). Update this section once each is settled.
 
-- **Wallpaper and macOS accent color**: a Bliss image, or a flat `frame_desktop` teal Classic desktop? Chrome's New Tab page already shows the flat teal Classic desktop (#38); the macOS wallpaper, accent and highlight color are still undecided.
+- **Wallpaper**: a Bliss image, or a flat `frame_desktop` teal Classic desktop? Chrome's New Tab page already shows the flat teal Classic desktop (#38); the macOS wallpaper is still undecided. (The accent and highlight color are settled: see [macOS](#macos).)
 - **Faking 3D bevels** where tools allow it (JankyBorders, Raycast, SketchyBar items beyond the taskbar). This includes the **VSCode custom-CSS extension**, which would also set the VSCode chrome font to Microsoft Sans Serif and square its widgets.
 
 ## Out of scope
