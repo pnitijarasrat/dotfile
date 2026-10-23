@@ -443,6 +443,17 @@ const PRESETS = {
     s.behavior.autoHide = "fullscreen";
     return s;
   }],
+  // The user's pick: C's settings, with insets at yabai's 8pt gap and macOS's 10pt window radius
+  D: ["Decision: C, aligned to yabai and macOS", s => {
+    s = PRESETS.C[1](s);
+    Object.assign(s.bar, { height: 28, radius: 10, margin: 8, yOffset: 8, opacity: 0.5, blur: 40 });
+    for (const [id, it] of Object.entries(s.items)) if (!ITEMS[id].fixed) it.family = "sf";
+    s.items.notifs.on = false;
+    s.items.calendar.on = false;
+    s.items.language.show = "both";
+    s.items.front_app.click = "nothing";
+    return s;
+  }],
 };
 
 // State
