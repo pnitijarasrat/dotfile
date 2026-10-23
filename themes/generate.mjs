@@ -152,8 +152,7 @@ export function vscodeExtension(all) {
 
 // Chrome's theme extension for a Theme: themes/templates/chrome-manifest.json,
 // which is Vintage's with each color a {{role}}, plus {{name}}. Chrome only
-// takes [r, g, b] arrays, so the manifest has no hex and no role comments; its
-// description is Vintage's.
+// takes [r, g, b] arrays, so the manifest has no hex and no role comments.
 export function chrome(theme) {
   const role = roles(theme);
   const rgb = (name) => `[${role(name).match(/\w\w/g).map((hex) => parseInt(hex, 16)).join(", ")}]`;

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Vintage",
   "version": "1.0",
-  "description": "Windows 95 Classic Frame for the Chrome window. See docs/theme-spec.md.",
+  "description": "The Vintage Theme for the Chrome window. See docs/theme-spec.md.",
   "theme": {
     "colors": {
       "frame": [0, 0, 128],
