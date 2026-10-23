@@ -29,8 +29,14 @@ export border_active_color="$frame_selection"
 export border_inactive_color="$frame_dark_shadow"
 
 # SketchyBar: the opacity and blur of a Theme's own bar (#169), from its source
-# file's bar, and its corners from the Theme rules. The alpha is opacity as two
-# hex digits, for 0xAARRGGBB colors.
+# file's bar. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.
+# The bar wears the active window's ring (#183): JankyBorders' active color and
+# width, and corners that curve like the ring's outline, the radius rule plus
+# the width; square Themes stay square. Popups keep the window corners, the
+# radius rule.
 export bar_alpha="99"
 export bar_blur="30"
-export bar_radius="6"
+export bar_border_color="$frame_selection"
+export bar_border_width="3"
+export bar_radius="9"
+export popup_radius="6"
