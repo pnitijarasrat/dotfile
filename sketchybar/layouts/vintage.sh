@@ -4,7 +4,7 @@
 # without one of its own (#155). sketchybarrc sources it after color.sh and
 # sets PLUGIN_DIR.
 source "$CONFIG_DIR/bevel.sh"
-source "$CONFIG_DIR/yabai.sh"
+source "$CONFIG_DIR/yabai_padding.sh"
 
 # XP-style taskbar: docked edge to edge at the bottom. The white border shows
 # as the raised line along the top edge. yabai leaves room for it at the
@@ -91,4 +91,4 @@ sketchybar --add item clock right \
            --set tray "${SUNKEN[@]}"
 
 # Tiled windows stop a window gap above the taskbar.
-reserve 0 "$BAR_HEIGHT"
+reserve_in_yabai 0 "$BAR_HEIGHT"

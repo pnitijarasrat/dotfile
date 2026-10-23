@@ -36,6 +36,9 @@ function sameCalls(actual, expected) {
   }
 }
 
+// Fails unless the last run's yabai padding is exactly expected.
+const samePadding = (bar, expected) => eq(JSON.stringify(padding(bar)), JSON.stringify(expected), "padding");
+
 // A layout of a Theme's own that makes one call, so its running shows.
 const ownLayout = "sketchybar --bar position=top\n";
 
@@ -76,14 +79,14 @@ test("a Theme whose palette was never generated runs Vintage's taskbar", () => w
 test("Vintage's taskbar has yabai leave top 8 and bottom 38", () => withScratch((bar) => {
   switchTo(bar, "vintage");
   calls(bar);
-  eq(JSON.stringify(padding(bar)), JSON.stringify({ top: 8, bottom: 38 }), "padding");
+  samePadding(bar, { top: 8, bottom: 38 });
 }));
 
 // Its y_offset, height and window gap, as the Marigold spec settles them.
 test("Marigold's bar has yabai leave top 44, clear of the bar, and bottom 8", () => withScratch((bar) => {
   switchTo(bar, "marigold");
   calls(bar);
-  eq(JSON.stringify(padding(bar)), JSON.stringify({ top: 44, bottom: 8 }), "padding");
+  samePadding(bar, { top: 44, bottom: 8 });
 }));
 
 for (const theme of ["vintage", "marigold"]) {
@@ -92,7 +95,7 @@ for (const theme of ["vintage", "marigold"]) {
     const running = calls(bar);
     stub(bar, "yabai", 'echo "yabai-msg: failed to connect to socket.." >&2\nexit 1');
     sameCalls(calls(bar), running);
-    eq(JSON.stringify(padding(bar)), "{}", "padding");
+    samePadding(bar, {});
   }));
 }
 
@@ -100,6 +103,20 @@ test("yabairc leaves top and bottom padding to the layouts", () => {
   const set = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^\s*yabai -m config (top|bottom)_padding.*/m);
   if (set) throw new Error(`yabairc sets ${set[0].trim()}`);
 });
+
+// A restarted yabai starts with no top or bottom padding.
+test("yabairc reloads the bar, so a restarted yabai gets its padding back", () => {
+  const lines = readFileSync(join(root, "yabai/yabairc"), "utf8").split("\n");
+  if (!lines.some((line) => /^sketchybar --reload\b/.test(line))) throw new Error("yabairc doesn't run sketchybar --reload");
+});
+
+// The spec's "8 from the top and sides of the screen (yabai's window_gap)".
+test("Marigold's bar is inset from the screen's sides by yabai's window_gap", () => withScratch((bar) => {
+  switchTo(bar, "marigold");
+  const margin = calls(bar).match(/^margin=(\d+)$/m)?.[1];
+  const gap = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^yabai -m config window_gap (\d+)$/m)[1];
+  eq(margin, gap, "margin");
+}));
 
 if (failures.length) {
   console.error(failures.join("\n"));
