@@ -3,7 +3,7 @@
 // Run: node sketchybar/tests/layout_test.mjs
 import { readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { calls, root, switchTo, withScratch } from "./scratch.mjs";
+import { calls, padding, root, stub, switchTo, withScratch } from "./scratch.mjs";
 
 const failures = [];
 let passed = 0;
@@ -71,6 +71,35 @@ test("a Theme whose palette was never generated runs Vintage's taskbar", () => w
   switchTo(bar, "gone");
   sameCalls(calls(bar), before(bar));
 }));
+
+// Each layout reserves the bar's room in yabai (#166).
+test("Vintage's taskbar has yabai leave top 8 and bottom 38", () => withScratch((bar) => {
+  switchTo(bar, "vintage");
+  calls(bar);
+  eq(JSON.stringify(padding(bar)), JSON.stringify({ top: 8, bottom: 38 }), "padding");
+}));
+
+// Its y_offset, height and window gap, as the Marigold spec settles them.
+test("Marigold's bar has yabai leave top 44, clear of the bar, and bottom 8", () => withScratch((bar) => {
+  switchTo(bar, "marigold");
+  calls(bar);
+  eq(JSON.stringify(padding(bar)), JSON.stringify({ top: 44, bottom: 8 }), "padding");
+}));
+
+for (const theme of ["vintage", "marigold"]) {
+  test(`${theme}: the bar loads in full when yabai isn't running`, () => withScratch((bar) => {
+    switchTo(bar, theme);
+    const running = calls(bar);
+    stub(bar, "yabai", 'echo "yabai-msg: failed to connect to socket.." >&2\nexit 1');
+    sameCalls(calls(bar), running);
+    eq(JSON.stringify(padding(bar)), "{}", "padding");
+  }));
+}
+
+test("yabairc leaves top and bottom padding to the layouts", () => {
+  const set = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^\s*yabai -m config (top|bottom)_padding.*/m);
+  if (set) throw new Error(`yabairc sets ${set[0].trim()}`);
+});
 
 if (failures.length) {
   console.error(failures.join("\n"));

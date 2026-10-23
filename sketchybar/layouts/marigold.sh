@@ -3,6 +3,7 @@
 # The Marigold theme's layout (#156, docs/theme-spec-marigold.md). sketchybarrc
 # sources it after color.sh and sets PLUGIN_DIR. Clock and front app share
 # Vintage's plugins; spaces, battery, Wi-Fi and volume have Marigold's own.
+source "$CONFIG_DIR/yabai.sh"
 MARIGOLD_PLUGINS="$PLUGIN_DIR/marigold"
 FONT="SF Pro:Regular:13.0"
 BOLD="SF Pro Text:Semibold:13.0"
@@ -10,7 +11,9 @@ ICON_FONT="JetBrainsMonoNL Nerd Font:Regular:14.0"
 
 # A floating bar at the top, inset from the screen edges: frame_face at the
 # Theme's opacity, with blur, corners and a hairline border from its rules.
-sketchybar --bar position=top height=32 margin=8 y_offset=4 \
+BAR_HEIGHT=32
+BAR_Y_OFFSET=4
+sketchybar --bar position=top height="$BAR_HEIGHT" margin=8 y_offset="$BAR_Y_OFFSET" \
                  corner_radius="$bar_radius" blur_radius="$bar_blur" \
                  color="0x$bar_alpha${frame_face#0xff}" border_color="$frame_highlight" border_width=1 \
                  padding_left=6 padding_right=6 topmost=window
@@ -66,3 +69,6 @@ sketchybar --add item clock right \
            --add item volume right \
            --set volume icon=$'' label.drawing=off script="$MARIGOLD_PLUGINS/volume.sh" \
            --subscribe volume volume_change
+
+# Tiled windows start a window gap below the bar, and need no room at the bottom.
+reserve $((BAR_Y_OFFSET + BAR_HEIGHT)) 0

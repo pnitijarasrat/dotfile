@@ -16,8 +16,8 @@ yabai -m config layout bsp
 yabai -m config window_placement second_child
 
 # ── Spacing ──
-yabai -m config top_padding 8
-yabai -m config bottom_padding 38
+# Top and bottom padding are the bar's: the active Theme's SketchyBar layout
+# sets them when it loads (#166).
 yabai -m config left_padding 8
 yabai -m config right_padding 8
 yabai -m config window_gap 8
@@ -52,5 +52,9 @@ yabai -m rule --add app="^Calculator$" manage=off
 yabai -m rule --add app="^App Store$" manage=off
 yabai -m rule --add app="^Archive Utility$" manage=off
 yabai -m rule --add title="Preferences" manage=off
+
+# A restarted yabai starts with no top or bottom padding, so have the bar's
+# layout set them again. Harmless if SketchyBar isn't running yet.
+sketchybar --reload 2>/dev/null
 
 echo "yabai configuration loaded.."
