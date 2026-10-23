@@ -20,7 +20,7 @@ Flat, not bevelled: the Frame is one step lighter than the Work surface, and the
 |---|---|
 | `frame_face` | Frame surface, one step above `work_bg` |
 | `frame_highlight` | hairline borders: the lit edge of bars, panels and popups |
-| `frame_light` | hover and selected rows (sidebar, completion list, Raycast) |
+| `frame_light` | hover and selected rows (sidebar, completion list, menus) |
 | `frame_shadow` | inactive window border, near-black, almost invisible |
 | `frame_dark_shadow` | pure black, the deepest edge |
 | `frame_title`, `frame_title_inactive` | the same as `frame_face`: title bars blend into the Frame |
@@ -75,7 +75,7 @@ The ANSI normal hues, which read on `frame_face` as well as on `work_bg`; `frame
 
 ## Display
 
-None. Wherever Vintage draws a Display, Marigold uses Frame roles: the background is `frame_window`, lit text `frame_text`, and ghost segments and dim lines `frame_gray_text`. That covers Spotify's player bar and the Event Viewer's status bar.
+None. Wherever Vintage draws a Display, Marigold uses Frame roles: the background is `frame_window`, lit text `frame_text`, and ghost segments and dim lines `frame_gray_text`. That covers Spotify's player bar. The Event Viewer keeps its Vintage Display: it stays out of Marigold (see [Out of scope](#out-of-scope)).
 
 ## Fonts
 
@@ -108,7 +108,7 @@ From the source file's `macos`. A Switch sets them (`docs/adr/0010-switch-sets-m
 Marigold's own rules, in place of the Vintage theme's **Purist fidelity**. The source file's `rules` holds the values generators read: `opacity` 0.85, `blur` 20, `radius` 10, `icons` true (Vintage's are `1`, `0`, `0`, `false`).
 
 - **Rounded corners** wherever the tool allows, at `radius`.
-- **Translucency and blur** on the surfaces seen most: Ghostty, the SketchyBar bar, and Raycast (its own). Every other tool stays opaque, VSCode included: it can't do this without patching. Role values are opaque; translucency is applied by `opacity` and `blur`. The SketchyBar bar is the exception: it's more see-through, with its own values in the source file's `bar` block, `opacity` 0.5 and `blur` 40 (Vintage's `1` and `0`).
+- **Translucency and blur** on the surfaces seen most: Ghostty and the SketchyBar bar. Every other tool stays opaque, VSCode included: it can't do this without patching. Role values are opaque; translucency is applied by `opacity` and `blur`. The SketchyBar bar is the exception: it's more see-through, with its own values in the source file's `bar` block, `opacity` 0.5 and `blur` 40 (Vintage's `1` and `0`).
 - **Drop shadows** on (`"shadows": true`).
 - **Icons** allowed: SF Symbols for SketchyBar's status items, `sketchybar-app-font` for its spaces and front app, Nerd Font icons in the prompt. No emoji.
 - No SIP-disabling or patching system files, as Vintage.
@@ -129,8 +129,8 @@ Which tools get a design of their own under Marigold, beyond colors, and which o
 | **JankyBorders** | **own design.** `style=round`, width 2, active `frame_selection` (marigold), inactive `frame_shadow` (near-black) | style, width and colors generated into `sketchybar/themes/marigold.sh` from the Theme source file's `borders` and `rules.radius` (#152); a Switch hands them to the running `borders` |
 | **Starship** | **own design.** The same segments, with Nerd Font icons (directory, branch, runtime). Starship joins the Switch with one config per Theme; Vintage's keeps `>` and no icons | **built**: `starship/themes/<theme>.toml` generated from the Theme source file's `rules.icons`; `starship/init.zsh` reads the Switch's `starship/active-theme` before each prompt (#154) |
 | **Spotify** | colors only. Spotify's own layout, which is already rounded and modern: `color.ini` plus minimal CSS, no Media Rack, no bevels and no Win95 window. The player bar is Frame (no Display). The lyrics view stays a Work surface | to build |
-| **Claude Code** (Event Viewer) | colors only. Its layout stays; with flat bevel roles it reads as a flat panel. The status bar is Frame instead of a Display (see [Display](#display)). A modern layout of its own is a possible follow-up | to build |
-| **Raycast** | colors only. A hand-written dark "Marigold" theme on the same slots as Vintage's; its corners, blur and font are its own | to build |
+| **Claude Code** (Event Viewer) | stays Vintage, out of the Switch (#158, `docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`): its Win95 window and Display under every Theme | nothing to build |
+| **Raycast** | stays Vintage, out of the Switch (#158, `docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`): its "Vintage" theme stays selected under every Theme | nothing to build |
 | **Chrome** | colors only. The generated "Marigold" extension, with the New Tab page `frame_desktop` black | generated (`chrome/marigold-theme/manifest.json`) |
 | **macOS** | dark, yellow accent, yellow highlight | follows the Switch already |
 | **ccstatusline**, **ranger**, **litecli** | no change: they inherit Ghostty's ANSI colors | nothing to build |
@@ -138,12 +138,38 @@ Which tools get a design of their own under Marigold, beyond colors, and which o
 
 ## Manual checklist
 
-Things the tests can't see, checked by hand on the Mac after a Switch to Marigold (#158 adds the rest):
+Things the tests can't see, checked by hand on the Mac (#158). `node themes/tests/theme_test.mjs` checks what each tool reads after a Switch, both ways, and that a round trip leaves the repo as committed; this checks that each real app shows it. Start on Vintage with Ghostty, VSCode, Chrome and Spotify open, then run `theme marigold` in Ghostty.
 
+### `theme marigold`
+
+- **The Switch**: it exits without an error, prints Chrome's Load unpacked step for `chrome/marigold-theme`, and the first time, VSCode's Reload Window reminder
+- **Ghostty**: open windows turn black with peach-white text and a marigold block cursor. Quit (⌘Q) and reopen: the window is translucent and blurred, rounded, with no title bar
+- **Starship**: the next prompt in every open shell has Nerd Font icons on the directory and branch
+- **ccstatusline**, **ranger**, **litecli**: their colors are Ghostty's new ANSI colors (rose, sage, flower yellow), with no change of their own
+- **SketchyBar**: the XP taskbar is gone and one floating, translucent bar sits 8 from the top and sides, rounded, with the shape in [Per tool](#per-tool): spaces with app icons and the active one marigold, the front app, now playing in the center, the status items on the right each in its own color. Hovering an item highlights it; clicking a status item opens its popup; clicking a space focuses it
 - **SketchyBar, full screen**: make a window full screen (green button or ⌃⌘F); the bar on that display hides, and a bar on any other display stays. Leave full screen and the bar comes back
 - **SketchyBar, menu bar**: with the macOS menu bar set to auto-hide, move the mouse to the top edge; the menu bar slides down over the bar and the bar doesn't move
 - **SketchyBar, second display**: plug in a second display; each display has a bar, listing only its own spaces, and both show the status items. Move a space to the other display in Mission Control; it leaves one bar and joins the other
-- **SketchyBar, back to Vintage**: `theme vintage` brings back the XP taskbar at the bottom, and `yabai -m signal --list` shows no `sketchybar_` signals
+- **yabai**: tiled windows sit 8 below the bar and 8 above the bottom of the screen
+- **JankyBorders**: the focused window's border is rounded, 2 wide and marigold; other windows' are near-black
+- **VSCode**: after Reload Window if reminded, the Marigold color theme and the modern UI's floating, rounded parts; it offers a restart, and after it the title bar is macOS's own. A selection, and the matched letters in a completion list, can be read
+- **Chrome**: after the printed step, the window frame is dark and a New Tab page is black
+- **Spotify**: Marigold's colors, Spotify's own layout, the player bar Frame and the lyrics view Work surface (once #157 is built; until then Spotify stays Vintage)
+- **macOS**: System Settings → Appearance shows Dark, accent Yellow, highlight Yellow; menus and Finder are dark
+- **Out of the Switch**: Raycast, the Event Viewer, Neovim, Deepvue and the wallpaper look as they did on Vintage
+
+### `theme vintage`
+
+- **Every tool above** is back to its Vintage look: Ghostty light and square (after ⌘Q for opacity), Starship's `>` prompt, the XP taskbar at the bottom with windows 38 above it, square grey borders 4 wide, VSCode's classic layout and custom title bar (after its restart), Chrome's Vintage frame after its printed step, macOS light with Graphite accent and Blue highlight
+- **SketchyBar**: `yabai -m signal --list` shows no `sketchybar_` signals
+- **The repo**: `git status` shows no change to `vscode/settings.json` or any other tracked file
+
+### Runs
+
+Each run on the Mac, and what didn't match: filed as an issue or recorded in [Deviations](#deviations).
+
+| Date | Result |
+|---|---|
 
 ## Deviations
 
@@ -157,7 +183,7 @@ As in the Vintage theme's spec, every place where a tool departs from this spec 
 ## Known exceptions
 
 - **Deepvue**: stays out of Marigold. Its chart settings are typed in by hand and stay Vintage's.
-- **Raycast**, **Chrome** and **VSCode** keep their own corners where a theme can't set them, as under Vintage. Under Marigold most of them are rounded already.
+- **Chrome** and **VSCode** keep their own corners where a theme can't set them, as under Vintage. Under Marigold both are rounded already.
 
 ## Open
 
@@ -165,5 +191,10 @@ As in the Vintage theme's spec, every place where a tool departs from this spec 
 
 ## Out of scope
 
+These stay Vintage whatever Theme is active, and a Switch doesn't touch them (#140, #158):
+
 - Deepvue (see [Known exceptions](#known-exceptions)).
-- Neovim.
+- Neovim (`docs/adr/0007-neovim-stays-out-of-the-switch.md`).
+- Raycast: its "Vintage" theme stays selected (`docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`).
+- The Claude Code Event Viewer: its Win95 window and Display (`docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`).
+- The wallpaper (see [Open](#open)).

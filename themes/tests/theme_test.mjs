@@ -1,4 +1,4 @@
-// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138, #153, #154).
+// Checks for `theme`, themes/theme.mjs, which makes a Switch (#133, #135, #137, #138, #153, #154, #158).
 // Runs it against a scratch copy of the repo with each tool's reload and every
 // macOS command stubbed, so no open window, bar or system setting changes.
 // Run: node themes/tests/theme_test.mjs
@@ -174,10 +174,14 @@ const macosCommands = (dark, accent, variant, highlight) => [
   ["osascript", "-e", `tell application "System Events" to tell appearance preferences to set dark mode to ${dark}`],
 ];
 
+// macOS's highlight colors as System Settings stores them.
+const yellow = "1.000000 0.937255 0.690196 Yellow";
+const blue = "0.698039 0.843137 1.000000 Blue";
+
 test("switching sets macOS appearance, accent and highlight color to the Theme's", () => {
   const root = scratch();
-  eq(JSON.stringify(theme(root, "tiny").commands), JSON.stringify(macosCommands(true, "3", "1", "1.000000 0.937255 0.690196 Yellow")), "commands for tiny");
-  eq(JSON.stringify(theme(root, "vintage").commands), JSON.stringify(macosCommands(false, "-1", "6", "0.698039 0.843137 1.000000 Blue")), "commands for vintage");
+  eq(JSON.stringify(theme(root, "tiny").commands), JSON.stringify(macosCommands(true, "3", "1", yellow)), "commands for tiny");
+  eq(JSON.stringify(theme(root, "vintage").commands), JSON.stringify(macosCommands(false, "-1", "6", blue)), "commands for vintage");
   rmSync(root, { recursive: true });
 });
 
@@ -281,6 +285,95 @@ test("with no name, prints the active Theme and changes nothing", () => {
   const after = theme(root);
   eq(after.out, "tiny\n", "active Theme after switching to tiny");
   eq(after.reloads, "", "reloads");
+  rmSync(root, { recursive: true });
+});
+
+// A scratch checkout of every file as committed, so a Switch runs on the real
+// Themes and every tool's real files (#158), whatever the working tree holds.
+function checkout() {
+  const root = mkdtempSync(join(tmpdir(), "checkout-"));
+  const archive = spawnSync("git", ["archive", "HEAD"], { cwd: repo, maxBuffer: 1 << 30 });
+  spawnSync("tar", ["-x", "-C", root], { input: archive.stdout });
+  const { stdout } = spawnSync("git", ["ls-tree", "-r", "-z", "HEAD"], { cwd: repo, encoding: "utf8" });
+  // The files, not the links (mode 120000), which point at a listed file or
+  // outside the repo.
+  const tracked = stdout.split("\0").filter((entry) => entry && !entry.startsWith("120000")).map((entry) => entry.split("\t")[1]);
+  return { root, tracked };
+}
+
+// STARSHIP_CONFIG as starship/init.zsh sets it before a prompt, with a stub
+// `starship` whose init does nothing.
+const starshipConfig = (root) =>
+  shell(root, `printf '#!/bin/sh\\n' > "$HOME/bin/starship"; chmod +x "$HOME/bin/starship"; zsh -fc '. "$HOME/.config/starship/init.zsh"; _starship_theme; echo "$STARSHIP_CONFIG"'`);
+
+// What each in-scope tool sees after a Switch, through the file it reads.
+function sees(root) {
+  return {
+    ghostty: read(root, "ghostty/active-theme"),
+    sketchybar: shell(root, '. "$HOME/.config/sketchybar/color.sh"; echo "$active_theme"'),
+    borders: borders(root),
+    starship: starshipConfig(root).replace(/^.*\/\.config\//, ""),
+    vscode: read(root, "vscode/settings.json").match(/"workbench\.colorTheme": "([^"]*)"/)[1],
+  };
+}
+
+// Each Theme as the spec and its source file describe it.
+const expected = {
+  marigold: {
+    ghostty: "theme = marigold\n",
+    sketchybar: "marigold\n",
+    // Rounded, 2 wide, marigold frame_selection and near-black frame_shadow.
+    borders: "style=round\nwidth=2.0\nhidpi=on\nactive_color=0xfff2c45a\ninactive_color=0xff111111\n",
+    starship: "starship/themes/marigold.toml\n",
+    vscode: "Marigold",
+    chrome: "Marigold",
+    // Dark, yellow accent with the Aqua variant for any color, yellow highlight.
+    macos: macosCommands(true, "2", "1", yellow),
+  },
+  vintage: {
+    ghostty: "theme = vintage\n",
+    sketchybar: "vintage\n",
+    borders: vintageBorders,
+    starship: "starship/themes/vintage.toml\n",
+    vscode: "Vintage",
+    chrome: "Vintage",
+    macos: macosCommands(false, "-1", "6", blue),
+  },
+};
+
+for (const [id, tools] of Object.entries(expected)) {
+  test(`theme ${id} switches every in-scope tool to ${id} (#158)`, () => {
+    const { root } = checkout();
+    // Start from the other Theme, so every tool has something to change.
+    theme(root, id === "vintage" ? "marigold" : "vintage");
+    const result = theme(root, id);
+    eq(result.code, 0, "exit code");
+    const { macos, chrome, ...files } = tools;
+    for (const [tool, seen] of Object.entries(sees(root))) eq(seen, files[tool], tool);
+    eq(result.reloads, "ghostty,sketchybar,borders", "reloads");
+    eq(JSON.stringify(result.commands), JSON.stringify(macos), "macOS commands");
+    // Each pointer leads to a file the Theme has.
+    for (const path of [`ghostty/themes/${id}`, `sketchybar/themes/${id}.sh`, `sketchybar/layouts/${id}.sh`, `starship/themes/${id}.toml`]) {
+      if (!existsSync(join(root, path))) throw new Error(`${path} is missing`);
+    }
+    const labels = JSON.parse(read(root, "vscode/vintage-theme/package.json")).contributes.themes.map(({ label }) => label);
+    if (!labels.includes(files.vscode)) throw new Error(`VSCode's extension has no ${files.vscode} color theme`);
+    // Chrome's manual step picks a folder Chrome can load.
+    if (!result.out.includes(`${root}/chrome/${id}-theme `)) throw new Error(`no Chrome step for ${id}: ${result.out}`);
+    eq(JSON.parse(read(root, `chrome/${id}-theme/manifest.json`)).name, chrome, "Chrome theme name");
+    rmSync(root, { recursive: true });
+  });
+}
+
+test("a Marigold → Vintage round trip leaves every tracked file as committed (#158)", () => {
+  const { root, tracked } = checkout();
+  const before = Object.fromEntries(tracked.map((path) => [path, read(root, path)]));
+  theme(root, "marigold");
+  const changed = tracked.filter((path) => read(root, path) !== before[path]);
+  // VSCode has no include, so its tracked settings are its pointer (ADR 0008).
+  eq(changed.join(), "vscode/settings.json", "tracked files Marigold changes");
+  theme(root, "vintage");
+  for (const path of tracked) eq(read(root, path), before[path], path);
   rmSync(root, { recursive: true });
 });
 

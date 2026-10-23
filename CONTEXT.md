@@ -5,11 +5,11 @@ Personal macOS configuration for the tools in `~/.config` (plus VSCode, symlinke
 ## Language
 
 **Theme**:
-One complete look applied to every themed tool at once: its palettes, fonts, and any shapes it's allowed to change. Exactly one Theme is active at a time; tools never mix Themes.
+One complete look applied to every tool in the **Switch** at once: its palettes, fonts, and any shapes it's allowed to change. Exactly one Theme is active at a time; tools in the Switch never mix Themes. Neovim, Raycast and the Claude Code Event Viewer stay out of the Switch and always show the **Vintage theme**.
 _Avoid_: skin, colorscheme (for the whole look; a tool's colorscheme is just its part of a Theme)
 
 **Switch**:
-Making a different **Theme** the active one, across every themed tool together.
+Making a different **Theme** the active one, across every tool in the Switch together.
 
 **Vintage theme**:
 The first **Theme**: a Windows Classic/XP **Frame** around light, K-95-style **Work surfaces**.
@@ -20,7 +20,7 @@ The second **Theme**: dark and modern, black with a marigold accent. Its **Frame
 _Avoid_: dark theme, modern theme
 
 **Frame**:
-The chrome surrounding work: menu bar (SketchyBar), window borders, launcher (Raycast), wallpaper, accent color, and the chrome inside apps (VSCode activity bar/sidebar/tabs/status bar, Neovim statusline). Menus and pickers count as Frame too (command palette, context menus, notifications, which-key, telescope). Light grey/cream, Classic/XP-styled.
+The chrome surrounding work: menu bar (SketchyBar), window borders, launcher (Raycast), wallpaper, accent color, and the chrome inside apps (VSCode activity bar/sidebar/tabs/status bar, Neovim statusline). Menus and pickers count as Frame too (command palette, context menus, notifications, which-key, telescope). Under the **Vintage theme**, light grey/cream, Classic/XP-styled.
 _Avoid_: UI, shell
 
 **Work surface**:
@@ -28,7 +28,7 @@ Where text and code are read and edited: terminal, editors, TUI apps, and inline
 _Avoid_: editor theme, canvas
 
 **Display**:
-A black LCD readout set into the **Frame**, like the time and track displays in Windows' Media Rack: lit cyan text in the **Work surface** font over unlit "ghost" segments, inside a sunken bevel. Shows status, not text being worked on. Only Spotify's player bar has one.
+A black LCD readout set into the **Frame**, like the time and track displays in Windows' Media Rack: lit cyan text in the **Work surface** font over unlit "ghost" segments, inside a sunken bevel. Shows status, not text being worked on. Only the **Vintage theme** has one: in Spotify's player bar and the Claude Code Event Viewer.
 _Avoid_: LCD theme, screen
 
 **Frame data colors**:
@@ -51,7 +51,7 @@ The **Vintage theme**'s **Theme rules**: no transparency or blur, square corners
 
 ## Relationships
 
-- A **Switch** changes the active **Theme** for every themed tool together
+- A **Switch** changes the active **Theme** for every tool in the Switch together; Neovim, Raycast and the Claude Code Event Viewer stay on the **Vintage theme**
 - Exactly one **Theme** is active; each **Theme** has one **Theme source file** and one **Theme spec**
 - The **Vintage theme** is made of exactly one **Frame** palette, one **Work surface** palette and one **Display** palette
 - The **Marigold theme** is made of one **Frame** palette and one **Work surface** palette; where Vintage draws a **Display**, it uses Frame colors
