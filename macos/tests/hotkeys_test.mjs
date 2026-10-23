@@ -45,8 +45,11 @@ function expect(id, enabled, params) {
   eq(`${on} ${value.type} ${value.parameters}`, `${enabled} standard ${params}`, `hotkey ${id}`);
 }
 
-// An entry the script doesn't own, to check it survives.
+// Entries the script doesn't own, to check they survive: 98, and Desktop 1
+// on ⌘1, which the user sets by hand.
+const desktop1 = "<dict><key>enabled</key><true/><key>value</key><dict><key>parameters</key><array><integer>49</integer><integer>18</integer><integer>1048576</integer></array><key>type</key><string>standard</string></dict></dict>";
 execFileSync("defaults", ["write", domain, "AppleSymbolicHotKeys", "-dict-add", "98", "<dict><key>enabled</key><true/></dict>"]);
+execFileSync("defaults", ["write", domain, "AppleSymbolicHotKeys", "-dict-add", "118", desktop1]);
 run();
 
 test("input source (60) on cmd+Space, Spotlight (64) off", () => {
@@ -60,12 +63,9 @@ test("screenshots on Hyper+3 / 4 / 5", () => {
   expect("184", true, [53, 23, hyper]);
 });
 
-test("Desktop 1-10 (118-127) off: spaces are switched in Mission Control", () => {
-  const digits = [18, 19, 20, 21, 23, 22, 26, 28, 25, 29]; // keycodes for 1..9, 0
-  digits.forEach((code, i) => {
-    const digit = (i + 1) % 10;
-    expect(String(118 + i), false, [48 + digit, code, meh]);
-  });
+test("Desktop 1-10 (118-127) are the user's: left alone", () => {
+  expect("118", true, [49, 18, cmd]);
+  for (let id = 119; id <= 127; id++) eq(hotkeys()[String(id)], undefined, `hotkey ${id}`);
 });
 
 test("Move focus to next window (27) off", () => {
