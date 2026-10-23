@@ -1,88 +1,11 @@
 PLUGIN_DIR="$CONFIG_DIR/plugins"
 source "$CONFIG_DIR/color.sh"
-source "$CONFIG_DIR/bevel.sh"
 
-# XP-style taskbar: docked edge to edge at the bottom. The white border shows
-# as the raised line along the top edge. yabai's bottom_padding leaves room,
-# and topmost=window stops window shadows from darkening the bar.
-sketchybar --bar position=bottom height=30 margin=0 y_offset=0 corner_radius=0 blur_radius=0 \
-                 color="$frame_face" border_color="$frame_highlight" border_width=1 padding_left=2 padding_right=2 \
-                 topmost=window
-
-default=(
-  padding_left=2
-  padding_right=2
-  icon.font="$FONT"
-  label.font="$FONT"
-  icon.color="$frame_text"
-  label.color="$frame_text"
-  icon.padding_left=0
-  icon.padding_right=0
-  label.padding_left=4
-  label.padding_right=4
-  background.height=22
-  icon.background.image.scale=0.5
-)
-sketchybar --default "${default[@]}"
-
-# Pixel icons are 2x PNGs drawn as the icon's background.
-PIXEL=(icon="" icon.width=16 icon.background.drawing=on)
-
-##### left: Start, spaces, task button #####
-sketchybar --add item start left \
-           --set start "${RAISED[@]}" "${PIXEL[@]}" \
-                       icon.background.image="$ICONS/start.png" icon.padding_left=4 \
-                       label="Start" label.font="$BOLD" label.padding_right=6 padding_right=6
-
-for sid in 1 2 3 4 5 6 7 8 9 10
-do
-  space=(
-    space="$sid"
-    icon="$((sid % 10))"
-    icon.width=22
-    icon.align=center
-    label.drawing=off
-    script="$PLUGIN_DIR/space.sh"
-    click_script="yabai -m space --focus $sid"
-  )
-  sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}" "${RAISED[@]}"
-done
-
-sketchybar --add item front_app left \
-           --set front_app "${SUNKEN[@]}" background.color="$frame_light" \
-                           icon.drawing=off label.font="$BOLD" label.width=180 \
-                           label.padding_left=8 padding_left=8 \
-                           script="$PLUGIN_DIR/front_app.sh" \
-           --subscribe front_app front_app_switched
-
-##### right: tray #####
-sketchybar --add item clock right \
-           --set clock icon.drawing=off update_freq=10 script="$PLUGIN_DIR/clock.sh" \
-                       label.padding_left=6 label.padding_right=8 \
-           --add item volume right \
-           --set volume "${PIXEL[@]}" label.drawing=off script="$PLUGIN_DIR/volume.sh" \
-           --subscribe volume volume_change \
-           --add item battery right \
-           --set battery "${PIXEL[@]}" update_freq=120 script="$PLUGIN_DIR/battery.sh" \
-           --subscribe battery system_woke power_source_change \
-           --add item language right \
-           --set language icon.drawing=off update_freq=1 script="$PLUGIN_DIR/language.sh" \
-           --add item wifi right \
-           --set wifi "${PIXEL[@]}" label.drawing=off update_freq=5 script="$PLUGIN_DIR/wifi.sh" \
-             click_script="$PLUGIN_DIR/wifi_menu.sh" \
-             popup.background.color="$frame_face" \
-             popup.background.border_color="$frame_dark_shadow" \
-             popup.background.border_width=1 \
-             popup.background.corner_radius=0 \
-             popup.blur_radius=0 \
-             popup.y_offset=4 \
-             popup.align=right \
-           --add item wifi_scanner right \
-           --set wifi_scanner drawing=off update_freq=20 script="$PLUGIN_DIR/wifi_scan.sh" \
-           --add item weather right \
-           --set weather "${PIXEL[@]}" update_freq=600 script="$PLUGIN_DIR/weather.sh" \
-                         icon.padding_left=6 \
-           --add bracket tray weather wifi language battery volume clock \
-           --set tray "${SUNKEN[@]}"
+# The bar's layout is per-Theme (ADR 0011): the active Theme's layouts/<theme>.sh,
+# or the Vintage theme's taskbar if it has none. The active Theme is the one
+# color.sh loaded, so it's Vintage when a Theme's palette was never generated.
+layout="$CONFIG_DIR/layouts/$active_theme.sh"
+[ -f "$layout" ] || layout="$CONFIG_DIR/layouts/vintage.sh"
+source "$layout"
 
 sketchybar --update

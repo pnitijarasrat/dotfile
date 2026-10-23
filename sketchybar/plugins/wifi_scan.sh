@@ -1,7 +1,7 @@
 #!/bin/sh
 source "$CONFIG_DIR/color.sh"
 # Rebuilds the wifi popup's item list. Runs silently on a background timer
-# (see the wifi_scanner item in sketchybarrc) so the list is already current
+# (see the wifi_scanner item in layouts/vintage.sh) so the list is already current
 # by the time the user clicks - no "Scanning..." flash and no popup resize
 # animation on open. If the popup is currently open, bail out instead of
 # mutating items out from under the user, since that mid-open swap is what
