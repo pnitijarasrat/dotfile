@@ -56,11 +56,22 @@ function scratch() {
 }
 
 // Runs `theme` with args in a scratch repo, listing the tools it reloads and
-// the system commands it runs.
+// the system commands it runs. No app is running.
 function theme(root, ...args) {
+  return themeWith(root, [], ...args);
+}
+
+// As theme, with the apps in runningApps running.
+function themeWith(root, runningApps, ...args) {
   const reloads = [];
   const commands = [];
-  const result = run({ root, args, reload: (tool) => reloads.push(tool), system: (...command) => commands.push(command) });
+  const result = run({
+    root,
+    args,
+    reload: (tool) => reloads.push(tool),
+    system: (...command) => commands.push(command),
+    running: (app) => runningApps.includes(app),
+  });
   return { ...result, reloads: reloads.join(), commands };
 }
 
@@ -199,6 +210,23 @@ test("switching says VSCode needs a reload if the Theme is new, and gives Chrome
   const reminder = "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n";
   eq(theme(root, "tiny").out, reminder + chromeStep(root, "tiny"), "output for tiny");
   eq(theme(root, "vintage").out, chromeStep(root, "vintage"), "output for vintage");
+  rmSync(root, { recursive: true });
+});
+
+// Ghostty only reshapes open windows after a restart (#184).
+const ghosttyNote = "Open Ghostty windows keep their old corners, title bar and opacity until you quit Ghostty (Cmd+Q) and reopen it.\n";
+
+test("switching while Ghostty runs says its open windows keep their old shape, and never quits it (#184)", () => {
+  const root = scratch();
+  const reminder = "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n";
+  for (const [id, vscode] of [["tiny", reminder], ["vintage", ""]]) {
+    const result = themeWith(root, ["ghostty"], id);
+    eq(result.out, vscode + ghosttyNote + chromeStep(root, id), `output for ${id} with Ghostty running`);
+    eq(result.reloads, "ghostty,sketchybar,borders", "reloads");
+    const ghostty = result.commands.filter((command) => command.join(" ").toLowerCase().includes("ghostty"));
+    eq(JSON.stringify(ghostty), "[]", "commands touching Ghostty");
+    eq(theme(root, id).out, vscode + chromeStep(root, id), `output for ${id} without Ghostty`);
+  }
   rmSync(root, { recursive: true });
 });
 

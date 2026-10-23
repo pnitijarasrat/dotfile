@@ -76,8 +76,9 @@ function macosCommands({ appearance, accent, highlight }) {
 
 // Makes a Switch, or prints the active Theme, in the repo at root. reload(tool)
 // makes a running tool re-read its config; system(command, ...args) runs a
-// command that changes macOS settings. Returns { code, out }.
-export function run({ root, args, reload, system }) {
+// command that changes macOS settings; running(app) says whether an app is
+// running. Returns { code, out }.
+export function run({ root, args, reload, system, running }) {
   const [name] = args;
   const activeFile = join(root, "themes/active");
   if (name === undefined) {
@@ -117,10 +118,14 @@ export function run({ root, args, reload, system }) {
   // VSCode only sees a Theme added to its extension after a reload (ADR 0008),
   // and Vintage is always there.
   const vscode = name === DEFAULT ? "" : `If ${theme.name} is new since VSCode's windows opened, run Developer: Reload Window once.\n`;
+  // Ghostty gives open windows a new title bar style, and their corners with
+  // it, and a new background-opacity only after a restart (#184). Quitting it
+  // would lose its sessions, so the Switch says so instead.
+  const ghostty = running("ghostty") ? "Open Ghostty windows keep their old corners, title bar and opacity until you quit Ghostty (Cmd+Q) and reopen it.\n" : "";
   // No supported route outside Chrome can change its theme, and Chrome uninstalls a theme
   // it switches away from, so every Switch loads the Theme's extension (ADR 0009).
   const chrome = `To switch Chrome, open chrome://extensions, turn on Developer mode, click Load unpacked and pick ${join(root, "chrome", `${name}-theme`)} (Cmd+Shift+G types a path).\n`;
-  return { code: 0, out: vscode + chrome };
+  return { code: 0, out: vscode + ghostty + chrome };
 }
 
 // How each running tool re-reads its config. A tool that isn't running is
@@ -147,7 +152,8 @@ if (process.argv[1] && realpathSync(process.argv[1]) === fileURLToPath(import.me
     const { status, stderr } = spawnSync(command, args, { encoding: "utf8" });
     if (status !== 0) process.stderr.write(stderr || `${command} failed\n`);
   };
-  const { code, out } = run({ root, args: process.argv.slice(2), reload: (tool) => reloaders[tool](), system });
+  const running = (app) => spawnSync("pgrep", ["-x", app]).status === 0;
+  const { code, out } = run({ root, args: process.argv.slice(2), reload: (tool) => reloaders[tool](), system, running });
   (code ? process.stderr : process.stdout).write(out);
   process.exit(code);
 }
