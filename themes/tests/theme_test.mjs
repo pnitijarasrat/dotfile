@@ -11,6 +11,10 @@ import { run } from "../theme.mjs";
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
+// A file as committed, so the tests hold while a Switch has rewritten the
+// working tree's copy (ADR 0008).
+const committed = (path) => spawnSync("git", ["show", `HEAD:${path}`], { cwd: repo, encoding: "utf8" }).stdout;
+
 const failures = [];
 let passed = 0;
 
@@ -40,7 +44,7 @@ function scratch() {
   copyFileSync(join(repo, "ghostty/themes/vintage"), join(root, "ghostty/themes/vintage"));
   copyFileSync(join(repo, "themes/tests/fixtures/tiny.ghostty"), join(root, "ghostty/themes/tiny"));
   mkdirSync(join(root, "vscode"));
-  copyFileSync(join(repo, "vscode/settings.json"), join(root, "vscode/settings.json"));
+  writeFileSync(join(root, "vscode/settings.json"), committed("vscode/settings.json"));
   mkdirSync(join(root, "sketchybar/themes"), { recursive: true });
   copyFileSync(join(repo, "sketchybar/color.sh"), join(root, "sketchybar/color.sh"));
   copyFileSync(join(repo, "sketchybar/themes/vintage.sh"), join(root, "sketchybar/themes/vintage.sh"));
@@ -81,7 +85,7 @@ const frameFace = (root) => shell(root, '. "$HOME/.config/sketchybar/color.sh"; 
 // The committed VSCode settings, with only the lines a Switch owns changed:
 // the color theme to label, and the title bar and modern UI if given.
 const settings = (label, { titleBar = "custom", modernUI = false } = {}) =>
-  readFileSync(join(repo, "vscode/settings.json"), "utf8")
+  committed("vscode/settings.json")
     .replace('"workbench.colorTheme": "Vintage",', `"workbench.colorTheme": "${label}",`)
     .replace('"window.titleBarStyle": "custom",', `"window.titleBarStyle": "${titleBar}",`)
     .replace('"workbench.experimental.modernUI": false,', `"workbench.experimental.modernUI": ${modernUI},`);
@@ -125,7 +129,7 @@ test("Marigold turns VSCode's modern UI on with the native title bar; Vintage le
   theme(root, "marigold");
   eq(read(root, "vscode/settings.json"), settings("Marigold", modern), "vscode/settings.json after theme marigold");
   theme(root, "vintage");
-  eq(read(root, "vscode/settings.json"), readFileSync(join(repo, "vscode/settings.json"), "utf8"), "vscode/settings.json after theme vintage");
+  eq(read(root, "vscode/settings.json"), committed("vscode/settings.json"), "vscode/settings.json after theme vintage");
   rmSync(root, { recursive: true });
 });
 

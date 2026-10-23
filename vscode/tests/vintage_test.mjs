@@ -1,6 +1,7 @@
 // Checks for the Vintage VSCode theme (#19, #20, #33, #46, #79), and each
 // Theme's VSCode color theme (#135).
 // Run: node vscode/tests/vintage_test.mjs
+import { spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -49,7 +50,9 @@ function parseJsonc(text) {
   return JSON.parse(out.replace(/,(\s*[}\]])/g, "$1"));
 }
 
-const settings = parseJsonc(read("vscode/settings.json"));
+// The settings as committed, which are Vintage's: a Switch to another Theme
+// rewrites the working tree's copy (ADR 0008).
+const settings = parseJsonc(spawnSync("git", ["show", "HEAD:vscode/settings.json"], { cwd: root, encoding: "utf8" }).stdout);
 const extension = JSON.parse(read("vscode/vintage-theme/package.json"));
 
 // The Vintage Theme source file, themes/vintage.json, which the settings'

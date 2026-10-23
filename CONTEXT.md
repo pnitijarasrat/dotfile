@@ -5,7 +5,7 @@ Personal macOS configuration for the tools in `~/.config` (plus VSCode, symlinke
 ## Language
 
 **Theme**:
-One complete look applied to every tool in the **Switch** at once: its palettes, fonts, and any shapes it's allowed to change. Exactly one Theme is active at a time; tools in the Switch never mix Themes. Neovim, Raycast and the Claude Code Event Viewer stay out of the Switch and always show the **Vintage theme**.
+One complete look applied to every tool in the **Switch** at once: its palettes, fonts, and any shapes it's allowed to change. Exactly one Theme is active at a time; tools in the Switch never mix Themes. Neovim, Spotify, Raycast and the Claude Code Event Viewer stay out of the Switch and always show the **Vintage theme**.
 _Avoid_: skin, colorscheme (for the whole look; a tool's colorscheme is just its part of a Theme)
 
 **Switch**:
@@ -51,7 +51,7 @@ The **Vintage theme**'s **Theme rules**: no transparency or blur, square corners
 
 ## Relationships
 
-- A **Switch** changes the active **Theme** for every tool in the Switch together; Neovim, Raycast and the Claude Code Event Viewer stay on the **Vintage theme**
+- A **Switch** changes the active **Theme** for every tool in the Switch together; Neovim, Spotify, Raycast and the Claude Code Event Viewer stay on the **Vintage theme**
 - Exactly one **Theme** is active; each **Theme** has one **Theme source file** and one **Theme spec**
 - The **Vintage theme** is made of exactly one **Frame** palette, one **Work surface** palette and one **Display** palette
 - The **Marigold theme** is made of one **Frame** palette and one **Work surface** palette; where Vintage draws a **Display**, it uses Frame colors
