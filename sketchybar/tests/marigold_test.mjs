@@ -132,16 +132,17 @@ test("items have no gap between them, but the front app is a window gap from the
   }
 });
 
-// The bar wears the active window's ring (#183): JankyBorders' active color and
-// width round the bar, its corners the ring's outline's, the radius rule plus the width.
-test("the bar is frame_face at its own opacity and blur, wearing the active window's ring", () => {
+// The bar wears the active window's ring (#183): a hairline in JankyBorders'
+// active color round the bar, its corners the ring's outline's, the radius
+// rule plus the ring's width.
+test("the bar is frame_face at its own opacity and blur, with a hairline in the active window's ring color", () => {
   const { props } = marigoldBar().get("bar");
   const alpha = Math.round(marigold.bar.opacity * 255).toString(16);
   eq(props.color, role("frame_face").replace(/^0xff/, `0x${alpha}`), "color");
   eq(props.blur_radius, String(marigold.bar.blur), "blur_radius");
   eq(props.corner_radius, String(marigold.rules.radius + marigold.borders.width), "corner_radius");
   eq(props.border_color, role(marigold.borders.active), "border_color");
-  eq(props.border_width, String(marigold.borders.width), "border_width");
+  eq(props.border_width, "1", "border_width");
 });
 
 test("spaces are numbered items on the left, then the front app", () => {

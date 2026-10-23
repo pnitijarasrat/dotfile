@@ -83,13 +83,15 @@ test("a Theme with square corners gives JankyBorders square borders", () => {
   if (!square.includes('export border_style="square"\n')) throw new Error(`no square style in:\n${square}`);
 });
 
-// The bar wears the active window's ring (#183): the border's color and width,
-// and corners that curve like the ring's outline, radius plus width.
-test("Marigold's bar has the active border, marigold and 2 wide, with corners of 12", () => {
+// The bar wears the active window's ring (#183): the border's color, and
+// corners that curve like the ring's outline, radius plus width. Its own
+// border stays a hairline, as a 2-wide one reads heavier than the ring.
+test("Marigold's bar has the active border's marigold, with corners of 12", () => {
   const text = sketchybar("marigold", JSON.parse(read("themes/marigold.json")));
-  for (const line of ['export bar_border_color="$frame_selection"', 'export bar_border_width="2"', 'export bar_radius="12"']) {
+  for (const line of ['export bar_border_color="$frame_selection"', 'export bar_radius="12"']) {
     if (!text.includes(`${line}\n`)) throw new Error(`missing ${line}`);
   }
+  if (text.includes("bar_border_width")) throw new Error("the bar takes the ring's width");
 });
 
 test("Vintage's bar has square corners", () => {
