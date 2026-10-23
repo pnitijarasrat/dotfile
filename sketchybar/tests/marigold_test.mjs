@@ -231,6 +231,21 @@ test("the other spaces are frame_gray_text", () => {
   eq(props["icon.color"], role("frame_gray_text"), "icon.color");
 });
 
+test("a space left while its last run is still drawing ends up not active", () => {
+  // SketchyBar runs space.sh once per change, each run with SELECTED as it was
+  // then. Here yabai answers the run from when the space was active slowly, so
+  // the run from after it was left finishes first.
+  const all = run("left.sh", {}, (scratch) => {
+    stub(scratch, "yabai", '[ "$SLOW" = 1 ] && sleep 1\nexit 0');
+    const space = join(scratch.config, "plugins/marigold/space.sh");
+    writeFileSync(join(scratch.config, "plugins/marigold/left.sh"),
+      `SID=1 SELECTED=true SLOW=1 bash "${space}" &\nsleep 0.3\nSID=1 SELECTED=false bash "${space}"\nwait\n`);
+  });
+  const props = all.get("item").props;
+  eq(props["background.drawing"], "off", "background.drawing");
+  eq(props["icon.color"], role("frame_gray_text"), "icon.color");
+});
+
 test("the battery shows its charge with its icon in frame_data_green", () => {
   const props = plugin("battery.sh", {}, battery(80));
   eq(props.label, "80%", "label");

@@ -16,6 +16,13 @@ fi
 source "$CONFIG_DIR/plugins/marigold/hover.sh"
 source "$CONFIG_DIR/plugins/marigold/app_icon.sh"
 
+# SketchyBar runs this once per change, each run with SELECTED as it was then,
+# and a run that waits on yabai can finish after a later one, leaving two
+# spaces marigold. So each run marks itself the latest for its item, and only
+# the latest draws.
+LATEST="${TMPDIR:-/tmp}/sketchybar_marigold_$NAME"
+echo "$$" >"$LATEST"
+
 APPS=""
 while read -r app; do
   [ "$app" = "" ] && continue
@@ -28,6 +35,8 @@ if [ "$APPS" = "" ]; then
 else
   LABEL=(label="$APPS" label.drawing=on)
 fi
+
+[ "$(cat "$LATEST" 2>/dev/null)" = "$$" ] || exit 0
 
 if [ "$SELECTED" = "true" ]; then
   sketchybar --set "$NAME" "${BACKGROUND[@]}" icon.color="$frame_selection_text" label.color="$frame_selection_text" "${LABEL[@]}"
