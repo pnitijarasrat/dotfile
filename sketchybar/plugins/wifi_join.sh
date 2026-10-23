@@ -24,4 +24,7 @@ else
 fi
 
 sleep 1
-NAME=wifi "$CONFIG_DIR/plugins/wifi.sh"
+# Redraw the bar's Wi-Fi with the active Theme's own plugin, as its layout does.
+WIFI_PLUGIN="$CONFIG_DIR/plugins/$active_theme/wifi.sh"
+[ -f "$WIFI_PLUGIN" ] || WIFI_PLUGIN="$CONFIG_DIR/plugins/wifi.sh"
+NAME=wifi "$WIFI_PLUGIN"
