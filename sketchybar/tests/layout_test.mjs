@@ -1,15 +1,9 @@
 // Checks for SketchyBar's choice of layout, which is per-Theme (#155, ADR 0011).
-// Runs sketchybarrc in a scratch $HOME with a stub `sketchybar` that records
-// each call, so the running bar and the repo's own sketchybar/active-theme
-// aren't touched.
+// Runs sketchybarrc in a scratch $HOME (scratch.mjs).
 // Run: node sketchybar/tests/layout_test.mjs
-import { spawnSync } from "node:child_process";
-import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
-const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { calls, padding, root, stub, switchTo, withScratch } from "./scratch.mjs";
 
 const failures = [];
 let passed = 0;
@@ -29,31 +23,6 @@ function eq(actual, expected, what) {
   }
 }
 
-// A scratch $HOME whose ~/.config/sketchybar is a copy of the repo's, with no
-// Switch made yet, and a stub `sketchybar` on PATH that appends each call's
-// arguments, one per line, to sketchybar.log.
-function scratch() {
-  const home = mkdtempSync(join(tmpdir(), "home-"));
-  const config = join(home, ".config/sketchybar");
-  cpSync(join(root, "sketchybar"), config, {
-    recursive: true,
-    filter: (path) => !/\/(active-theme|tests|icons|\.claude)$/.test(path),
-  });
-  mkdirSync(join(home, "bin"));
-  writeFileSync(join(home, "bin/sketchybar"), '#!/bin/sh\nprintf "%s\\n" "$@" -- >> "$HOME/sketchybar.log"\n');
-  chmodSync(join(home, "bin/sketchybar"), 0o755);
-  return { home, config };
-}
-
-// Every sketchybar call the config file at path makes, as SketchyBar runs it.
-function calls({ home, config }, path = join(config, "sketchybarrc")) {
-  rmSync(join(home, "sketchybar.log"), { force: true });
-  const env = { HOME: home, CONFIG_DIR: config, PATH: `${join(home, "bin")}:${process.env.PATH}` };
-  const { stderr, status } = spawnSync("bash", [path], { env, encoding: "utf8" });
-  if (status !== 0) throw new Error(`${path} failed: ${stderr}`);
-  return readFileSync(join(home, "sketchybar.log"), "utf8");
-}
-
 // The calls the XP taskbar made before layouts were per-Theme.
 const before = (bar) => calls(bar, join(root, "sketchybar/tests/fixtures/before.sketchybarrc"));
 
@@ -67,19 +36,11 @@ function sameCalls(actual, expected) {
   }
 }
 
+// Fails unless the last run's yabai padding is exactly expected.
+const samePadding = (bar, expected) => eq(JSON.stringify(padding(bar)), JSON.stringify(expected), "padding");
+
 // A layout of a Theme's own that makes one call, so its running shows.
 const ownLayout = "sketchybar --bar position=top\n";
-
-const switchTo = ({ config }, name) => writeFileSync(join(config, "active-theme"), `active_theme=${name}\n`);
-
-function withScratch(fn) {
-  const bar = scratch();
-  try {
-    fn(bar);
-  } finally {
-    rmSync(bar.home, { recursive: true });
-  }
-}
 
 test("a fresh checkout runs Vintage's taskbar, exactly as before", () => withScratch((bar) => {
   const taskbar = calls(bar);
@@ -99,6 +60,8 @@ test("the active Theme's own layout runs in place of the taskbar", () => withScr
 }));
 
 test("a Theme with no layout of its own runs Vintage's taskbar in its colors", () => withScratch((bar) => {
+  // Marigold, as if it had no layout of its own: its palette is the one generated.
+  rmSync(join(bar.config, "layouts/marigold.sh"));
   switchTo(bar, "marigold");
   const taskbar = calls(bar);
   const face = readFileSync(join(root, "sketchybar/themes/marigold.sh"), "utf8").match(/^export frame_face="(0x\w+)"/m)[1];
@@ -110,6 +73,49 @@ test("a Theme whose palette was never generated runs Vintage's taskbar", () => w
   writeFileSync(join(bar.config, "layouts/gone.sh"), ownLayout);
   switchTo(bar, "gone");
   sameCalls(calls(bar), before(bar));
+}));
+
+// Each layout reserves the bar's room in yabai (#166).
+test("Vintage's taskbar has yabai leave top 8 and bottom 38", () => withScratch((bar) => {
+  switchTo(bar, "vintage");
+  calls(bar);
+  samePadding(bar, { top: 8, bottom: 38 });
+}));
+
+// Its y_offset, height and window gap, as the Marigold spec settles them.
+test("Marigold's bar has yabai leave top 44, clear of the bar, and bottom 8", () => withScratch((bar) => {
+  switchTo(bar, "marigold");
+  calls(bar);
+  samePadding(bar, { top: 44, bottom: 8 });
+}));
+
+for (const theme of ["vintage", "marigold"]) {
+  test(`${theme}: the bar loads in full when yabai isn't running`, () => withScratch((bar) => {
+    switchTo(bar, theme);
+    const running = calls(bar);
+    stub(bar, "yabai", 'echo "yabai-msg: failed to connect to socket.." >&2\nexit 1');
+    sameCalls(calls(bar), running);
+    samePadding(bar, {});
+  }));
+}
+
+test("yabairc leaves top and bottom padding to the layouts", () => {
+  const set = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^\s*yabai -m config (top|bottom)_padding.*/m);
+  if (set) throw new Error(`yabairc sets ${set[0].trim()}`);
+});
+
+// A restarted yabai starts with no top or bottom padding.
+test("yabairc reloads the bar, so a restarted yabai gets its padding back", () => {
+  const lines = readFileSync(join(root, "yabai/yabairc"), "utf8").split("\n");
+  if (!lines.some((line) => /^sketchybar --reload\b/.test(line))) throw new Error("yabairc doesn't run sketchybar --reload");
+});
+
+// The spec's "8 from the top and sides of the screen (yabai's window_gap)".
+test("Marigold's bar is inset from the screen's sides by yabai's window_gap", () => withScratch((bar) => {
+  switchTo(bar, "marigold");
+  const margin = calls(bar).match(/^margin=(\d+)$/m)?.[1];
+  const gap = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^yabai -m config window_gap (\d+)$/m)[1];
+  eq(margin, gap, "margin");
 }));
 
 if (failures.length) {

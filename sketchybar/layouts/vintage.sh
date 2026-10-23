@@ -4,11 +4,13 @@
 # without one of its own (#155). sketchybarrc sources it after color.sh and
 # sets PLUGIN_DIR.
 source "$CONFIG_DIR/bevel.sh"
+source "$CONFIG_DIR/yabai_padding.sh"
 
 # XP-style taskbar: docked edge to edge at the bottom. The white border shows
-# as the raised line along the top edge. yabai's bottom_padding leaves room,
-# and topmost=window stops window shadows from darkening the bar.
-sketchybar --bar position=bottom height=30 margin=0 y_offset=0 corner_radius=0 blur_radius=0 \
+# as the raised line along the top edge. yabai leaves room for it at the
+# bottom, and topmost=window stops window shadows from darkening the bar.
+BAR_HEIGHT=30
+sketchybar --bar position=bottom height="$BAR_HEIGHT" margin=0 y_offset=0 corner_radius=0 blur_radius=0 \
                  color="$frame_face" border_color="$frame_highlight" border_width=1 padding_left=2 padding_right=2 \
                  topmost=window
 
@@ -87,3 +89,6 @@ sketchybar --add item clock right \
                          icon.padding_left=6 \
            --add bracket tray weather wifi language battery volume clock \
            --set tray "${SUNKEN[@]}"
+
+# Tiled windows stop a window gap above the taskbar.
+reserve_in_yabai 0 "$BAR_HEIGHT"

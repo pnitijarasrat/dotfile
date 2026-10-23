@@ -31,7 +31,10 @@ const users = [
   "sketchybar/sketchybarrc",
   ...readdirSync(join(root, "sketchybar/layouts")).map((file) => `sketchybar/layouts/${file}`),
   "sketchybar/bevel.sh",
-  ...readdirSync(join(root, "sketchybar/plugins")).map((file) => `sketchybar/plugins/${file}`),
+  // A Theme's own plugins are in a folder of its name (#156).
+  ...readdirSync(join(root, "sketchybar/plugins"), { recursive: true })
+    .filter((file) => file.endsWith(".sh"))
+    .map((file) => `sketchybar/plugins/${file}`),
   "borders/bordersrc",
 ];
 const used = new Set(users.flatMap((path) => [...read(path).matchAll(/\$\{?(frame_\w+)/g)].map((m) => m[1])));
