@@ -109,7 +109,7 @@ The window Shortcuts follow the modifier scheme in #113:
 | Send the focused window to space N (you stay put) | ⇧⌘+1–0 |
 | Finder: launch, focus or cycle | Hyper+D |
 
-⇧⌘0 is space 10. Hyper+D runs `skhd/scripts/go.sh`: it opens Finder if it's closed, focuses it if it's open, and goes to its next window if it's already frontmost. There are no go-to-space Shortcuts and no apps pinned to spaces: switch spaces in Mission Control (#126), since the macOS Desktop N hotkeys always slide.
+⇧⌘0 is space 10. Hyper+D runs `skhd/scripts/go.sh`: it opens Finder if it's closed, focuses it if it's open, and goes to its next window if it's already frontmost. Switching to space N is macOS's own Switch to Desktop N on ⌘1–0, set by hand in System Settings; nothing in this repo touches it. No apps are pinned to spaces.
 
 Check the bindings with `node skhd/tests/shortcuts_test.mjs`, and the script with `node skhd/tests/go_test.mjs` (stubbed, nothing on screen moves).
 
