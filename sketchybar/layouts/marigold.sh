@@ -15,8 +15,8 @@ FRONT_APP_FONT="sketchybar-app-font:Regular:15.0"
 
 # A floating bar at the top, inset from the screen edges: frame_face at the
 # bar's own opacity and blur (#169), wearing the active window's ring (#183):
-# JankyBorders' active color and width, with corners curved like the ring's
-# outline. Its top and side insets are yabai's window_gap, so the bar
+# a hairline in JankyBorders' active color, as a border as wide as the ring
+# reads heavier than it, with corners curved like the ring's outline. Its top and side insets are yabai's window_gap, so the bar
 # lines up with the tiled windows. Each display has its own bar (#172), hidden
 # while that display shows a full-screen window. topmost=window keeps it above
 # windows but under the auto-hidden macOS menu bar, which slides down over it.
@@ -27,7 +27,7 @@ BAR_Y_OFFSET=8
 BAR_MARGIN=8
 sketchybar --bar position=top height="$BAR_HEIGHT" margin="$BAR_MARGIN" y_offset="$BAR_Y_OFFSET" \
                  corner_radius="$bar_radius" blur_radius="$bar_blur" \
-                 color="0x$bar_alpha${frame_face#0xff}" border_color="$bar_border_color" border_width="$bar_border_width" \
+                 color="0x$bar_alpha${frame_face#0xff}" border_color="$bar_border_color" border_width=1 \
                  padding_left=6 padding_right=6 topmost=window display=all show_in_fullscreen=off
 
 # No gap between items: each pads its own icon and label, so its frame_light
