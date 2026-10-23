@@ -63,6 +63,7 @@ export function sketchybar(id, theme) {
   if (!theme.borders) throw new Error(`${theme.name} has no borders for JankyBorders`);
   const role = roles(theme);
   const { width, active, inactive } = theme.borders;
+  const { opacity, blur, radius } = theme.rules;
   for (const name of [active, inactive]) {
     if (!theme.palettes.frame?.[name]) throw new Error(`${theme.name}'s border color ${name} isn't one of its Frame roles`);
   }
@@ -91,10 +92,16 @@ export function sketchybar(id, theme) {
     ...["red", "green", "yellow", "blue", "magenta", "cyan", "orange"].map((color) => line(`frame_data_${color}`)),
     "",
     "# JankyBorders: style from the radius rule, width and colors from the Theme's borders.",
-    `export border_style="${theme.rules.radius > 0 ? "round" : "square"}"`,
+    `export border_style="${radius > 0 ? "round" : "square"}"`,
     `export border_width="${width.toFixed(1)}"`,
     `export border_active_color="$${active}"`,
     `export border_inactive_color="$${inactive}"`,
+    "",
+    "# SketchyBar: the opacity, blur and corners of a Theme's own bar (#156), from its",
+    "# Theme rules. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.",
+    `export bar_alpha="${Math.round(opacity * 255).toString(16).padStart(2, "0")}"`,
+    `export bar_blur="${blur}"`,
+    `export bar_radius="${radius}"`,
     "",
   ].join("\n");
 }
