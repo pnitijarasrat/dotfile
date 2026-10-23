@@ -72,20 +72,59 @@ sketchybar --add item front_app left \
                            script="$MARIGOLD_PLUGINS/front_app.sh" \
            --subscribe front_app front_app_switched "${HOVER[@]}"
 
-##### right: clock, battery, Wi-Fi, volume, right to left #####
-# Each with its icon in its own Frame data color.
-sketchybar --add item clock right \
-           --set clock icon="$sf_clock" icon.color="$frame_data_yellow" update_freq=10 script="$MARIGOLD_PLUGINS/clock.sh" \
-           --subscribe clock "${HOVER[@]}" \
+# Clicking a status item opens its popup under it (plugins/marigold/popup.sh),
+# Frame as the spec's "Where popups go"; moving the mouse off the bar and
+# the popup closes it, as SketchyBar can't see clicks outside its windows. Rows are a fixed height, so a row's highlight doesn't resize it.
+POPUP=(
+  click_script="$MARIGOLD_PLUGINS/popup.sh"
+  popup.align=right
+  popup.y_offset=2
+  popup.height=24
+  popup.blur_radius=0
+  popup.background.color="$frame_face"
+  popup.background.border_color="$frame_highlight"
+  popup.background.border_width=1
+  popup.background.corner_radius="$bar_radius"
+)
+STATUS=("${HOVER[@]}" mouse.exited.global)
+
+##### center: now playing #####
+# A popup across the track's row: what's playing, then its controls.
+sketchybar --add item media center \
+           --set media icon="$sf_music" icon.color="$frame_data_magenta" label.max_chars=40 script="$MARIGOLD_PLUGINS/media.sh" \
+                       "${POPUP[@]}" popup.align=center popup.horizontal=on \
+           --subscribe media media_change "${STATUS[@]}"
+
+##### right: clock, battery, Wi-Fi, volume, language, weather, memory, CPU, right to left #####
+# Each with its icon in its own Frame data color. language follows the input
+# source as macOS announces it changing.
+sketchybar --add event input_change AppleSelectedInputSourcesChangedNotification \
+           --add item clock right \
+           --set clock icon="$sf_clock" icon.color="$frame_data_yellow" update_freq=10 script="$MARIGOLD_PLUGINS/clock.sh" "${POPUP[@]}" \
+           --subscribe clock "${STATUS[@]}" \
            --add item battery right \
-           --set battery icon="$sf_battery_100" icon.color="$frame_data_green" update_freq=120 script="$MARIGOLD_PLUGINS/battery.sh" \
-           --subscribe battery system_woke power_source_change "${HOVER[@]}" \
+           --set battery icon="$sf_battery_100" icon.color="$frame_data_green" update_freq=120 script="$MARIGOLD_PLUGINS/battery.sh" "${POPUP[@]}" \
+           --subscribe battery system_woke power_source_change "${STATUS[@]}" \
            --add item wifi right \
-           --set wifi icon="$sf_wifi" icon.color="$frame_data_blue" update_freq=5 script="$MARIGOLD_PLUGINS/wifi.sh" \
-           --subscribe wifi "${HOVER[@]}" \
+           --set wifi icon="$sf_wifi" icon.color="$frame_data_blue" update_freq=5 script="$MARIGOLD_PLUGINS/wifi.sh" "${POPUP[@]}" \
+           --subscribe wifi "${STATUS[@]}" \
+           --add item wifi_scanner right \
+           --set wifi_scanner drawing=off update_freq=20 script="$MARIGOLD_PLUGINS/wifi_scan.sh" \
            --add item volume right \
-           --set volume icon="$sf_volume" icon.color="$frame_data_magenta" script="$MARIGOLD_PLUGINS/volume.sh" \
-           --subscribe volume volume_change "${HOVER[@]}"
+           --set volume icon="$sf_volume" icon.color="$frame_data_magenta" script="$MARIGOLD_PLUGINS/volume.sh" "${POPUP[@]}" \
+           --subscribe volume volume_change "${STATUS[@]}" \
+           --add item language right \
+           --set language icon="$sf_keyboard" icon.color="$frame_data_cyan" script="$MARIGOLD_PLUGINS/language.sh" "${POPUP[@]}" \
+           --subscribe language input_change "${STATUS[@]}" \
+           --add item weather right \
+           --set weather icon="$sf_partly_cloudy" icon.color="$frame_data_yellow" update_freq=600 script="$MARIGOLD_PLUGINS/weather.sh" "${POPUP[@]}" \
+           --subscribe weather system_woke "${STATUS[@]}" \
+           --add item memory right \
+           --set memory icon="$sf_memory" icon.color="$frame_data_orange" update_freq=5 script="$MARIGOLD_PLUGINS/memory.sh" "${POPUP[@]}" \
+           --subscribe memory "${STATUS[@]}" \
+           --add item cpu right \
+           --set cpu icon="$sf_cpu" icon.color="$frame_data_cyan" update_freq=5 script="$MARIGOLD_PLUGINS/cpu.sh" "${POPUP[@]}" \
+           --subscribe cpu "${STATUS[@]}"
 
 # Tiled windows start a window gap below the bar, and need no room at the bottom.
 reserve_in_yabai $((BAR_Y_OFFSET + BAR_HEIGHT)) 0
