@@ -11,6 +11,10 @@ import { run } from "../theme.mjs";
 
 const repo = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
+// A file as committed, so the tests hold while a Switch has rewritten the
+// working tree's copy (ADR 0008).
+const committed = (path) => spawnSync("git", ["show", `HEAD:${path}`], { cwd: repo, encoding: "utf8" }).stdout;
+
 const failures = [];
 let passed = 0;
 
@@ -40,7 +44,7 @@ function scratch() {
   copyFileSync(join(repo, "ghostty/themes/vintage"), join(root, "ghostty/themes/vintage"));
   copyFileSync(join(repo, "themes/tests/fixtures/tiny.ghostty"), join(root, "ghostty/themes/tiny"));
   mkdirSync(join(root, "vscode"));
-  copyFileSync(join(repo, "vscode/settings.json"), join(root, "vscode/settings.json"));
+  writeFileSync(join(root, "vscode/settings.json"), committed("vscode/settings.json"));
   mkdirSync(join(root, "sketchybar/themes"), { recursive: true });
   copyFileSync(join(repo, "sketchybar/color.sh"), join(root, "sketchybar/color.sh"));
   copyFileSync(join(repo, "sketchybar/themes/vintage.sh"), join(root, "sketchybar/themes/vintage.sh"));
@@ -52,11 +56,22 @@ function scratch() {
 }
 
 // Runs `theme` with args in a scratch repo, listing the tools it reloads and
-// the system commands it runs.
+// the system commands it runs. No app is running.
 function theme(root, ...args) {
+  return themeWith(root, [], ...args);
+}
+
+// As theme, with the apps in runningApps running.
+function themeWith(root, runningApps, ...args) {
   const reloads = [];
   const commands = [];
-  const result = run({ root, args, reload: (tool) => reloads.push(tool), system: (...command) => commands.push(command) });
+  const result = run({
+    root,
+    args,
+    reload: (tool) => reloads.push(tool),
+    system: (...command) => commands.push(command),
+    running: (app) => runningApps.includes(app),
+  });
   return { ...result, reloads: reloads.join(), commands };
 }
 
@@ -81,7 +96,7 @@ const frameFace = (root) => shell(root, '. "$HOME/.config/sketchybar/color.sh"; 
 // The committed VSCode settings, with only the lines a Switch owns changed:
 // the color theme to label, and the title bar and modern UI if given.
 const settings = (label, { titleBar = "custom", modernUI = false } = {}) =>
-  readFileSync(join(repo, "vscode/settings.json"), "utf8")
+  committed("vscode/settings.json")
     .replace('"workbench.colorTheme": "Vintage",', `"workbench.colorTheme": "${label}",`)
     .replace('"window.titleBarStyle": "custom",', `"window.titleBarStyle": "${titleBar}",`)
     .replace('"workbench.experimental.modernUI": false,', `"workbench.experimental.modernUI": ${modernUI},`);
@@ -125,7 +140,7 @@ test("Marigold turns VSCode's modern UI on with the native title bar; Vintage le
   theme(root, "marigold");
   eq(read(root, "vscode/settings.json"), settings("Marigold", modern), "vscode/settings.json after theme marigold");
   theme(root, "vintage");
-  eq(read(root, "vscode/settings.json"), readFileSync(join(repo, "vscode/settings.json"), "utf8"), "vscode/settings.json after theme vintage");
+  eq(read(root, "vscode/settings.json"), committed("vscode/settings.json"), "vscode/settings.json after theme vintage");
   rmSync(root, { recursive: true });
 });
 
@@ -195,6 +210,23 @@ test("switching says VSCode needs a reload if the Theme is new, and gives Chrome
   const reminder = "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n";
   eq(theme(root, "tiny").out, reminder + chromeStep(root, "tiny"), "output for tiny");
   eq(theme(root, "vintage").out, chromeStep(root, "vintage"), "output for vintage");
+  rmSync(root, { recursive: true });
+});
+
+// Ghostty only reshapes open windows after a restart (#184).
+const ghosttyNote = "Open Ghostty windows keep their old corners, title bar and opacity until you quit Ghostty (Cmd+Q) and reopen it.\n";
+
+test("switching while Ghostty runs says its open windows keep their old shape, and never quits it (#184)", () => {
+  const root = scratch();
+  const reminder = "If Tiny is new since VSCode's windows opened, run Developer: Reload Window once.\n";
+  for (const [id, vscode] of [["tiny", reminder], ["vintage", ""]]) {
+    const result = themeWith(root, ["ghostty"], id);
+    eq(result.out, vscode + ghosttyNote + chromeStep(root, id), `output for ${id} with Ghostty running`);
+    eq(result.reloads, "ghostty,sketchybar,borders", "reloads");
+    const ghostty = result.commands.filter((command) => command.join(" ").toLowerCase().includes("ghostty"));
+    eq(JSON.stringify(ghostty), "[]", "commands touching Ghostty");
+    eq(theme(root, id).out, vscode + chromeStep(root, id), `output for ${id} without Ghostty`);
+  }
   rmSync(root, { recursive: true });
 });
 

@@ -132,14 +132,16 @@ test("items have no gap between them, but the front app is a window gap from the
   }
 });
 
-test("the bar is frame_face at its own opacity and blur, rounded by the Theme rules, with a 1px frame_highlight border", () => {
+// The bar wears the active window's ring (#183): JankyBorders' active color and
+// width round the bar, its corners the ring's outline's, the radius rule plus the width.
+test("the bar is frame_face at its own opacity and blur, wearing the active window's ring", () => {
   const { props } = marigoldBar().get("bar");
   const alpha = Math.round(marigold.bar.opacity * 255).toString(16);
   eq(props.color, role("frame_face").replace(/^0xff/, `0x${alpha}`), "color");
   eq(props.blur_radius, String(marigold.bar.blur), "blur_radius");
-  eq(props.corner_radius, String(marigold.rules.radius), "corner_radius");
-  eq(props.border_color, role("frame_highlight"), "border_color");
-  eq(props.border_width, "1", "border_width");
+  eq(props.corner_radius, String(marigold.rules.radius + marigold.borders.width), "corner_radius");
+  eq(props.border_color, role(marigold.borders.active), "border_color");
+  eq(props.border_width, String(marigold.borders.width), "border_width");
 });
 
 test("spaces are numbered items on the left, then the front app", () => {
@@ -227,6 +229,21 @@ test("the active space is marigold with frame_selection_text", () => {
 
 test("the other spaces are frame_gray_text", () => {
   const props = plugin("space.sh", { SELECTED: "false" });
+  eq(props["background.drawing"], "off", "background.drawing");
+  eq(props["icon.color"], role("frame_gray_text"), "icon.color");
+});
+
+test("a space left while its last run is still drawing ends up not active", () => {
+  // SketchyBar runs space.sh once per change, each run with SELECTED as it was
+  // then. Here yabai answers the run from when the space was active slowly, so
+  // the run from after it was left finishes first.
+  const all = run("left.sh", {}, (scratch) => {
+    stub(scratch, "yabai", '[ "$SLOW" = 1 ] && sleep 1\nexit 0');
+    const space = join(scratch.config, "plugins/marigold/space.sh");
+    writeFileSync(join(scratch.config, "plugins/marigold/left.sh"),
+      `SID=1 SELECTED=true SLOW=1 bash "${space}" &\nsleep 0.3\nSID=1 SELECTED=false bash "${space}"\nwait\n`);
+  });
+  const props = all.get("item").props;
   eq(props["background.drawing"], "off", "background.drawing");
   eq(props["icon.color"], role("frame_gray_text"), "icon.color");
 });

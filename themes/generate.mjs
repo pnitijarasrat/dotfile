@@ -58,7 +58,7 @@ export function ghostty(id, theme) {
 // shell variables named after their roles, as 0xAARRGGBB. It ends with
 // JankyBorders' options (#152), so bordersrc reads them instead of asking
 // which Theme is active, then the bar's opacity and blur from the Theme's
-// bar (#169) and its corners from the Theme rules.
+// bar (#169), and its border and corners from the active window's ring (#183).
 export function sketchybar(id, theme) {
   if (!theme.rules) throw new Error(`${theme.name} has no Theme rules`);
   if (!theme.borders) throw new Error(`${theme.name} has no borders for JankyBorders`);
@@ -101,11 +101,17 @@ export function sketchybar(id, theme) {
     `export border_inactive_color="$${inactive}"`,
     "",
     "# SketchyBar: the opacity and blur of a Theme's own bar (#169), from its source",
-    "# file's bar, and its corners from the Theme rules. The alpha is opacity as two",
-    "# hex digits, for 0xAARRGGBB colors.",
+    "# file's bar. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.",
+    "# The bar wears the active window's ring (#183): JankyBorders' active color and",
+    "# width, and corners that curve like the ring's outline, the radius rule plus",
+    "# the width; square Themes stay square. Popups keep the window corners, the",
+    "# radius rule.",
     `export bar_alpha="${Math.round(opacity * 255).toString(16).padStart(2, "0")}"`,
     `export bar_blur="${blur}"`,
-    `export bar_radius="${radius}"`,
+    `export bar_border_color="$${active}"`,
+    `export bar_border_width="${width}"`,
+    `export bar_radius="${radius > 0 ? radius + width : 0}"`,
+    `export popup_radius="${radius}"`,
     "",
   ].join("\n");
 }
