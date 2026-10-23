@@ -57,13 +57,16 @@ export function ghostty(id, theme) {
 // SketchyBar's Frame palette for a Theme, which JankyBorders shares (#136):
 // shell variables named after their roles, as 0xAARRGGBB. It ends with
 // JankyBorders' options (#152), so bordersrc reads them instead of asking
-// which Theme is active.
+// which Theme is active, then the bar's opacity and blur from the Theme's
+// bar (#169) and its corners from the Theme rules.
 export function sketchybar(id, theme) {
   if (!theme.rules) throw new Error(`${theme.name} has no Theme rules`);
   if (!theme.borders) throw new Error(`${theme.name} has no borders for JankyBorders`);
+  if (!theme.bar) throw new Error(`${theme.name} has no bar for SketchyBar`);
   const role = roles(theme);
   const { width, active, inactive } = theme.borders;
-  const { opacity, blur, radius } = theme.rules;
+  const { opacity, blur } = theme.bar;
+  const { radius } = theme.rules;
   for (const name of [active, inactive]) {
     if (!theme.palettes.frame?.[name]) throw new Error(`${theme.name}'s border color ${name} isn't one of its Frame roles`);
   }
@@ -97,8 +100,9 @@ export function sketchybar(id, theme) {
     `export border_active_color="$${active}"`,
     `export border_inactive_color="$${inactive}"`,
     "",
-    "# SketchyBar: the opacity, blur and corners of a Theme's own bar (#156), from its",
-    "# Theme rules. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.",
+    "# SketchyBar: the opacity and blur of a Theme's own bar (#169), from its source",
+    "# file's bar, and its corners from the Theme rules. The alpha is opacity as two",
+    "# hex digits, for 0xAARRGGBB colors.",
     `export bar_alpha="${Math.round(opacity * 255).toString(16).padStart(2, "0")}"`,
     `export bar_blur="${blur}"`,
     `export bar_radius="${radius}"`,

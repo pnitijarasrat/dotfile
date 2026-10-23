@@ -82,11 +82,11 @@ test("the bar floats at the top, inset from the screen edges", () => {
   }
 });
 
-test("the bar is frame_face at the Theme's opacity, blurred and rounded by its rules, with a 1px frame_highlight border", () => {
+test("the bar is frame_face at its own opacity and blur, rounded by the Theme rules, with a 1px frame_highlight border", () => {
   const { props } = marigoldBar().get("bar");
-  const alpha = Math.round(marigold.rules.opacity * 255).toString(16);
+  const alpha = Math.round(marigold.bar.opacity * 255).toString(16);
   eq(props.color, role("frame_face").replace(/^0xff/, `0x${alpha}`), "color");
-  eq(props.blur_radius, String(marigold.rules.blur), "blur_radius");
+  eq(props.blur_radius, String(marigold.bar.blur), "blur_radius");
   eq(props.corner_radius, String(marigold.rules.radius), "corner_radius");
   eq(props.border_color, role("frame_highlight"), "border_color");
   eq(props.border_width, "1", "border_width");
