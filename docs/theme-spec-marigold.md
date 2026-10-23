@@ -129,8 +129,8 @@ Which tools get a design of their own under Marigold, beyond colors, and which o
 | **JankyBorders** | **own design.** `style=round`, width 2, active `frame_selection` (marigold), inactive `frame_shadow` (near-black) | style, width and colors generated into `sketchybar/themes/marigold.sh` from the Theme source file's `borders` and `rules.radius` (#152); a Switch hands them to the running `borders` |
 | **Starship** | **own design.** The same segments, with Nerd Font icons (directory, branch, runtime). Starship joins the Switch with one config per Theme; Vintage's keeps `>` and no icons | **built**: `starship/themes/<theme>.toml` generated from the Theme source file's `rules.icons`; `starship/init.zsh` reads the Switch's `starship/active-theme` before each prompt (#154) |
 | **Spotify** | colors only. Spotify's own layout, which is already rounded and modern: `color.ini` plus minimal CSS, no Media Rack, no bevels and no Win95 window. The player bar is Frame (no Display). The lyrics view stays a Work surface | to build |
-| **Claude Code** (Event Viewer) | stays Vintage, out of the Switch (#158): its Win95 window and Display under every Theme | nothing to build |
-| **Raycast** | stays Vintage, out of the Switch (#158): its "Vintage" theme stays selected under every Theme | nothing to build |
+| **Claude Code** (Event Viewer) | stays Vintage, out of the Switch (#158, `docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`): its Win95 window and Display under every Theme | nothing to build |
+| **Raycast** | stays Vintage, out of the Switch (#158, `docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`): its "Vintage" theme stays selected under every Theme | nothing to build |
 | **Chrome** | colors only. The generated "Marigold" extension, with the New Tab page `frame_desktop` black | generated (`chrome/marigold-theme/manifest.json`) |
 | **macOS** | dark, yellow accent, yellow highlight | follows the Switch already |
 | **ccstatusline**, **ranger**, **litecli** | no change: they inherit Ghostty's ANSI colors | nothing to build |
@@ -195,6 +195,6 @@ These stay Vintage whatever Theme is active, and a Switch doesn't touch them (#1
 
 - Deepvue (see [Known exceptions](#known-exceptions)).
 - Neovim (`docs/adr/0007-neovim-stays-out-of-the-switch.md`).
-- Raycast: its "Vintage" theme stays selected.
-- The Claude Code Event Viewer: its Win95 window and Display.
+- Raycast: its "Vintage" theme stays selected (`docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`).
+- The Claude Code Event Viewer: its Win95 window and Display (`docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`).
 - The wallpaper (see [Open](#open)).
