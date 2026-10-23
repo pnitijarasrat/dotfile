@@ -89,6 +89,17 @@ test("Marigold's bar has yabai leave top 44, clear of the bar, and bottom 8", ()
   samePadding(bar, { top: 44, bottom: 8 });
 }));
 
+// Marigold's bar asks yabai to tell it when spaces change (#172); the taskbar
+// needs no signals, so a Switch to Vintage removes them.
+test("a Switch back to Vintage stops yabai signalling Marigold's bar", () => withScratch((bar) => {
+  switchTo(bar, "vintage");
+  calls(bar);
+  const log = readFileSync(join(bar.home, "yabai.log"), "utf8").split("\n--\n").map((call) => call.split("\n"));
+  for (const event of ["space_created", "space_destroyed", "display_added", "display_removed", "display_moved", "mission_control_exit"]) {
+    if (!log.some((call) => call[2] === "--remove" && call[3] === `sketchybar_${event}`)) throw new Error(`the ${event} signal stays`);
+  }
+}));
+
 for (const theme of ["vintage", "marigold"]) {
   test(`${theme}: the bar loads in full when yabai isn't running`, () => withScratch((bar) => {
     switchTo(bar, theme);

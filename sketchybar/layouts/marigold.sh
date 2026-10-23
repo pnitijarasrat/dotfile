@@ -4,26 +4,30 @@
 # chosen in #165 (#170). sketchybarrc sources it after color.sh and sets
 # PLUGIN_DIR. Every item runs one of Marigold's own plugins.
 source "$CONFIG_DIR/yabai_padding.sh"
+source "$CONFIG_DIR/yabai_signals.sh"
 source "$CONFIG_DIR/sf_symbols.sh"
 MARIGOLD_PLUGINS="$PLUGIN_DIR/marigold"
 FONT="JetBrainsMonoNL Nerd Font:Regular:13.0"
 BOLD="JetBrainsMonoNL Nerd Font:Bold:13.0"
 ICON_FONT="SF Pro:Regular:13.0"
-APP_FONT="sketchybar-app-font:Regular:13.0"
 # The front app's icon is a size up, as in the #165 mockup.
 FRONT_APP_FONT="sketchybar-app-font:Regular:15.0"
 
 # A floating bar at the top, inset from the screen edges: frame_face at the
 # bar's own opacity and blur (#169), with corners from the Theme rules and a
 # hairline border. Its top and side insets are yabai's window_gap, so the bar
-# lines up with the tiled windows.
+# lines up with the tiled windows. Each display has its own bar (#172), hidden
+# while that display shows a full-screen window. topmost=window keeps it above
+# windows but under the auto-hidden macOS menu bar, which slides down over it.
+# Deviation: a window yabai zooms to full screen (hyper-f) isn't full screen to
+# SketchyBar, so the bar stays; the window stops short of it, in yabai's padding.
 BAR_HEIGHT=28
 BAR_Y_OFFSET=8
 BAR_MARGIN=8
 sketchybar --bar position=top height="$BAR_HEIGHT" margin="$BAR_MARGIN" y_offset="$BAR_Y_OFFSET" \
                  corner_radius="$bar_radius" blur_radius="$bar_blur" \
                  color="0x$bar_alpha${frame_face#0xff}" border_color="$frame_highlight" border_width=1 \
-                 padding_left=6 padding_right=6 topmost=window
+                 padding_left=6 padding_right=6 topmost=window display=all show_in_fullscreen=off
 
 # No gap between items: each pads its own icon and label, so its frame_light
 # highlight under the mouse (plugins/marigold/hover.sh) covers both.
@@ -46,24 +50,16 @@ sketchybar --default "${default[@]}"
 HOVER=(mouse.entered mouse.exited)
 
 ##### left: spaces, front app #####
-# Each space is its number, then its windows' apps (plugins/marigold/space.sh).
-for sid in 1 2 3 4 5 6 7 8 9 10
-do
-  space=(
-    space="$sid"
-    icon="$((sid % 10))"
-    icon.font="$BOLD"
-    icon.color="$frame_gray_text"
-    icon.padding_right=6
-    label.font="$APP_FONT"
-    label.drawing=off
-    background.color="$frame_selection"
-    script="$MARIGOLD_PLUGINS/space.sh"
-    click_script="yabai -m space --focus $sid"
-  )
-  sketchybar --add space space."$sid" left --set space."$sid" "${space[@]}" \
-             --subscribe space."$sid" space_windows_change "${HOVER[@]}"
-done
+# Each space is its number, then its windows' apps (plugins/marigold/space.sh),
+# on its own display's bar. The hidden spaces item keeps an item for each of
+# yabai's spaces (plugins/marigold/spaces.sh), as yabai's spaces and displays
+# change.
+sketchybar --add event spaces_change \
+           --add item spaces left \
+           --set spaces drawing=off script="$MARIGOLD_PLUGINS/spaces.sh" \
+           --subscribe spaces spaces_change display_change
+"$MARIGOLD_PLUGINS/spaces.sh"
+trigger_on_yabai_spaces spaces_change
 
 # Set off from the spaces by the window gap, outside its highlight.
 sketchybar --add item front_app left \

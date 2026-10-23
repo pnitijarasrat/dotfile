@@ -75,17 +75,34 @@ const symbol = (icon, what) => {
   if (!/^[\u{100000}-\u{10fffd}]$/u.test(icon ?? "")) throw new Error(`${what} ${JSON.stringify(icon)} isn't an SF Symbols character`);
 };
 
-const marigoldBar = () => {
+// yabai's window gap, which the bar sits at from the screen edges.
+const gap = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^yabai -m config window_gap (\d+)$/m)[1];
+
+// yabai's spaces, as `yabai -m query --spaces` gives them, for spaces as
+// [index, display] or [index, display, "fullscreen"]. The stub still records
+// each call and answers yabairc's window gap, as scratch.mjs's does.
+const yabaiSpaces = (...spaces) => (scratch) => {
+  const json = spaces.map(([index, display, full]) => ({ index, display, "is-native-fullscreen": full === "fullscreen" }));
+  stub(scratch, "yabai", `printf "%s\\n" "$@" -- >> "$HOME/yabai.log"
+case "$*" in
+"-m config window_gap") echo ${gap} ;;
+"-m query --spaces") echo '${JSON.stringify(json)}' ;;
+esac
+exit 0`);
+};
+// Ten spaces, all on one display.
+const oneDisplay = yabaiSpaces(...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sid) => [sid, 1]));
+
+const marigoldBar = (setup = oneDisplay) => {
   let all;
   withScratch((scratch) => {
     switchTo(scratch, "marigold");
+    setup(scratch);
     all = items(calls(scratch));
   });
   return all;
 };
 
-// yabai's window gap, which the bar sits at from the screen edges.
-const gap = readFileSync(join(root, "yabai/yabairc"), "utf8").match(/^yabai -m config window_gap (\d+)$/m)[1];
 
 test("the bar floats at the top, 28 high, a window gap from the top and sides", () => {
   const { props } = marigoldBar().get("bar");
@@ -93,6 +110,18 @@ test("the bar floats at the top, 28 high, a window gap from the top and sides", 
   eq(props.height, "28", "height");
   eq(props.y_offset, gap, "y_offset");
   eq(props.margin, gap, "margin");
+});
+
+test("the bar hides on a display whose front window is full screen", () => {
+  // SketchyBar hides a display's bar while its space is a native full-screen
+  // one, and shows it again when it isn't, unless show_in_fullscreen is on.
+  eq(marigoldBar().get("bar").props.show_in_fullscreen, "off", "show_in_fullscreen");
+});
+
+test("the macOS menu bar slides down over the bar", () => {
+  // topmost=window is the floating window level, below the menu bar's;
+  // topmost=on would sit above it.
+  eq(marigoldBar().get("bar").props.topmost, "window", "topmost");
 });
 
 test("items have no gap between them, but the front app is a window gap from the spaces", () => {
@@ -114,7 +143,7 @@ test("the bar is frame_face at its own opacity and blur, rounded by the Theme ru
 });
 
 test("spaces are numbered items on the left, then the front app", () => {
-  const items = [...marigoldBar().values()].filter((item) => item.position === "left");
+  const items = [...marigoldBar().values()].filter((item) => item.position === "left" && item.props.drawing !== "off");
   eq(items.map((item) => item.name).join(" "), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sid) => `space.${sid}`).join(" ") + " front_app", "left items");
   eq(items.slice(0, 10).map((item) => item.props.icon).join(""), "1234567890", "space numbers");
   for (const space of items.slice(0, 10)) {
@@ -396,6 +425,99 @@ test("the active space stays marigold under the mouse", () => {
     eq(props["background.drawing"], "on", `${SENDER} background.drawing`);
     eq(props["background.color"], role("frame_selection"), `${SENDER} background.color`);
   }
+});
+
+test("each display has its own bar, showing its own spaces and not full-screen ones", () => {
+  const bar = marigoldBar(yabaiSpaces([1, 1], [2, 1], [3, 1, "fullscreen"], [4, 2], [5, 2]));
+  eq(bar.get("bar").props.display, "all", "bar display");
+  const spaces = [...bar.values()].filter((item) => item.type === "space");
+  eq(spaces.map((space) => `${space.name}@${space.props.display}`).join(" "), "space.1@1 space.2@1 space.4@2 space.5@2", "spaces on displays");
+  eq(spaces.map((space) => space.props.icon).join(" "), "1 2 4 5", "space numbers");
+});
+
+// A stub sketchybar that records each call and answers `--query bar` with
+// the items on the bar.
+const showing = (...names) => (scratch) =>
+  stub(scratch, "sketchybar", `printf "%s\\n" "$@" -- >> "$HOME/sketchybar.log"
+[ "$*" = "--query bar" ] && echo '${JSON.stringify({ items: ["spaces", ...names, "front_app"] })}'
+exit 0`);
+
+test("moving a space to another display moves its item to that display's bar", () => {
+  const moved = (scratch) => (showing("space.1", "space.2", "space.3")(scratch), yabaiSpaces([1, 1], [2, 1], [3, 2])(scratch));
+  const bar = run("spaces.sh", { NAME: "spaces", SENDER: "spaces_change" }, moved);
+  eq(["space.1", "space.2", "space.3"].map((name) => bar.get(name)?.props.display).join(" "), "1 1 2", "displays");
+});
+
+test("a space that's gone loses its item, and a new one gains one before the front app", () => {
+  let log;
+  withScratch((scratch) => {
+    switchTo(scratch, "marigold");
+    showing("space.1", "space.2")(scratch);
+    yabaiSpaces([1, 1], [3, 2])(scratch);
+    log = calls(scratch, join(scratch.config, "plugins/marigold/spaces.sh"), { NAME: "spaces", SENDER: "spaces_change" }).split("\n");
+  });
+  const after = (flag, ...rest) => log.some((arg, i) => arg === flag && rest.every((want, j) => log[i + 1 + j] === want));
+  if (!after("--remove", "space.2")) throw new Error("space.2 isn't removed");
+  if (after("--remove", "space.1")) throw new Error("space.1 is removed");
+  if (!after("--add", "space", "space.3", "left")) throw new Error("space.3 isn't added");
+  if (!after("--move", "space.3", "before", "spaces")) throw new Error("space.3 isn't moved ahead of the front app");
+  // Its windows are another space's now.
+  if (!after("--trigger", "space_windows_change")) throw new Error("the spaces' apps aren't refreshed");
+});
+
+test("yabai tells the bar when its spaces or displays change", () => {
+  let log;
+  withScratch((scratch) => {
+    switchTo(scratch, "marigold");
+    oneDisplay(scratch);
+    calls(scratch);
+    log = readFileSync(join(scratch.home, "yabai.log"), "utf8").split("\n--\n").map((call) => call.split("\n"));
+  });
+  for (const event of ["space_created", "space_destroyed", "display_added", "display_removed", "display_moved", "mission_control_exit"]) {
+    const signal = log.find((call) => call[2] === "--add" && call.includes(`event=${event}`));
+    if (!signal) throw new Error(`no yabai signal on ${event}`);
+    eq(signal.find((arg) => arg.startsWith("action=")), "action=sketchybar --trigger spaces_change", `${event} action`);
+  }
+  const { events } = marigoldBar().get("spaces");
+  for (const event of ["spaces_change", "display_change"]) {
+    if (!events.includes(event)) throw new Error(`spaces isn't subscribed to ${event}`);
+  }
+});
+
+test("without yabai, the bar shows spaces 1 to 10, wherever SketchyBar finds them", () => {
+  const bar = marigoldBar((scratch) => stub(scratch, "yabai", 'echo "yabai-msg: failed to connect to socket.." >&2\nexit 1'));
+  const spaces = [...bar.values()].filter((item) => item.type === "space");
+  eq(spaces.map((space) => space.props.icon).join(""), "1234567890", "space numbers");
+  for (const space of spaces) eq(space.props.display, undefined, `${space.name} display`);
+});
+
+test("a space that comes back takes its place among the others", () => {
+  let log;
+  withScratch((scratch) => {
+    switchTo(scratch, "marigold");
+    showing("space.1", "space.3")(scratch);
+    yabaiSpaces([1, 1], [2, 1], [3, 1])(scratch);
+    log = calls(scratch, join(scratch.config, "plugins/marigold/spaces.sh"), { NAME: "spaces", SENDER: "spaces_change" }).split("\n");
+  });
+  // Each --move puts its space last before the hidden spaces item.
+  const moved = log.flatMap((arg, i) => (arg === "--move" && log[i + 3] === "spaces" ? [log[i + 1]] : []));
+  eq(moved.join(" "), "space.1 space.2 space.3", "spaces moved, in order");
+});
+
+test("when yabai stops, the spaces stay", () => {
+  const stopped = (scratch) => (showing("space.1", "space.2")(scratch), stub(scratch, "yabai", "exit 1"));
+  let log;
+  withScratch((scratch) => {
+    switchTo(scratch, "marigold");
+    stopped(scratch);
+    log = calls(scratch, join(scratch.config, "plugins/marigold/spaces.sh"), { NAME: "spaces", SENDER: "space_change" });
+  });
+  if (log.includes("--remove")) throw new Error("spaces are removed");
+});
+
+test("the status items show on every display", () => {
+  const bar = marigoldBar(yabaiSpaces([1, 1], [2, 2]));
+  for (const item of status(bar)) eq(item.props.display, undefined, `${item.name} display`);
 });
 
 test("clicking a space focuses it", () => {

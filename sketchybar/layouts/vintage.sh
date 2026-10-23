@@ -5,6 +5,7 @@
 # sets PLUGIN_DIR.
 source "$CONFIG_DIR/bevel.sh"
 source "$CONFIG_DIR/yabai_padding.sh"
+source "$CONFIG_DIR/yabai_signals.sh"
 
 # XP-style taskbar: docked edge to edge at the bottom. The white border shows
 # as the raised line along the top edge. yabai leaves room for it at the
@@ -92,3 +93,6 @@ sketchybar --add item clock right \
 
 # Tiled windows stop a window gap above the taskbar.
 reserve_in_yabai 0 "$BAR_HEIGHT"
+
+# The taskbar's spaces are fixed, so yabai needn't tell it when they change.
+stop_yabai_space_signals
