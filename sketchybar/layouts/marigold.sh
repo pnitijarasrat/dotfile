@@ -10,7 +10,8 @@ BOLD="SF Pro Text:Semibold:13.0"
 ICON_FONT="JetBrainsMonoNL Nerd Font:Regular:14.0"
 
 # A floating bar at the top, inset from the screen edges: frame_face at the
-# Theme's opacity, with blur, corners and a hairline border from its rules.
+# bar's own opacity and blur (#169), with corners from the Theme rules and a
+# hairline border.
 BAR_HEIGHT=32
 BAR_Y_OFFSET=4
 # The same as yabai's window_gap, so the bar lines up with the tiled windows.
