@@ -1,7 +1,7 @@
 #!/bin/sh
 # Toggles the wifi popup. Purely an instant show/hide - the popup's item
 # list is kept current in the background by the wifi_scanner timer (see
-# wifi_scan.sh / sketchybarrc), so opening never triggers a scan or a
+# wifi_scan.sh / layouts/vintage.sh), so opening never triggers a scan or a
 # resize/rebuild of the popup's contents.
 #
 # sketchybar's `--query` does not expose popup drawing state (at least as of

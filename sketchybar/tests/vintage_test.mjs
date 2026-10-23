@@ -29,6 +29,7 @@ function eq(actual, expected, what) {
 // Every $frame_* variable the bar and JankyBorders use.
 const users = [
   "sketchybar/sketchybarrc",
+  ...readdirSync(join(root, "sketchybar/layouts")).map((file) => `sketchybar/layouts/${file}`),
   "sketchybar/bevel.sh",
   ...readdirSync(join(root, "sketchybar/plugins")).map((file) => `sketchybar/plugins/${file}`),
   "borders/bordersrc",
