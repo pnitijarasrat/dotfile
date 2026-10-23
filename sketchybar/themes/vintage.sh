@@ -28,8 +28,9 @@ export border_width="4.0"
 export border_active_color="$frame_face"
 export border_inactive_color="$frame_shadow"
 
-# SketchyBar: the opacity, blur and corners of a Theme's own bar (#156), from its
-# Theme rules. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.
+# SketchyBar: the opacity and blur of a Theme's own bar (#169), from its source
+# file's bar, and its corners from the Theme rules. The alpha is opacity as two
+# hex digits, for 0xAARRGGBB colors.
 export bar_alpha="ff"
 export bar_blur="0"
 export bar_radius="0"

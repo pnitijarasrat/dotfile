@@ -83,10 +83,11 @@ test("a Theme with square corners gives JankyBorders square borders", () => {
   if (!square.includes('export border_style="square"\n')) throw new Error(`no square style in:\n${square}`);
 });
 
-test("refuses a Theme without borders or Theme rules for JankyBorders", () => {
+test("refuses a Theme without borders, Theme rules or a bar for SketchyBar's palette", () => {
   const { borders, ...noBorders } = tiny;
   const { rules, ...noRules } = tiny;
-  for (const [broken, key] of [[noBorders, "borders"], [noRules, "rules"]]) {
+  const { bar, ...noBar } = tiny;
+  for (const [broken, key] of [[noBorders, "borders"], [noRules, "rules"], [noBar, "bar"]]) {
     let message = "";
     try {
       sketchybar("tiny", broken);
