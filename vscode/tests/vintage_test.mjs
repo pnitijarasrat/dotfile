@@ -212,16 +212,15 @@ for (const { id, theme: source } of themes(root)) {
     expect("editor.inactiveSelectionBackground", roles.frame_light);
   });
 
-  test(`${id}: the selection, match highlights and matched completion letters are the Theme's VSCode selection role (#150)`, () => {
-    const selection = roles[source.vscode.selection];
-    if (!selection) throw new Error(`vscode.selection ${JSON.stringify(source.vscode.selection)} isn't a role`);
-    for (const key of [
-      "editor.selectionBackground",
-      "peekViewEditor.matchHighlightBackground",
-      "peekViewResult.matchHighlightBackground",
-      "editorSuggestWidget.focusHighlightForeground",
+  test(`${id}: the selection, peek match highlights and matched completion letters are the roles the Theme chooses (#150, #160)`, () => {
+    for (const [choice, keys] of [
+      ["selection", ["editor.selectionBackground", "peekViewEditor.matchHighlightBackground"]],
+      ["peek_match", ["peekViewResult.matchHighlightBackground"]],
+      ["completion_match", ["editorSuggestWidget.focusHighlightForeground"]],
     ]) {
-      expect(key, selection);
+      const hex = roles[source.vscode[choice]];
+      if (!hex) throw new Error(`vscode.${choice} ${JSON.stringify(source.vscode[choice])} isn't a role`);
+      for (const key of keys) expect(key, hex);
     }
   });
 
@@ -280,6 +279,19 @@ test("Vintage's VSCode selection is ansi_11; Marigold's is work_selection (#150)
   const chosen = Object.fromEntries(themes(root).map(({ id, theme }) => [id, theme.vscode?.selection]));
   eq(chosen.vintage, "ansi_11", "vintage");
   eq(chosen.marigold, "work_selection", "marigold");
+});
+
+// Matches on the selected completion row and peek result must stand out from
+// work_selection, the selected row. Vintage's ansi_11 reads on navy. Marigold's work_selection would vanish
+// into its own selected rows, so its matched letters are frame_selection and
+// its peek result match highlights frame_dark_shadow, which token colors and
+// work_selection_text read on (#160).
+test("Vintage's matches are ansi_11; Marigold's are frame_selection letters and frame_dark_shadow peek result highlights (#160)", () => {
+  const chosen = Object.fromEntries(themes(root).map(({ id, theme }) => [id, theme.vscode]));
+  eq(chosen.vintage.completion_match, "ansi_11", "vintage completion_match");
+  eq(chosen.vintage.peek_match, "ansi_11", "vintage peek_match");
+  eq(chosen.marigold.completion_match, "frame_selection", "marigold completion_match");
+  eq(chosen.marigold.peek_match, "frame_dark_shadow", "marigold peek_match");
 });
 
 test("the editor and terminal use the Work surface font (#79)", () => {

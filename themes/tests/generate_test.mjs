@@ -165,13 +165,13 @@ test("refuses a Theme that doesn't say whether it has shadows", () => {
   if (!message.includes("shadows")) throw new Error(`expected an error naming shadows, got ${JSON.stringify(message)}`);
 });
 
-test("VSCode's selection, match highlights and matched completion letters are the role the Theme chooses", () => {
-  // tiny chooses work_selection, #AACCEE.
+test("VSCode's selection, peek match highlights and matched completion letters are the roles the Theme chooses", () => {
+  // tiny chooses work_selection (#AACCEE), frame_dark_shadow (#111111) and frame_selection (#3030A0).
   for (const line of [
     '"editor.selectionBackground": "#AACCEE", // work_selection',
     '"peekViewEditor.matchHighlightBackground": "#AACCEE", // work_selection',
-    '"peekViewResult.matchHighlightBackground": "#AACCEE", // work_selection',
-    '"editorSuggestWidget.focusHighlightForeground": "#AACCEE", // work_selection',
+    '"peekViewResult.matchHighlightBackground": "#111111", // frame_dark_shadow',
+    '"editorSuggestWidget.focusHighlightForeground": "#3030A0", // frame_selection',
   ]) {
     if (!vscode(tiny).includes(line)) throw new Error(`missing ${line}`);
   }
@@ -186,6 +186,19 @@ test("refuses a Theme that doesn't choose VSCode's selection role", () => {
     message = err.message;
   }
   if (!message.includes("selection")) throw new Error(`expected an error naming selection, got ${JSON.stringify(message)}`);
+});
+
+test("refuses a Theme that doesn't choose the roles of VSCode's matches", () => {
+  for (const key of ["completion_match", "peek_match"]) {
+    const { [key]: _, ...rest } = tiny.vscode;
+    let message = "";
+    try {
+      vscode({ ...tiny, vscode: rest });
+    } catch (err) {
+      message = err.message;
+    }
+    if (!message.includes(key)) throw new Error(`expected an error naming ${key}, got ${JSON.stringify(message)}`);
+  }
 });
 
 test("the VSCode extension contributes one color theme per Theme", () => {
