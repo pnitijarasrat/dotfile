@@ -408,6 +408,45 @@ test("a space with no windows shows only its number", () => {
   eq(plugin("space.sh", { SID: "1", SELECTED: "false" }, windows())["label.drawing"], "off", "label.drawing");
 });
 
+// SketchyBar's space_windows_change for a space, with its apps and how many
+// windows each has, as SketchyBar sends it.
+const changed = (space, apps) => ({ SENDER: "space_windows_change", INFO: JSON.stringify({ space, apps }) });
+
+// A yabai that would answer Safari for space 1, and sets yabai_queried on the
+// bar whenever it's asked, so a test can see it wasn't.
+const queried = (scratch) => stub(scratch, "yabai", `sketchybar --set yabai_queried "args=$*"\necho '[{"app":"Safari"}]'`);
+
+test("a space whose windows change shows the event's apps, without asking yabai", () => {
+  const all = run("space.sh", { SID: "1", SELECTED: "false", ...changed(1, { Code: 2, Ghostty: 1 }) }, queried);
+  eq(all.get("item")?.props.label, ":code: :terminal:", "label");
+  eq(all.get("item")?.props["label.drawing"], "on", "label.drawing");
+  eq(all.get("yabai_queried"), undefined, "yabai query");
+});
+
+test("the active space stays marigold when its windows change", () => {
+  const props = plugin("space.sh", { SID: "1", SELECTED: "true", ...changed(1, { Code: 1 }) }, queried);
+  eq(props["background.drawing"], "on", "background.drawing");
+  eq(props["background.color"], role("frame_selection"), "background.color");
+  eq(props["icon.color"], role("frame_selection_text"), "icon.color");
+});
+
+test("a space whose last window closes shows only its number", () => {
+  eq(plugin("space.sh", { SID: "1", SELECTED: "false", ...changed(1, {}) }, queried)["label.drawing"], "off", "label.drawing");
+});
+
+test("a space whose windows didn't change isn't redrawn", () => {
+  const all = run("space.sh", { SID: "2", SELECTED: "false", ...changed(1, { Code: 1 }) }, queried);
+  eq(all.get("item"), undefined, "item");
+  eq(all.get("yabai_queried"), undefined, "yabai query");
+});
+
+test("on load and on a space change, a space reads its apps from yabai", () => {
+  // spaces.sh triggers space_windows_change itself, naming no space.
+  for (const env of [{ SENDER: "forced" }, { SENDER: "space_windows_change", INFO: "" }, { SENDER: "space_change" }]) {
+    eq(plugin("space.sh", { SID: "1", SELECTED: "false", ...env }, windows("Code")).label, ":code:", `${env.SENDER} label`);
+  }
+});
+
 test("the front app shows its icon in sketchybar-app-font and its name", () => {
   const { props } = marigoldBar().get("front_app");
   if (!props["icon.font"]?.startsWith("sketchybar-app-font:")) throw new Error(`icon.font ${props["icon.font"]} isn't sketchybar-app-font`);
