@@ -7,6 +7,7 @@ source "$CONFIG_DIR/yabai_padding.sh"
 source "$CONFIG_DIR/yabai_signals.sh"
 source "$CONFIG_DIR/sf_symbols.sh"
 MARIGOLD_PLUGINS="$PLUGIN_DIR/marigold"
+source "$MARIGOLD_PLUGINS/pill.sh"
 FONT="JetBrainsMonoNL Nerd Font:Regular:13.0"
 BOLD="JetBrainsMonoNL Nerd Font:Bold:13.0"
 ICON_FONT="SF Pro:Regular:13.0"
@@ -31,7 +32,10 @@ sketchybar --bar position=top height="$BAR_HEIGHT" margin="$BAR_MARGIN" y_offset
                  padding_left=6 padding_right=6 topmost=window display=all show_in_fullscreen=off
 
 # No gap between items: each pads its own icon and label, so its frame_light
-# highlight under the mouse (plugins/marigold/hover.sh) covers both.
+# highlight under the mouse (plugins/marigold/hover.sh) covers both. Every
+# highlight, the current space's too, is the bar's pill (plugins/marigold/pill.sh),
+# as high as the bar less its inset at the top and bottom.
+PILL_HEIGHT=$((BAR_HEIGHT - 2 * PILL_INSET))
 default=(
   padding_left=0
   padding_right=0
@@ -43,8 +47,8 @@ default=(
   label.padding_left=0
   label.padding_right=6
   background.color="$frame_light"
-  background.corner_radius=6
-  background.height=$((BAR_HEIGHT - 8))
+  background.corner_radius="$PILL_RADIUS"
+  background.height="$PILL_HEIGHT"
   background.drawing=off
 )
 sketchybar --default "${default[@]}"
@@ -70,8 +74,8 @@ sketchybar --add item front_app left \
            --subscribe front_app front_app_switched "${HOVER[@]}"
 
 # Clicking a status item opens its popup under it (plugins/marigold/popup.sh),
-# Frame as the spec's "Where popups go"; moving the mouse off the bar and
-# the popup closes it, as SketchyBar can't see clicks outside its windows. Rows are a fixed height, so a row's highlight doesn't resize it.
+# Frame as the spec's "Where popups go", a grey hairline rounded like the bar;
+# moving the mouse off the bar and the popup closes it, as SketchyBar can't see clicks outside its windows. Rows are a fixed height, so a row's highlight doesn't resize it.
 POPUP=(
   click_script="$MARIGOLD_PLUGINS/popup.sh"
   popup.align=right
@@ -81,7 +85,7 @@ POPUP=(
   popup.background.color="$frame_face"
   popup.background.border_color="$frame_highlight"
   popup.background.border_width=1
-  popup.background.corner_radius="$popup_radius"
+  popup.background.corner_radius="$bar_radius"
 )
 STATUS=("${HOVER[@]}" mouse.exited.global)
 

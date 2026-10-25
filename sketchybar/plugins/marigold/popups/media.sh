@@ -13,7 +13,7 @@ DETAIL="$ARTIST${APP:+${ARTIST:+ · }$APP}"
 control() {
   ROWS+=(--add item "media.$1" popup.media
     --set "media.$1" icon="$2" icon.font="$POPUP_SYMBOL_FONT" icon.color="$frame_text" icon.padding_left=8 icon.padding_right=8
-    label.drawing=off background.color="$frame_light" background.corner_radius=6 background.height=22 background.drawing=off
+    label.drawing=off background.color="$frame_light" background.corner_radius="$PILL_RADIUS" background.height=22 background.drawing=off
     script="$CONFIG_DIR/plugins/marigold/hover.sh" click_script="nowplaying-cli $3"
     --subscribe "media.$1" mouse.entered mouse.exited)
 }

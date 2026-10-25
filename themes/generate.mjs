@@ -104,12 +104,11 @@ export function sketchybar(id, theme) {
     "# file's bar. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.",
     "# The bar wears the active window's ring (#183): JankyBorders' active color, and",
     "# corners that curve like the ring's outline, the radius rule plus the width;",
-    "# square Themes stay square. Popups keep the window corners, the radius rule.",
+    "# square Themes stay square.",
     `export bar_alpha="${Math.round(opacity * 255).toString(16).padStart(2, "0")}"`,
     `export bar_blur="${blur}"`,
     `export bar_border_color="$${active}"`,
     `export bar_radius="${radius > 0 ? radius + width : 0}"`,
-    `export popup_radius="${radius}"`,
     "",
   ].join("\n");
 }

@@ -32,9 +32,8 @@ export border_inactive_color="$frame_dark_shadow"
 # file's bar. The alpha is opacity as two hex digits, for 0xAARRGGBB colors.
 # The bar wears the active window's ring (#183): JankyBorders' active color, and
 # corners that curve like the ring's outline, the radius rule plus the width;
-# square Themes stay square. Popups keep the window corners, the radius rule.
+# square Themes stay square.
 export bar_alpha="99"
 export bar_blur="30"
 export bar_border_color="$frame_selection"
 export bar_radius="9"
-export popup_radius="6"

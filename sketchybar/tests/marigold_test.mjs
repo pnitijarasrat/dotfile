@@ -145,6 +145,20 @@ test("the bar is frame_face at its own opacity and blur, with a hairline in the 
   eq(props.border_width, "1", "border_width");
 });
 
+// Every highlight on the bar is one pill, concentric with the bar (#186): 5
+// in from its edge, so 18 high in the 28 bar, its corners the bar's radius
+// less those 5.
+const barRadius = marigold.rules.radius + marigold.borders.width;
+const pillRadius = String(barRadius - 5);
+
+test("every item's highlight is an 18 high pill, concentric with the bar", () => {
+  for (const item of marigoldBar().values()) {
+    if (item.name === "bar") continue;
+    eq(item.props["background.height"], "18", `${item.name} background.height`);
+    eq(item.props["background.corner_radius"], pillRadius, `${item.name} background.corner_radius`);
+  }
+});
+
 test("spaces are numbered items on the left, then the front app", () => {
   const items = [...marigoldBar().values()].filter((item) => item.position === "left" && item.props.drawing !== "off");
   eq(items.map((item) => item.name).join(" "), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((sid) => `space.${sid}`).join(" ") + " front_app", "left items");
@@ -610,12 +624,12 @@ const popupOpen = (open) => (scratch) =>
 [ "$1" = "--query" ] && echo '{"popup":{"drawing":"${open ? "on" : "off"}"}}'
 exit 0`);
 
-test("every status item has a Frame popup under it, rounded by the Theme rules", () => {
+test("every status item has a Frame popup under it, a grey hairline rounded like the bar", () => {
   for (const item of status(marigoldBar())) {
     eq(item.props["popup.background.color"], role("frame_face"), `${item.name} popup.background.color`);
     eq(item.props["popup.background.border_color"], role("frame_highlight"), `${item.name} popup.background.border_color`);
     eq(item.props["popup.background.border_width"], "1", `${item.name} popup.background.border_width`);
-    eq(item.props["popup.background.corner_radius"], String(marigold.rules.radius), `${item.name} popup.background.corner_radius`);
+    eq(item.props["popup.background.corner_radius"], String(barRadius), `${item.name} popup.background.corner_radius`);
     if (!item.props.click_script?.endsWith("/plugins/marigold/popup.sh")) throw new Error(`${item.name} doesn't open its popup on click`);
   }
 });
@@ -671,6 +685,7 @@ test("popup rows are Frame: frame_text, headers frame_gray_text, frame_light und
   for (const row of rows) {
     eq(row.props["icon.color"], role("frame_text"), `${row.name} icon.color`);
     eq(row.props["background.color"], role("frame_light"), `${row.name} background.color`);
+    eq(row.props["background.corner_radius"], pillRadius, `${row.name} background.corner_radius`);
     if (!row.props.script?.endsWith("/plugins/marigold/hover.sh")) throw new Error(`${row.name} isn't highlighted under the mouse`);
     for (const event of ["mouse.entered", "mouse.exited"]) if (!row.events.includes(event)) throw new Error(`${row.name} isn't subscribed to ${event}`);
   }
@@ -847,6 +862,12 @@ test("the now playing popup shows the track, artist and app, then previous, play
   eq(rows[0].props.label, "The Fake Band · Spotify", "artist and app");
   eq(rows.slice(1).map((row) => row.props.icon).join(" "), ["sf_previous", "sf_pause", "sf_next"].map((name) => utf8(glyph(name))).join(" "), "controls while playing");
   eq(opened("media", spotify("paused"))[2].props.icon, utf8(glyph("sf_play")), "play/pause while paused");
+});
+
+test("now playing's controls highlight as the bar's pill", () => {
+  for (const row of opened("media", spotify("playing")).slice(1)) {
+    eq(row.props["background.corner_radius"], pillRadius, `${row.name} background.corner_radius`);
+  }
 });
 
 test("now playing's controls skip back, play or pause, and skip forward", () => {
