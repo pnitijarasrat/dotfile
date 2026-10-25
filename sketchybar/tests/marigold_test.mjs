@@ -151,7 +151,7 @@ test("spaces are numbered items on the left, then the front app", () => {
   eq(items.slice(0, 10).map((item) => item.props.icon).join(""), "1234567890", "space numbers");
   for (const space of items.slice(0, 10)) {
     eq(space.props["icon.color"], role("frame_gray_text"), `${space.name} icon.color`);
-    // Drawn only on the active space, by plugins/marigold/space.sh.
+    // Drawn only on the current space, by plugins/marigold/space.sh.
     eq(space.props["background.color"], role("frame_selection"), `${space.name} background.color`);
   }
 });
@@ -218,35 +218,57 @@ function plugin(name, env, setup = () => {}) {
   return props;
 }
 
+// A yabai whose display shows space current, and whose space 1 has windows
+// of apps, by name, as `yabai -m query --spaces --space` and
+// `yabai -m query --windows --space` give them. With asked, it sets
+// yabai_queried on the bar whenever it's asked for windows, so a test can see
+// it wasn't.
+const yabai = ({ current, apps = [], asked = false } = {}) => (scratch) =>
+  stub(scratch, "yabai", `case "$*" in
+"-m query --spaces --space ${current}") echo '{"is-visible":true}' ;;
+"-m query --spaces --space "*) echo '{"is-visible":false}' ;;
+"-m query --windows --space "*)${asked ? ' sketchybar --set yabai_queried "args=$*";' : ""} [ "$*" = "-m query --windows --space 1" ] && echo '${JSON.stringify(apps.map((app) => ({ app })))}' ;;
+esac
+exit 0`);
 // pmset's battery report at a charge, on battery power or charging.
 const battery = (percent, source = "Battery Power") => (scratch) =>
   stub(scratch, "pmset", `printf "Now drawing from '${source}'\\n -InternalBattery-0 (id=1)\\t${percent}%%; discharging; 3:00 remaining present: true\\n"`);
 
-test("the active space is marigold with frame_selection_text", () => {
-  const props = plugin("space.sh", { SELECTED: "true" });
+test("the current space is marigold with frame_selection_text", () => {
+  const props = plugin("space.sh", { SID: "1" }, yabai({ current: 1 }));
   eq(props["background.drawing"], "on", "background.drawing");
   eq(props["icon.color"], role("frame_selection_text"), "icon.color");
 });
 
 test("the other spaces are frame_gray_text", () => {
-  const props = plugin("space.sh", { SELECTED: "false" });
+  const props = plugin("space.sh", { SID: "1" }, yabai({ current: 2 }));
   eq(props["background.drawing"], "off", "background.drawing");
   eq(props["icon.color"], role("frame_gray_text"), "icon.color");
 });
 
-test("a space left while its last run is still drawing ends up not active", () => {
-  // SketchyBar runs space.sh once per change, each run with SELECTED as it was
-  // then. Here yabai answers the run from when the space was active slowly, so
-  // the run from after it was left finishes first.
+test("a space left while its last run is still drawing ends up not current", () => {
+  // Here yabai answers the run from when the space was current slowly, so the
+  // run from after it was left finishes first.
   const all = run("left.sh", {}, (scratch) => {
-    stub(scratch, "yabai", '[ "$SLOW" = 1 ] && sleep 1\nexit 0');
+    stub(scratch, "yabai", `case "$*" in
+"-m query --spaces --space 1") [ "$(cat "$HOME/current")" = 1 ] && echo '{"is-visible":true}' || echo '{"is-visible":false}' ;;
+*) [ "$SLOW" = 1 ] && sleep 1 ;;
+esac
+exit 0`);
     const space = join(scratch.config, "plugins/marigold/space.sh");
     writeFileSync(join(scratch.config, "plugins/marigold/left.sh"),
-      `SID=1 SELECTED=true SLOW=1 bash "${space}" &\nsleep 0.3\nSID=1 SELECTED=false bash "${space}"\nwait\n`);
+      `echo 1 >"$HOME/current"\nSID=1 SLOW=1 bash "${space}" &\nsleep 0.3\necho 2 >"$HOME/current"\nSID=1 bash "${space}"\nwait\n`);
   });
   const props = all.get("item").props;
   eq(props["background.drawing"], "off", "background.drawing");
   eq(props["icon.color"], role("frame_gray_text"), "icon.color");
+});
+
+test("a space SketchyBar still calls selected isn't marigold once it isn't current", () => {
+  for (const SENDER of ["mouse.entered", "space_windows_change", "forced"]) {
+    const props = plugin("space.sh", { SID: "1", SELECTED: "true", SENDER }, yabai({ current: 2 }));
+    eq(props["background.color"] === role("frame_selection") && props["background.drawing"] === "on", false, `${SENDER} marigold`);
+  }
 });
 
 test("the battery shows its charge with its icon in frame_data_green", () => {
@@ -387,10 +409,7 @@ test("offline, weather shows no temperature", () => {
   eq(plugin("weather.sh", {}, offline).label, "--°", "label");
 });
 
-// yabai's windows on a space, as `yabai -m query --windows --space` gives
-// them, for apps by name.
-const windows = (...apps) => (scratch) =>
-  stub(scratch, "yabai", `[ "$*" = "-m query --windows --space 1" ] && echo '${JSON.stringify(apps.map((app) => ({ app })))}'\nexit 0`);
+const windows = (...apps) => yabai({ apps });
 
 test("spaces show their windows' apps in sketchybar-app-font", () => {
   for (const space of [...marigoldBar().values()].filter((item) => item.type === "space")) {
@@ -399,43 +418,43 @@ test("spaces show their windows' apps in sketchybar-app-font", () => {
 });
 
 test("a space shows each of its windows' apps once, Ghostty as the terminal", () => {
-  const props = plugin("space.sh", { SID: "1", SELECTED: "false" }, windows("Code", "Ghostty", "Code"));
+  const props = plugin("space.sh", { SID: "1" }, windows("Code", "Ghostty", "Code"));
   eq(props.label, ":code: :terminal:", "label");
   eq(props["label.drawing"], "on", "label.drawing");
 });
 
 test("a space with no windows shows only its number", () => {
-  eq(plugin("space.sh", { SID: "1", SELECTED: "false" }, windows())["label.drawing"], "off", "label.drawing");
+  eq(plugin("space.sh", { SID: "1" }, windows())["label.drawing"], "off", "label.drawing");
 });
 
 // SketchyBar's space_windows_change for a space, with its apps and how many
 // windows each has, as SketchyBar sends it.
 const changed = (space, apps) => ({ SENDER: "space_windows_change", INFO: JSON.stringify({ space, apps }) });
 
-// A yabai that would answer Safari for space 1, and sets yabai_queried on the
-// bar whenever it's asked, so a test can see it wasn't.
-const queried = (scratch) => stub(scratch, "yabai", `sketchybar --set yabai_queried "args=$*"\necho '[{"app":"Safari"}]'`);
+// A yabai that would answer Safari for space 1's windows, and tells the bar
+// when it's asked for them.
+const queried = yabai({ apps: ["Safari"], asked: true });
 
 test("a space whose windows change shows the event's apps, without asking yabai", () => {
-  const all = run("space.sh", { SID: "1", SELECTED: "false", ...changed(1, { Code: 2, Ghostty: 1 }) }, queried);
+  const all = run("space.sh", { SID: "1", ...changed(1, { Code: 2, Ghostty: 1 }) }, queried);
   eq(all.get("item")?.props.label, ":code: :terminal:", "label");
   eq(all.get("item")?.props["label.drawing"], "on", "label.drawing");
   eq(all.get("yabai_queried"), undefined, "yabai query");
 });
 
-test("the active space stays marigold when its windows change", () => {
-  const props = plugin("space.sh", { SID: "1", SELECTED: "true", ...changed(1, { Code: 1 }) }, queried);
+test("the current space stays marigold when its windows change", () => {
+  const props = plugin("space.sh", { SID: "1", ...changed(1, { Code: 1 }) }, yabai({ current: 1, asked: true }));
   eq(props["background.drawing"], "on", "background.drawing");
   eq(props["background.color"], role("frame_selection"), "background.color");
   eq(props["icon.color"], role("frame_selection_text"), "icon.color");
 });
 
 test("a space whose last window closes shows only its number", () => {
-  eq(plugin("space.sh", { SID: "1", SELECTED: "false", ...changed(1, {}) }, queried)["label.drawing"], "off", "label.drawing");
+  eq(plugin("space.sh", { SID: "1", ...changed(1, {}) }, queried)["label.drawing"], "off", "label.drawing");
 });
 
 test("a space whose windows didn't change isn't redrawn", () => {
-  const all = run("space.sh", { SID: "2", SELECTED: "false", ...changed(1, { Code: 1 }) }, queried);
+  const all = run("space.sh", { SID: "2", ...changed(1, { Code: 1 }) }, queried);
   eq(all.get("item"), undefined, "item");
   eq(all.get("yabai_queried"), undefined, "yabai query");
 });
@@ -443,7 +462,7 @@ test("a space whose windows didn't change isn't redrawn", () => {
 test("on load and on a space change, a space reads its apps from yabai", () => {
   // spaces.sh triggers space_windows_change itself, naming no space.
   for (const env of [{ SENDER: "forced" }, { SENDER: "space_windows_change", INFO: "" }, { SENDER: "space_change" }]) {
-    eq(plugin("space.sh", { SID: "1", SELECTED: "false", ...env }, windows("Code")).label, ":code:", `${env.SENDER} label`);
+    eq(plugin("space.sh", { SID: "1", ...env }, windows("Code")).label, ":code:", `${env.SENDER} label`);
   }
 });
 
@@ -468,7 +487,7 @@ test("every item highlights frame_light under the mouse", () => {
     }
   }
   for (const name of ["clock.sh", "battery.sh", "wifi.sh", "volume.sh", "front_app.sh", "space.sh", "media.sh", "cpu.sh", "memory.sh", "weather.sh", "language.sh"]) {
-    const env = { SID: "1", SELECTED: "false" };
+    const env = { SID: "1" };
     const on = plugin(name, { ...env, SENDER: "mouse.entered" }, battery(80));
     eq(on["background.drawing"], "on", `${name} on mouse.entered background.drawing`);
     eq(on["background.color"], role("frame_light"), `${name} on mouse.entered background.color`);
@@ -476,9 +495,9 @@ test("every item highlights frame_light under the mouse", () => {
   }
 });
 
-test("the active space stays marigold under the mouse", () => {
+test("the current space stays marigold under the mouse", () => {
   for (const SENDER of ["mouse.entered", "mouse.exited"]) {
-    const props = plugin("space.sh", { SID: "1", SELECTED: "true", SENDER });
+    const props = plugin("space.sh", { SID: "1", SENDER }, yabai({ current: 1 }));
     eq(props["background.drawing"], "on", `${SENDER} background.drawing`);
     eq(props["background.color"], role("frame_selection"), `${SENDER} background.color`);
   }

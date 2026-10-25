@@ -4,17 +4,24 @@
 # too; the rest are frame_gray_text, highlighted under the mouse. Each shows
 # its windows' apps, once each, after its number.
 source "$CONFIG_DIR/color.sh"
-if [ "$SELECTED" = "true" ]; then
-  BACKGROUND=(background.drawing=on background.color="$frame_selection")
-  case "$SENDER" in
-  mouse.*)
-    sketchybar --set "$NAME" "${BACKGROUND[@]}"
-    exit 0
-    ;;
-  esac
-fi
-source "$CONFIG_DIR/plugins/marigold/hover.sh"
 source "$CONFIG_DIR/plugins/marigold/app_icon.sh"
+
+# Which space is current comes from yabai alone, asked as each run draws: the
+# space its display shows. SketchyBar's SELECTED goes stale on mouse and
+# windows events, leaving spaces marigold that aren't current.
+current() {
+  [ "$(yabai -m query --spaces --space "$SID" 2>/dev/null | jq -r '."is-visible"')" = "true" ]
+}
+
+case "$SENDER" in
+mouse.*)
+  if current; then
+    sketchybar --set "$NAME" background.drawing=on background.color="$frame_selection"
+    exit 0
+  fi
+  source "$CONFIG_DIR/plugins/marigold/hover.sh"
+  ;;
+esac
 
 # A space_windows_change names the one space whose windows changed and its
 # apps, and SketchyBar runs every space for it, so the others stop here,
@@ -23,10 +30,9 @@ CHANGED_SPACE=""
 [ "$SENDER" = "space_windows_change" ] && [ "$INFO" != "" ] && CHANGED_SPACE="$(jq -r '.space' <<<"$INFO")"
 [ "$CHANGED_SPACE" = "" ] || [ "$CHANGED_SPACE" = "$SID" ] || exit 0
 
-# SketchyBar runs this once per change, each run with SELECTED as it was then,
-# and a run that waits on yabai can finish after a later one, leaving two
-# spaces marigold. So each run marks itself the latest for its item, and only
-# the latest draws.
+# SketchyBar runs this once per change, and a run that waits on yabai can
+# finish after a later one, drawing apps from before. So each run marks itself
+# the latest for its item, and only the latest draws.
 LATEST="${TMPDIR:-/tmp}/sketchybar_marigold_$NAME"
 echo "$$" >"$LATEST"
 
@@ -54,8 +60,8 @@ fi
 
 [ "$(cat "$LATEST" 2>/dev/null)" = "$$" ] || exit 0
 
-if [ "$SELECTED" = "true" ]; then
-  sketchybar --set "$NAME" "${BACKGROUND[@]}" icon.color="$frame_selection_text" label.color="$frame_selection_text" "${LABEL[@]}"
+if current; then
+  sketchybar --set "$NAME" background.drawing=on background.color="$frame_selection" icon.color="$frame_selection_text" label.color="$frame_selection_text" "${LABEL[@]}"
 else
   sketchybar --set "$NAME" background.drawing=off icon.color="$frame_gray_text" label.color="$frame_text" "${LABEL[@]}"
 fi
