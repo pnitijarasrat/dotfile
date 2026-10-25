@@ -117,20 +117,23 @@ export function sketchybar(id, theme) {
 // VSCode's color theme for a Theme: themes/templates/vscode-color-theme.jsonc,
 // which is Vintage's with each value a {{role}}, plus {{name}} and {{type}}.
 // Its prose comments describe Vintage. Lines set to {{no_shadow}} turn a shadow
-// off; a Theme with shadows drops them and keeps VSCode's own. $selection is
-// the role the Theme's vscode.selection chooses for the editor selection, match
-// highlights and matched completion letters (ADR 0011).
+// off; a Theme with shadows drops them and keeps VSCode's own. $selection,
+// $completion_match and $peek_match are the roles the Theme's vscode block
+// chooses for the editor selection and peek editor match highlights, the
+// matched letters on the selected completion row and the peek results' match
+// highlights (ADR 0011).
 export function vscode(theme) {
   if (typeof theme.shadows !== "boolean") throw new Error(`${theme.name} doesn't say whether it has shadows`);
-  const selection = theme.vscode?.selection;
-  if (!selection) throw new Error(`${theme.name} doesn't say which role VSCode's selection takes`);
+  const roleChoices = ["selection", "completion_match", "peek_match"];
+  const missing = roleChoices.find((key) => !theme.vscode?.[key]);
+  if (missing) throw new Error(`${theme.name} doesn't say which role VSCode's ${missing} takes`);
   const role = roles(theme);
   const vars = { name: JSON.stringify(theme.name).slice(1, -1), type: vscodeType(theme), no_shadow: "#00000000" };
   return template("vscode-color-theme.jsonc")
     .split("\n")
     .filter((line) => !(theme.shadows && line.includes("{{no_shadow}}")))
     .join("\n")
-    .replaceAll("$selection", selection)
+    .replace(new RegExp(`\\$(${roleChoices.join("|")})\\b`, "g"), (_, key) => theme.vscode[key])
     .replace(/\{\{(\w+)\}\}/g, (_, name) => vars[name] ?? role(name));
 }
 

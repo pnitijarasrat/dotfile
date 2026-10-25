@@ -274,7 +274,7 @@
     "editorSuggestWidget.highlightForeground": "{{syntax_keyword}}", // syntax_keyword
     // Deviation: matched letters on the selected row are ansi_11, not a
     // syntax role; no syntax role reads on work_selection navy.
-    "editorSuggestWidget.focusHighlightForeground": "{{$selection}}", // $selection
+    "editorSuggestWidget.focusHighlightForeground": "{{$completion_match}}", // $completion_match
     "editorSuggestWidgetStatus.foreground": "{{work_line_number}}", // work_line_number
     "editorHoverWidget.background": "{{work_bg}}", // work_bg
     "editorHoverWidget.foreground": "{{work_fg}}", // work_fg
@@ -305,7 +305,7 @@
     // Deviation: match highlights keep their text colors, so they're ansi_11
     // like the selection, not work_selection.
     "peekViewEditor.matchHighlightBackground": "{{$selection}}", // $selection
-    "peekViewResult.matchHighlightBackground": "{{$selection}}", // $selection
+    "peekViewResult.matchHighlightBackground": "{{$peek_match}}", // $peek_match
     "peekViewTitle.background": "{{work_bg}}", // work_bg
     "peekViewTitleLabel.foreground": "{{work_fg}}", // work_fg
     "peekViewTitleDescription.foreground": "{{work_line_number}}", // work_line_number
