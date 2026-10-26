@@ -4,7 +4,7 @@
 # too; the rest are frame_gray_text, highlighted under the mouse. Each shows
 # its windows' apps, once each, after its number.
 source "$CONFIG_DIR/color.sh"
-source "$CONFIG_DIR/plugins/marigold/app_icon.sh"
+source "$CONFIG_DIR/icon_map.sh"
 
 # Which space is current comes from yabai alone, asked as each run draws: the
 # space its display shows. SketchyBar's SELECTED goes stale on mouse and
@@ -48,7 +48,7 @@ fi
 APPS=""
 while read -r app; do
   [ "$app" = "" ] && continue
-  app_icon "$app"
+  __icon_map "$app"
   APPS="${APPS:+$APPS }$icon_result"
 done <<<"$APP_NAMES"
 

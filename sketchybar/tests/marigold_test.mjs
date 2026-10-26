@@ -431,9 +431,9 @@ test("spaces show their windows' apps in sketchybar-app-font", () => {
   }
 });
 
-test("a space shows each of its windows' apps once, Ghostty as the terminal", () => {
-  const props = plugin("space.sh", { SID: "1" }, windows("Code", "Ghostty", "Code"));
-  eq(props.label, ":code: :terminal:", "label");
+test("a space shows each of its windows' apps once, each in its own glyph", () => {
+  const props = plugin("space.sh", { SID: "1" }, windows("Code", "Ghostty", "Raycast", "Code"));
+  eq(props.label, ":code: :ghostty: :raycast:", "label");
   eq(props["label.drawing"], "on", "label.drawing");
 });
 
@@ -451,7 +451,7 @@ const queried = yabai({ apps: ["Safari"], asked: true });
 
 test("a space whose windows change shows the event's apps, without asking yabai", () => {
   const all = run("space.sh", { SID: "1", ...changed(1, { Code: 2, Ghostty: 1 }) }, queried);
-  eq(all.get("item")?.props.label, ":code: :terminal:", "label");
+  eq(all.get("item")?.props.label, ":code: :ghostty:", "label");
   eq(all.get("item")?.props["label.drawing"], "on", "label.drawing");
   eq(all.get("yabai_queried"), undefined, "yabai query");
 });
@@ -484,9 +484,11 @@ test("the front app shows its icon in sketchybar-app-font and its name", () => {
   const { props } = marigoldBar().get("front_app");
   if (!props["icon.font"]?.startsWith("sketchybar-app-font:")) throw new Error(`icon.font ${props["icon.font"]} isn't sketchybar-app-font`);
   if (props["icon.drawing"] === "off") throw new Error("front_app hides its icon");
-  const app = plugin("front_app.sh", { SENDER: "front_app_switched", INFO: "Ghostty" });
-  eq(app.icon, ":terminal:", "icon");
-  eq(app.label, "Ghostty", "label");
+  for (const [name, glyph] of [["Ghostty", ":ghostty:"], ["Raycast", ":raycast:"]]) {
+    const app = plugin("front_app.sh", { SENDER: "front_app_switched", INFO: name });
+    eq(app.icon, glyph, `${name} icon`);
+    eq(app.label, name, `${name} label`);
+  }
 });
 
 test("clicking the front app does nothing", () => {
