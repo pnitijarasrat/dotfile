@@ -114,6 +114,27 @@ test("refuses a Theme without borders, Theme rules or a bar for SketchyBar's pal
   }
 });
 
+// Only a Theme whose layout sizes its bar from the palette has a height and
+// fonts (#177); Vintage's taskbar keeps its own.
+test("a bar without a height and fonts writes none", () => {
+  const { height, fonts, ...bar } = tiny.bar;
+  const text = sketchybar("tiny", { ...tiny, bar });
+  if (/bar_height|_font=/.test(text)) throw new Error(`height or fonts in:\n${text}`);
+});
+
+test("refuses a bar with a height but no fonts, or fonts but no height", () => {
+  const { height, fonts, ...bar } = tiny.bar;
+  for (const half of [{ ...bar, height }, { ...bar, fonts }]) {
+    let message = "";
+    try {
+      sketchybar("tiny", { ...tiny, bar: half });
+    } catch (err) {
+      message = err.message;
+    }
+    if (!message.includes("height")) throw new Error(`expected an error naming the height, got ${JSON.stringify(message)}`);
+  }
+});
+
 test("refuses JankyBorders colors that aren't Frame roles of the Theme", () => {
   let message = "";
   try {

@@ -8,8 +8,6 @@
 # ahead of the front app.
 source "$CONFIG_DIR/color.sh"
 MARIGOLD_PLUGINS="$CONFIG_DIR/plugins/marigold"
-BOLD="JetBrainsMonoNL Nerd Font:Bold:13.0"
-APP_FONT="sketchybar-app-font:Regular:13.0"
 
 # "<index> <display>" for each space, in order. Without yabai, spaces 1 to
 # 10 with no display, which SketchyBar puts on their own display's bar itself.
@@ -34,10 +32,10 @@ while read -r sid display; do
   space=(
     space="$sid"
     icon="$icon"
-    icon.font="$BOLD"
+    icon.font="$bar_label_bold_font"
     icon.color="$frame_gray_text"
     icon.padding_right=6
-    label.font="$APP_FONT"
+    label.font="$bar_app_font"
     label.drawing=off
     background.color="$frame_selection"
     script="$MARIGOLD_PLUGINS/space.sh"

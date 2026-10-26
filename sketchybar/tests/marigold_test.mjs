@@ -104,10 +104,15 @@ const marigoldBar = (setup = oneDisplay) => {
 };
 
 
-test("the bar floats at the top, 28 high, a window gap from the top and sides", () => {
+// The bar's height and fonts, from its source file's bar (#177), as SketchyBar
+// takes a font: family:style:size.
+const { height: barHeight, fonts: barFonts } = marigold.bar;
+const font = ({ family, size }, style = "Regular") => `${family}:${style}:${size.toFixed(1)}`;
+
+test("the bar floats at the top, as high as its source file says, a window gap from the top and sides", () => {
   const { props } = marigoldBar().get("bar");
   eq(props.position, "top", "position");
-  eq(props.height, "28", "height");
+  eq(props.height, String(barHeight), "height");
   eq(props.y_offset, gap, "y_offset");
   eq(props.margin, gap, "margin");
 });
@@ -146,15 +151,16 @@ test("the bar is frame_face at its own opacity and blur, with a hairline in the 
 });
 
 // Every highlight on the bar is one pill, concentric with the bar (#186): 5
-// in from its edge, so 18 high in the 28 bar, its corners the bar's radius
-// less those 5.
+// in from its edge, so the bar's height less twice that, its corners the
+// bar's radius less it.
+const pillInset = 5;
 const barRadius = marigold.rules.radius + marigold.borders.width;
-const pillRadius = String(barRadius - 5);
+const pillRadius = String(barRadius - pillInset);
 
-test("every item's highlight is an 18 high pill, concentric with the bar", () => {
+test("every item's highlight is a pill 5 in from the bar's edge, concentric with it", () => {
   for (const item of marigoldBar().values()) {
     if (item.name === "bar") continue;
-    eq(item.props["background.height"], "18", `${item.name} background.height`);
+    eq(item.props["background.height"], String(barHeight - 2 * pillInset), `${item.name} background.height`);
     eq(item.props["background.corner_radius"], pillRadius, `${item.name} background.corner_radius`);
   }
 });
@@ -183,7 +189,7 @@ const dataColors = {
   clock: "frame_data_yellow",
 };
 const statusItems = Object.keys(dataColors);
-const labelFont = `${marigold.fonts.work.family[0]}:Regular:13.0`;
+const labelFont = font(barFonts.label);
 // The status items on the bar itself, not in a popup or hidden.
 const status = (bar) => [...bar.values()].filter((item) => statusItems.includes(item.name));
 
@@ -198,15 +204,15 @@ test("CPU, memory, weather, language, volume, Wi-Fi, battery and clock are on th
   eq(items.map((item) => item.name).reverse().join(" "), "cpu memory weather language volume wifi battery clock", "right items, left to right");
 });
 
-test("status items show SF Symbols at 13 in their Frame data colors", () => {
+test("status items show SF Symbols in their Frame data colors", () => {
   for (const item of status(marigoldBar())) {
     eq(item.props["icon.color"], role(dataColors[item.name]), `${item.name} icon.color`);
-    eq(item.props["icon.font"], "SF Pro:Regular:13.0", `${item.name} icon.font`);
+    eq(item.props["icon.font"], font(barFonts.symbols), `${item.name} icon.font`);
     symbol(item.props.icon, `${item.name}'s icon`);
   }
 });
 
-test("status items show their labels in the Work surface's Nerd Font at 13", () => {
+test("status items show their labels in the bar's label font", () => {
   for (const item of status(marigoldBar())) {
     eq(item.props["label.font"], labelFont, `${item.name} label.font`);
     if (item.props["label.drawing"] === "off") throw new Error(`${item.name} hides its label`);
@@ -425,9 +431,10 @@ test("offline, weather shows no temperature", () => {
 
 const windows = (...apps) => yabai({ apps });
 
-test("spaces show their windows' apps in sketchybar-app-font", () => {
+test("spaces show their numbers in the bold label font and their windows' apps in the app font", () => {
   for (const space of [...marigoldBar().values()].filter((item) => item.type === "space")) {
-    eq(space.props["label.font"], "sketchybar-app-font:Regular:13.0", `${space.name} label.font`);
+    eq(space.props["icon.font"], font(barFonts.label, "Bold"), `${space.name} icon.font`);
+    eq(space.props["label.font"], font(barFonts.app), `${space.name} label.font`);
   }
 });
 
@@ -480,9 +487,10 @@ test("on load and on a space change, a space reads its apps from yabai", () => {
   }
 });
 
-test("the front app shows its icon in sketchybar-app-font and its name", () => {
+test("the front app shows its icon in the app font a size up, and its name in bold", () => {
   const { props } = marigoldBar().get("front_app");
-  if (!props["icon.font"]?.startsWith("sketchybar-app-font:")) throw new Error(`icon.font ${props["icon.font"]} isn't sketchybar-app-font`);
+  eq(props["icon.font"], font({ ...barFonts.app, size: barFonts.app.front_app_size }), "icon.font");
+  eq(props["label.font"], font(barFonts.label, "Bold"), "label.font");
   if (props["icon.drawing"] === "off") throw new Error("front_app hides its icon");
   for (const [name, glyph] of [["Ghostty", ":ghostty:"], ["Raycast", ":raycast:"]]) {
     const app = plugin("front_app.sh", { SENDER: "front_app_switched", INFO: name });

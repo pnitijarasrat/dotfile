@@ -37,3 +37,13 @@ export bar_alpha="d9"
 export bar_blur="20"
 export bar_border_color="$frame_selection"
 export bar_radius="12"
+
+# The bar's height and fonts (#177), from its source file's bar: SF Symbols for
+# the status icons, the label font in regular and bold, and the app font, which
+# the front app's icon wears a size up.
+export bar_height="28"
+export bar_symbol_font="SF Pro:Regular:13.0"
+export bar_label_font="JetBrainsMonoNL Nerd Font:Regular:13.0"
+export bar_label_bold_font="JetBrainsMonoNL Nerd Font:Bold:13.0"
+export bar_app_font="sketchybar-app-font:Regular:13.0"
+export bar_front_app_font="sketchybar-app-font:Regular:15.0"
