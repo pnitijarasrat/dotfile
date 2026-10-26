@@ -4,8 +4,10 @@
 # row, then popup_draw, which replaces the popup's old rows with the new ones
 # in one call, so it never shows half-built. Rows are named <item>.<id>, the
 # Frame as the spec's "Where popups go": frame_text on the popup's
-# frame_face, headers frame_gray_text, frame_light under the mouse.
+# frame_face, headers frame_gray_text, frame_light under the mouse, in the
+# bar's pill's corners.
 source "$CONFIG_DIR/color.sh"
+source "$CONFIG_DIR/plugins/marigold/pill.sh"
 source "$CONFIG_DIR/sf_symbols.sh"
 POPUP_FONT="JetBrainsMonoNL Nerd Font:Regular:13.0"
 POPUP_BOLD="JetBrainsMonoNL Nerd Font:Bold:13.0"
@@ -53,7 +55,7 @@ popup_row() {
     icon.width=$((ROW_WIDTH - VALUE_WIDTH - 8)) icon.padding_left=8 icon.padding_right=0
     label="$value" label.font="$POPUP_FONT" label.color="$frame_gray_text" label.drawing="$([ -n "$value" ] && echo on || echo off)"
     label.width="$VALUE_WIDTH" label.align=right label.padding_left=0 label.padding_right=8
-    background.color="$frame_light" background.corner_radius=6 background.height=22 background.drawing=off
+    background.color="$frame_light" background.corner_radius="$PILL_RADIUS" background.height=22 background.drawing=off
     script="$CONFIG_DIR/plugins/marigold/hover.sh" click_script="$click" "$@"
     --subscribe "$id" mouse.entered mouse.exited)
 }
