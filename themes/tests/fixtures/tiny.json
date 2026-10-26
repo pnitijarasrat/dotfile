@@ -5,7 +5,16 @@
   "macos": { "appearance": "dark", "accent": "green", "highlight": "yellow" },
   "vscode": { "selection": "work_selection", "completion_match": "frame_selection", "peek_match": "frame_dark_shadow", "modern_ui": true, "title_bar": "native" },
   "rules": { "opacity": 0.9, "blur": 10, "radius": 6, "icons": true },
-  "bar": { "opacity": 0.6, "blur": 30 },
+  "bar": {
+    "opacity": 0.6,
+    "blur": 30,
+    "height": 30,
+    "fonts": {
+      "symbols": { "family": "Tiny Symbols", "size": 12 },
+      "label": { "family": "Tiny Mono", "size": 11 },
+      "app": { "family": "tiny-app-font", "size": 11, "front_app_size": 14 }
+    }
+  },
   "borders": { "width": 3, "active": "frame_selection", "inactive": "frame_dark_shadow" },
   "palettes": {
     "frame": {

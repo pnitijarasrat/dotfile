@@ -58,15 +58,17 @@ export function ghostty(id, theme) {
 // shell variables named after their roles, as 0xAARRGGBB. It ends with
 // JankyBorders' options (#152), so bordersrc reads them instead of asking
 // which Theme is active, then the bar's opacity and blur from the Theme's
-// bar (#169), and its border color and corners from the active window's ring (#183).
+// bar (#169), its border color and corners from the active window's ring (#183),
+// and, for a Theme whose bar has its own layout, its height and fonts (#177).
 export function sketchybar(id, theme) {
   if (!theme.rules) throw new Error(`${theme.name} has no Theme rules`);
   if (!theme.borders) throw new Error(`${theme.name} has no borders for JankyBorders`);
   if (!theme.bar) throw new Error(`${theme.name} has no bar for SketchyBar`);
   const role = roles(theme);
   const { width, active, inactive } = theme.borders;
-  const { opacity, blur } = theme.bar;
+  const { opacity, blur, height, fonts } = theme.bar;
   const { radius } = theme.rules;
+  if ((height === undefined) !== (fonts === undefined)) throw new Error(`${theme.name}'s bar has a height without fonts, or fonts without a height`);
   for (const name of [active, inactive]) {
     if (!theme.palettes.frame?.[name]) throw new Error(`${theme.name}'s border color ${name} isn't one of its Frame roles`);
   }
@@ -110,7 +112,25 @@ export function sketchybar(id, theme) {
     `export bar_border_color="$${active}"`,
     `export bar_radius="${radius > 0 ? radius + width : 0}"`,
     "",
+    ...(height === undefined ? [] : barLayout(height, fonts)),
   ].join("\n");
+}
+
+// A Theme's bar height and fonts, as SketchyBar's family:style:size fonts.
+function barLayout(height, { symbols, label, app }) {
+  const font = (family, style, size) => `"${family}:${style}:${size.toFixed(1)}"`;
+  return [
+    "# The bar's height and fonts (#177), from its source file's bar: SF Symbols for",
+    "# the status icons, the label font in regular and bold, and the app font, which",
+    "# the front app's icon wears a size up.",
+    `export bar_height="${height}"`,
+    `export bar_symbol_font=${font(symbols.family, "Regular", symbols.size)}`,
+    `export bar_label_font=${font(label.family, "Regular", label.size)}`,
+    `export bar_label_bold_font=${font(label.family, "Bold", label.size)}`,
+    `export bar_app_font=${font(app.family, "Regular", app.size)}`,
+    `export bar_front_app_font=${font(app.family, "Regular", app.front_app_size)}`,
+    "",
+  ];
 }
 
 // VSCode's color theme for a Theme: themes/templates/vscode-color-theme.jsonc,

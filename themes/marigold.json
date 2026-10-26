@@ -5,7 +5,16 @@
   "macos": { "appearance": "dark", "accent": "yellow", "highlight": "yellow" },
   "vscode": { "selection": "work_selection", "completion_match": "frame_selection", "peek_match": "frame_dark_shadow", "modern_ui": true, "title_bar": "native" },
   "rules": { "opacity": 0.85, "blur": 20, "radius": 10, "icons": true },
-  "bar": { "opacity": 0.85, "blur": 20 },
+  "bar": {
+    "opacity": 0.85,
+    "blur": 20,
+    "height": 28,
+    "fonts": {
+      "symbols": { "family": "SF Pro", "size": 13 },
+      "label": { "family": "JetBrainsMonoNL Nerd Font", "size": 13 },
+      "app": { "family": "sketchybar-app-font", "size": 13, "front_app_size": 15 }
+    }
+  },
   "borders": { "width": 2, "active": "frame_selection", "inactive": "frame_shadow" },
   "palettes": {
     "frame": {
