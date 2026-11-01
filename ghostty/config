@@ -32,3 +32,17 @@ font-style-bold=false
 font-style-italic=false
 font-style-bold-italic=false
 font-feature=-calt, -liga
+
+# VSCode-style keys for Neovim (nvim/lua/config/keymaps.lua, README.md "Neovim keys"):
+# each Cmd key is sent as a CSI-u sequence with the super modifier, which Neovim
+# reads as <D-…>. Only these are forwarded: Ghostty keeps Cmd+Shift+P, Cmd+W,
+# Cmd+C/V, Cmd+T/N and Ctrl+Tab. In a plain shell they type junk.
+keybind = super+p=csi:112;9u
+keybind = super+shift+f=csi:102;10u
+keybind = super+b=csi:98;9u
+keybind = super+s=csi:115;9u
+keybind = super+slash=csi:47;9u
+keybind = super+period=csi:46;9u
+keybind = super+shift+o=csi:111;10u
+keybind = super+z=csi:122;9u
+keybind = super+shift+z=csi:122;10u
