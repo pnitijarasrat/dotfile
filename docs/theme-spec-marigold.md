@@ -108,7 +108,7 @@ From the source file's `macos`. A Switch sets them (`docs/adr/0010-switch-sets-m
 Marigold's own rules, in place of the Vintage theme's **Purist fidelity**. The source file's `rules` holds the values generators read: `opacity` 0.85, `blur` 20, `radius` 10, `icons` true (Vintage's are `1`, `0`, `0`, `false`).
 
 - **Rounded corners** wherever the tool allows, at `radius`.
-- **Translucency and blur** on the surfaces seen most: Ghostty and the SketchyBar bar. Every other tool stays opaque, VSCode included: it can't do this without patching. Role values are opaque; translucency is applied by `opacity` and `blur`. The SketchyBar bar takes its values from the source file's own `bar` block, set to match Ghostty's: `opacity` 0.85 and `blur` 20 (Vintage's `1` and `0`).
+- **Translucency and blur** on the surfaces seen most: Ghostty and the SketchyBar bar. Neovim, inside Ghostty, paints no window background (editor, splits, popups, pickers, explorer, terminal), so Ghostty's translucent window shows behind them all; its statusline, tab line and highlighted rows still paint. Only while Marigold is the active Theme: under Vintage, Ghostty's window behind it is white. Every other tool stays opaque, VSCode included: it can't do this without patching. Role values are opaque; translucency is applied by `opacity` and `blur`. The SketchyBar bar takes its values from the source file's own `bar` block, set to match Ghostty's: `opacity` 0.85 and `blur` 20 (Vintage's `1` and `0`).
 - **Drop shadows** on (`"shadows": true`).
 - **Icons** allowed: SF Symbols for SketchyBar's status items, `sketchybar-app-font` for its spaces and front app, Nerd Font icons in the prompt. No emoji.
 - No SIP-disabling or patching system files, as Vintage.
@@ -134,7 +134,7 @@ Which tools get a design of their own under Marigold, beyond colors, and which o
 | **Chrome** | colors only. The generated "Marigold" extension, with the New Tab page `frame_desktop` black | generated (`chrome/marigold-theme/manifest.json`) |
 | **macOS** | dark, yellow accent, yellow highlight | follows the Switch already |
 | **ccstatusline**, **ranger**, **litecli** | no change: they inherit Ghostty's ANSI colors | nothing to build |
-| **Neovim** | stays out of the Switch (`docs/adr/0007-neovim-stays-out-of-the-switch.md`), but shows Marigold whatever Theme is active (`docs/adr/0014-neovim-shows-marigold.md`). Colors only: the Work surface for the editor and inline code popups (completion matches `frame_selection`, as VSCode), Frame for the statusline, tab line and pickers (Telescope, Snacks, which-key), the ANSI colors for `:terminal` | **built**: `nvim/colors/marigold.lua` reads every role from the Theme source file when it loads; LazyVim's default colorscheme |
+| **Neovim** | stays out of the Switch (`docs/adr/0007-neovim-stays-out-of-the-switch.md`), but shows Marigold whatever Theme is active (`docs/adr/0014-neovim-shows-marigold.md`). Colors, plus transparent windows (see [Theme rules](#theme-rules)): the Work surface for the editor and inline code popups (completion matches `frame_selection`, as VSCode), Frame for the statusline, tab line and pickers (Telescope, Snacks, which-key), the ANSI colors for `:terminal` | **built**: `nvim/colors/marigold.lua` reads every role from the Theme source file when it loads; LazyVim's default colorscheme |
 
 ## Manual checklist
 
