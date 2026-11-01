@@ -134,7 +134,7 @@ Which tools get a design of their own under Marigold, beyond colors, and which o
 | **Chrome** | colors only. The generated "Marigold" extension, with the New Tab page `frame_desktop` black | generated (`chrome/marigold-theme/manifest.json`) |
 | **macOS** | dark, yellow accent, yellow highlight | follows the Switch already |
 | **ccstatusline**, **ranger**, **litecli** | no change: they inherit Ghostty's ANSI colors | nothing to build |
-| **Neovim** | stays out of the Switch (`docs/adr/0007-neovim-stays-out-of-the-switch.md`): it shows Vintage's dark colorscheme whatever Theme is active | nothing to build |
+| **Neovim** | stays out of the Switch (`docs/adr/0007-neovim-stays-out-of-the-switch.md`), but shows Marigold whatever Theme is active (`docs/adr/0014-neovim-shows-marigold.md`). Colors only: the Work surface for the editor and inline code popups (completion matches `frame_selection`, as VSCode), Frame for the statusline, tab line and pickers (Telescope, Snacks, which-key), the ANSI colors for `:terminal` | **built**: `nvim/colors/marigold.lua` reads every role from the Theme source file when it loads; LazyVim's default colorscheme |
 
 ## Manual checklist
 
@@ -155,7 +155,7 @@ Things the tests can't see, checked by hand on the Mac (#158). `node themes/test
 - **VSCode**: after Reload Window if reminded, the Marigold color theme and the modern UI's floating, rounded parts; it offers a restart, and after it the title bar is macOS's own. A selection, and the matched letters in a completion list, can be read
 - **Chrome**: after the printed step, the window frame is dark and a New Tab page is black
 - **macOS**: System Settings → Appearance shows Dark, accent Yellow, highlight Yellow; menus and Finder are dark
-- **Out of the Switch**: Spotify, Raycast, the Event Viewer, Neovim, Deepvue and the wallpaper look as they did on Vintage
+- **Out of the Switch**: Spotify, Raycast, the Event Viewer, Deepvue and the wallpaper look as they did on Vintage; Neovim is Marigold under both Themes
 
 ### `theme vintage`
 
@@ -190,10 +190,9 @@ As in the Vintage theme's spec, every place where a tool departs from this spec 
 
 ## Out of scope
 
-These stay Vintage whatever Theme is active, and a Switch doesn't touch them (#140, #158):
+These stay Vintage whatever Theme is active, and a Switch doesn't touch them (#140, #158). Neovim is out of the Switch too, but always Marigold (`docs/adr/0014-neovim-shows-marigold.md`):
 
 - Deepvue (see [Known exceptions](#known-exceptions)).
-- Neovim (`docs/adr/0007-neovim-stays-out-of-the-switch.md`).
 - Spotify: its Spicetify "Vintage" theme, with the Media Rack and its Display (`docs/adr/0013-spotify-stays-vintage.md`).
 - Raycast: its "Vintage" theme stays selected (`docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`).
 - The Claude Code Event Viewer: its Win95 window and Display (`docs/adr/0012-raycast-and-the-event-viewer-stay-vintage.md`).

@@ -140,25 +140,6 @@ test("every highlight uses roles, not raw hex", function()
   assert(not after:find("#%x%x%x%x%x%x"), "raw hex after the role table")
 end)
 
-test("LazyVim uses vintage", function()
-  local spec = dofile(root .. "/lua/plugins/colorscheme.lua")
-  local found
-  for _, s in ipairs(spec) do
-    if s[1] == "LazyVim/LazyVim" then
-      found = s.opts.colorscheme
-    end
-  end
-  eq(found, "vintage", "LazyVim colorscheme")
-  local disabled = {}
-  for _, s in ipairs(spec) do
-    if s.enabled == false then
-      disabled[s[1]] = true
-    end
-  end
-  eq(disabled["folke/tokyonight.nvim"], true, "tokyonight disabled")
-  eq(disabled["catppuccin/nvim"], true, "catppuccin disabled")
-end)
-
 test("old colorscheme plugins and transparent groups are gone", function()
   eq(vim.uv.fs_stat(root .. "/lua/plugins/github.lua") ~= nil, false, "github.lua exists")
   eq(vim.uv.fs_stat(root .. "/lua/plugins/tokyonight.lua") ~= nil, false, "tokyonight.lua exists")

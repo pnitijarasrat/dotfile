@@ -1,0 +1,320 @@
+-- Marigold theme (docs/theme-spec-marigold.md): black with a marigold accent.
+-- Every role's value is read from the Theme source file, themes/marigold.json,
+-- so this file holds no hex of its own. Highlights below refer to roles only.
+-- Neovim stays out of the Switch, but this is its colorscheme under every Theme
+-- (docs/adr/0014-neovim-shows-marigold.md); it doesn't follow `theme <name>`.
+local here = vim.fn.resolve(debug.getinfo(1, "S").source:sub(2))
+local source = vim.fn.fnamemodify(here, ":p:h:h:h") .. "/themes/marigold.json"
+
+local file = io.open(source, "r")
+if not file then
+  vim.notify("marigold: can't read " .. source, vim.log.levels.ERROR)
+  return
+end
+local theme = vim.json.decode(file:read("*a"))
+file:close()
+
+local p = {}
+for _, palette in pairs(theme.palettes) do
+  for role, value in pairs(palette) do
+    p[role] = value
+  end
+end
+
+vim.cmd("highlight clear")
+if vim.fn.exists("syntax_on") == 1 then
+  vim.cmd("syntax reset")
+end
+vim.o.background = "dark"
+vim.g.colors_name = "marigold"
+
+local groups = {
+  -- Editor: the Work surface
+  Normal = { fg = p.work_fg, bg = p.work_bg },
+  NormalNC = { link = "Normal" },
+  Cursor = { fg = p.work_cursor_text, bg = p.work_cursor },
+  lCursor = { link = "Cursor" },
+  CursorIM = { link = "Cursor" },
+  TermCursor = { link = "Cursor" },
+  CursorLine = { bg = p.work_cursorline },
+  CursorColumn = { link = "CursorLine" },
+  ColorColumn = { bg = p.work_grid },
+  LineNr = { fg = p.work_line_number },
+  LineNrAbove = { link = "LineNr" },
+  LineNrBelow = { link = "LineNr" },
+  CursorLineNr = { fg = p.work_cursor, bg = p.work_cursorline },
+  SignColumn = { bg = p.work_bg },
+  CursorLineSign = { link = "CursorLine" },
+  FoldColumn = { fg = p.work_line_number, bg = p.work_bg },
+  CursorLineFold = { link = "CursorLine" },
+  Folded = { fg = p.syntax_comment, bg = p.work_cursorline },
+  EndOfBuffer = { fg = p.work_grid },
+  NonText = { fg = p.work_grid },
+  Whitespace = { fg = p.work_grid },
+  SpecialKey = { fg = p.work_grid },
+  Conceal = { fg = p.work_line_number },
+  WinSeparator = { fg = p.frame_highlight, bg = p.work_bg },
+  VertSplit = { link = "WinSeparator" },
+  Visual = { fg = p.work_selection_text, bg = p.work_selection },
+  VisualNOS = { link = "Visual" },
+  Search = { fg = p.work_selection_text, bg = p.work_selection },
+  CurSearch = { fg = p.frame_selection_text, bg = p.frame_selection },
+  IncSearch = { link = "CurSearch" },
+  Substitute = { link = "CurSearch" },
+  MatchParen = { fg = p.frame_selection, bg = p.work_grid, bold = true },
+  Directory = { fg = p.syntax_type },
+  Title = { fg = p.frame_selection, bold = true },
+  Question = { fg = p.frame_selection },
+  MoreMsg = { fg = p.frame_selection },
+  ModeMsg = { fg = p.work_fg },
+  MsgArea = { link = "Normal" },
+  ErrorMsg = { fg = p.syntax_error },
+  WarningMsg = { fg = p.syntax_warning },
+  QuickFixLine = { link = "CursorLine" },
+  WildMenu = { link = "PmenuSel" },
+
+  -- Frame chrome: one step above the Work surface, marigold for what's active
+  StatusLine = { fg = p.frame_text, bg = p.frame_face },
+  StatusLineNC = { fg = p.frame_title_inactive_text, bg = p.frame_face },
+  TabLine = { fg = p.frame_gray_text, bg = p.frame_face },
+  TabLineFill = { bg = p.frame_face },
+  TabLineSel = { fg = p.frame_selection_text, bg = p.frame_selection, bold = true },
+  WinBar = { fg = p.frame_text, bg = p.work_bg },
+  WinBarNC = { fg = p.frame_gray_text, bg = p.work_bg },
+
+  -- Inline code popups: Work surface with a 1px work_popup_border
+  NormalFloat = { fg = p.work_fg, bg = p.work_bg },
+  FloatBorder = { fg = p.work_popup_border, bg = p.work_bg },
+  FloatTitle = { fg = p.frame_selection, bg = p.work_bg, bold = true },
+  FloatFooter = { fg = p.frame_gray_text, bg = p.work_bg },
+  Pmenu = { fg = p.work_fg, bg = p.work_bg },
+  PmenuSel = { fg = p.work_selection_text, bg = p.work_selection },
+  PmenuKind = { fg = p.syntax_type, bg = p.work_bg },
+  PmenuKindSel = { fg = p.syntax_type, bg = p.work_selection },
+  PmenuExtra = { fg = p.work_line_number, bg = p.work_bg },
+  PmenuExtraSel = { fg = p.work_line_number, bg = p.work_selection },
+  PmenuSbar = { bg = p.work_bg },
+  PmenuThumb = { bg = p.work_popup_border },
+  -- As VSCode: matched letters are marigold, which reads on work_selection
+  PmenuMatch = { fg = p.frame_selection, bg = p.work_bg, bold = true },
+  PmenuMatchSel = { fg = p.frame_selection, bg = p.work_selection, bold = true },
+
+  -- blink.cmp
+  BlinkCmpMenu = { link = "Pmenu" },
+  BlinkCmpMenuBorder = { link = "FloatBorder" },
+  BlinkCmpMenuSelection = { link = "PmenuSel" },
+  BlinkCmpScrollBarThumb = { link = "PmenuThumb" },
+  BlinkCmpScrollBarGutter = { link = "PmenuSbar" },
+  BlinkCmpLabel = { fg = p.work_fg },
+  BlinkCmpLabelDeprecated = { fg = p.work_line_number, strikethrough = true },
+  BlinkCmpLabelMatch = { fg = p.frame_selection, bold = true },
+  BlinkCmpLabelDetail = { fg = p.work_line_number },
+  BlinkCmpLabelDescription = { fg = p.work_line_number },
+  BlinkCmpKind = { fg = p.syntax_type },
+  BlinkCmpSource = { fg = p.work_line_number },
+  BlinkCmpGhostText = { fg = p.work_line_number },
+  BlinkCmpDoc = { link = "NormalFloat" },
+  BlinkCmpDocBorder = { link = "FloatBorder" },
+  BlinkCmpDocSeparator = { link = "FloatBorder" },
+  BlinkCmpDocCursorLine = { link = "CursorLine" },
+  BlinkCmpSignatureHelp = { link = "NormalFloat" },
+  BlinkCmpSignatureHelpBorder = { link = "FloatBorder" },
+  BlinkCmpSignatureHelpActiveParameter = { fg = p.work_selection_text, bg = p.work_selection },
+
+  -- Pickers and menus are Frame: frame_face, frame_light for the hovered row
+  TelescopeNormal = { fg = p.frame_text, bg = p.frame_face },
+  TelescopeBorder = { fg = p.frame_highlight, bg = p.frame_face },
+  TelescopeTitle = { fg = p.frame_selection, bg = p.frame_face, bold = true },
+  TelescopePromptNormal = { fg = p.frame_text, bg = p.frame_face },
+  TelescopePromptBorder = { link = "TelescopeBorder" },
+  TelescopePromptTitle = { fg = p.frame_selection_text, bg = p.frame_selection, bold = true },
+  TelescopePromptPrefix = { fg = p.frame_selection, bg = p.frame_face },
+  TelescopeSelection = { fg = p.frame_text, bg = p.frame_light },
+  TelescopeSelectionCaret = { fg = p.frame_selection, bg = p.frame_light },
+  TelescopeMultiSelection = { fg = p.frame_selection, bg = p.frame_face },
+  TelescopeMatching = { fg = p.frame_selection, bold = true },
+  TelescopePreviewTitle = { fg = p.frame_gray_text, bg = p.frame_face },
+  TelescopeResultsTitle = { fg = p.frame_gray_text, bg = p.frame_face },
+  SnacksPicker = { link = "TelescopeNormal" },
+  SnacksPickerBorder = { link = "TelescopeBorder" },
+  SnacksPickerTitle = { link = "TelescopeTitle" },
+  SnacksPickerListCursorLine = { link = "TelescopeSelection" },
+  SnacksPickerMatch = { link = "TelescopeMatching" },
+  SnacksPickerPrompt = { fg = p.frame_selection },
+  WhichKey = { fg = p.frame_selection },
+  WhichKeyNormal = { fg = p.frame_text, bg = p.frame_face },
+  WhichKeyBorder = { fg = p.frame_highlight, bg = p.frame_face },
+  WhichKeyTitle = { fg = p.frame_selection, bg = p.frame_face, bold = true },
+  WhichKeyDesc = { fg = p.frame_text },
+  WhichKeyGroup = { fg = p.syntax_type },
+  WhichKeySeparator = { fg = p.frame_gray_text },
+  WhichKeyValue = { fg = p.frame_gray_text },
+
+  -- Syntax roles
+  Comment = { fg = p.syntax_comment }, -- not italic, as the spec says
+  Keyword = { fg = p.syntax_keyword },
+  Statement = { link = "Keyword" },
+  Conditional = { link = "Keyword" },
+  Repeat = { link = "Keyword" },
+  Label = { link = "Keyword" },
+  Exception = { link = "Keyword" },
+  PreProc = { link = "Keyword" },
+  Include = { link = "Keyword" },
+  Define = { link = "Keyword" },
+  Macro = { link = "Keyword" },
+  PreCondit = { link = "Keyword" },
+  StorageClass = { link = "Keyword" },
+  String = { fg = p.syntax_string },
+  Character = { link = "String" },
+  Number = { fg = p.syntax_number },
+  Float = { link = "Number" },
+  Boolean = { link = "Constant" },
+  Constant = { fg = p.syntax_constant },
+  Function = { fg = p.syntax_function },
+  Identifier = { fg = p.work_fg },
+  Type = { fg = p.syntax_type },
+  Structure = { link = "Type" },
+  Typedef = { link = "Type" },
+  Operator = { fg = p.syntax_operator },
+  Delimiter = { fg = p.syntax_operator },
+  Special = { fg = p.syntax_constant },
+  SpecialChar = { link = "Special" },
+  Tag = { fg = p.syntax_keyword },
+  SpecialComment = { link = "Comment" },
+  Debug = { link = "Special" },
+  Underlined = { fg = p.syntax_type, underline = true },
+  Ignore = { fg = p.work_grid },
+  Error = { fg = p.syntax_error },
+  Todo = { fg = p.frame_selection_text, bg = p.frame_selection, bold = true },
+  Added = { fg = p.ansi_2 },
+  Changed = { fg = p.ansi_3 },
+  Removed = { fg = p.ansi_1 },
+  DiffAdd = { fg = p.ansi_2, bg = p.work_cursorline },
+  DiffChange = { fg = p.ansi_3, bg = p.work_cursorline },
+  DiffDelete = { fg = p.ansi_1, bg = p.work_cursorline },
+  DiffText = { fg = p.work_selection_text, bg = p.work_selection },
+  SpellBad = { sp = p.syntax_error, undercurl = true },
+  SpellCap = { sp = p.syntax_warning, undercurl = true },
+  SpellLocal = { sp = p.ansi_6, undercurl = true },
+  SpellRare = { sp = p.syntax_number, undercurl = true },
+
+  -- Diagnostics
+  DiagnosticError = { fg = p.syntax_error },
+  DiagnosticWarn = { fg = p.syntax_warning },
+  DiagnosticInfo = { fg = p.ansi_4 },
+  DiagnosticHint = { fg = p.ansi_6 },
+  DiagnosticOk = { fg = p.ansi_2 },
+  DiagnosticUnderlineError = { sp = p.syntax_error, undercurl = true },
+  DiagnosticUnderlineWarn = { sp = p.syntax_warning, undercurl = true },
+  DiagnosticUnderlineInfo = { sp = p.ansi_4, undercurl = true },
+  DiagnosticUnderlineHint = { sp = p.ansi_6, undercurl = true },
+  DiagnosticUnderlineOk = { sp = p.ansi_2, undercurl = true },
+  DiagnosticUnnecessary = { fg = p.work_line_number },
+  DiagnosticDeprecated = { strikethrough = true },
+
+  -- Git signs
+  GitSignsAdd = { fg = p.ansi_2 },
+  GitSignsChange = { fg = p.ansi_3 },
+  GitSignsDelete = { fg = p.ansi_1 },
+
+  -- LSP
+  LspReferenceText = { bg = p.work_grid },
+  LspReferenceRead = { link = "LspReferenceText" },
+  LspReferenceWrite = { link = "LspReferenceText" },
+  LspSignatureActiveParameter = { link = "BlinkCmpSignatureHelpActiveParameter" },
+  LspInlayHint = { fg = p.work_line_number },
+  LspCodeLens = { fg = p.work_line_number },
+
+  -- Treesitter
+  ["@comment"] = { link = "Comment" },
+  ["@comment.error"] = { link = "DiagnosticError" },
+  ["@comment.warning"] = { link = "DiagnosticWarn" },
+  ["@comment.note"] = { link = "DiagnosticInfo" },
+  ["@comment.todo"] = { link = "Todo" },
+  ["@keyword"] = { link = "Keyword" },
+  ["@keyword.function"] = { link = "Keyword" },
+  ["@keyword.return"] = { link = "Keyword" },
+  ["@keyword.operator"] = { link = "Keyword" },
+  ["@keyword.import"] = { link = "Include" },
+  ["@keyword.conditional"] = { link = "Conditional" },
+  ["@keyword.repeat"] = { link = "Repeat" },
+  ["@keyword.exception"] = { link = "Exception" },
+  ["@string"] = { link = "String" },
+  ["@string.escape"] = { link = "SpecialChar" },
+  ["@string.regexp"] = { link = "SpecialChar" },
+  ["@string.special"] = { link = "SpecialChar" },
+  ["@string.special.url"] = { link = "Underlined" },
+  ["@character"] = { link = "Character" },
+  ["@number"] = { link = "Number" },
+  ["@number.float"] = { link = "Float" },
+  ["@boolean"] = { link = "Boolean" },
+  ["@constant"] = { link = "Constant" },
+  ["@constant.builtin"] = { link = "Constant" },
+  ["@function"] = { link = "Function" },
+  ["@function.builtin"] = { link = "Function" },
+  ["@function.call"] = { link = "Function" },
+  ["@function.method"] = { link = "Function" },
+  ["@function.method.call"] = { link = "Function" },
+  ["@constructor"] = { link = "Type" },
+  ["@type"] = { link = "Type" },
+  ["@type.builtin"] = { link = "Type" },
+  ["@type.definition"] = { link = "Type" },
+  ["@module"] = { link = "Type" },
+  ["@variable"] = { fg = p.work_fg },
+  ["@variable.builtin"] = { link = "Constant" },
+  ["@variable.parameter"] = { fg = p.ansi_7 },
+  ["@variable.member"] = { fg = p.work_fg },
+  ["@property"] = { fg = p.work_fg },
+  ["@attribute"] = { link = "PreProc" },
+  ["@label"] = { link = "Label" },
+  ["@operator"] = { link = "Operator" },
+  ["@punctuation"] = { link = "Delimiter" },
+  ["@punctuation.special"] = { link = "Special" },
+  ["@tag"] = { link = "Tag" },
+  ["@tag.attribute"] = { fg = p.syntax_constant },
+  ["@tag.delimiter"] = { link = "Delimiter" },
+  ["@markup.heading"] = { link = "Title" },
+  ["@markup.strong"] = { bold = true },
+  ["@markup.italic"] = { fg = p.syntax_type },
+  ["@markup.strikethrough"] = { strikethrough = true },
+  ["@markup.underline"] = { underline = true },
+  ["@markup.link"] = { fg = p.syntax_type },
+  ["@markup.link.url"] = { link = "Underlined" },
+  ["@markup.raw"] = { link = "String" },
+  ["@markup.list"] = { fg = p.frame_selection },
+  ["@markup.quote"] = { link = "Comment" },
+  ["@diff.plus"] = { link = "Added" },
+  ["@diff.minus"] = { link = "Removed" },
+  ["@diff.delta"] = { link = "Changed" },
+
+  -- LSP semantic tokens
+  ["@lsp.type.class"] = { link = "@type" },
+  ["@lsp.type.enum"] = { link = "@type" },
+  ["@lsp.type.interface"] = { link = "@type" },
+  ["@lsp.type.struct"] = { link = "@type" },
+  ["@lsp.type.type"] = { link = "@type" },
+  ["@lsp.type.typeParameter"] = { link = "@type" },
+  ["@lsp.type.namespace"] = { link = "@module" },
+  ["@lsp.type.function"] = { link = "@function" },
+  ["@lsp.type.method"] = { link = "@function.method" },
+  ["@lsp.type.macro"] = { link = "Macro" },
+  ["@lsp.type.keyword"] = { link = "@keyword" },
+  ["@lsp.type.string"] = { link = "@string" },
+  ["@lsp.type.number"] = { link = "@number" },
+  ["@lsp.type.comment"] = { link = "@comment" },
+  ["@lsp.type.enumMember"] = { link = "@constant" },
+  ["@lsp.type.parameter"] = { link = "@variable.parameter" },
+  ["@lsp.type.property"] = { link = "@property" },
+  ["@lsp.type.variable"] = { link = "@variable" },
+  ["@lsp.type.operator"] = { link = "@operator" },
+  ["@lsp.mod.deprecated"] = { link = "DiagnosticDeprecated" },
+}
+
+for group, attrs in pairs(groups) do
+  vim.api.nvim_set_hl(0, group, attrs)
+end
+
+-- :terminal follows the same 16 colors as Ghostty
+for i = 0, 15 do
+  vim.g["terminal_color_" .. i] = p["ansi_" .. i]
+end
