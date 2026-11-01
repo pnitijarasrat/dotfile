@@ -52,6 +52,28 @@ Check each Theme's color theme against its Theme source file and `docs/theme-spe
 
 The terminal theme is `ghostty/themes/vintage`, generated from `themes/vintage.json` (#132) and selected by `ghostty/config` (#13, #44) until the first Switch, which overrides it through `ghostty/active-theme` (#133). Each Theme gets its own `ghostty/themes/<name>`, which also sets the window's shape from the Theme's `rules` (#151): Vintage's is opaque and square, Marigold's translucent, blurred and rounded with no title bar. A Switch recolors open windows, but a new opacity needs Ghostty quit and reopened, and a new title bar style only reaches new windows. Starship, ccstatusline and ranger take their colors from it.
 
+## Neovim keys
+
+Neovim is default LazyVim (#196) with Marigold's colors and rounded popups, plus a few VSCode-style keys in `nvim/lua/config/keymaps.lua`. Each does what LazyVim's own key for it does:
+
+| Key | Action | LazyVim's key |
+|---|---|---|
+| Cmd+P | find files | `<leader>ff` |
+| Cmd+Shift+F | search text across the project | `<leader>/` |
+| Cmd+B | toggle the explorer | `<leader>e` |
+| Cmd+S | save (normal and insert mode) | `<C-s>` |
+| Cmd+/ | toggle comment (normal and visual mode) | `gcc` / `gc` |
+| Cmd+. | code action | `<leader>ca` |
+| Cmd+Shift+O | go to a symbol in the file | `<leader>ss` |
+| Cmd+Z / Cmd+Shift+Z | undo / redo | `u` / `<C-r>` |
+| F12 / Shift+F12 / F2 | definition / references / rename | `gd` / `gr` / `<leader>cr` |
+| Alt+↑ / Alt+↓ | move the line or selection | `<A-k>` / `<A-j>` |
+| Ctrl+` | toggle the terminal | `<C-/>` |
+
+Everything else is LazyVim's: buffers on Shift+H / Shift+L (close with `<leader>bd`), the command palette on `<leader>:` and `<leader>sC`, and `G` still jumps to the last line.
+
+Ghostty doesn't pass Cmd keys to programs, so `ghostty/config` forwards only the Cmd keys above, as CSI-u sequences that Neovim reads as `<D-…>`. Ghostty keeps Cmd+Shift+P, Cmd+W, Cmd+C/V, Cmd+T/N and Ctrl+Tab, but loses its own Cmd+Z / Cmd+Shift+Z (undo and redo closing a tab) and Cmd+Shift+F (end search). In a plain shell the forwarded keys type junk. Check both sides with `nvim --headless -u NONE -l nvim/tests/keymaps_test.lua` and `node ghostty/tests/keys_test.mjs`.
+
 ## Starship
 
 Each Theme's prompt is `starship/themes/<name>.toml`, generated from its source file (#154): the same segments for every Theme, in named ANSI colors from Ghostty, with Nerd Font icons on the directory, branch and runtimes when the Theme's `rules.icons` allows them. Vintage's keeps `>` and words; Marigold's has icons. `starship.toml` is a link to Vintage's, so Starship shows it with no Switch made. To follow the Switch, start Starship from `~/.zshrc` with `source ~/.config/starship/init.zsh` in place of `eval "$(starship init zsh)"`: before each prompt it reads `starship/active-theme`, so a new prompt after `theme <name>` is that Theme's in every open shell.

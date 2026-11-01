@@ -140,48 +140,14 @@ test("every highlight uses roles, not raw hex", function()
   assert(not after:find("#%x%x%x%x%x%x"), "raw hex after the role table")
 end)
 
-test("LazyVim uses vintage", function()
-  local spec = dofile(root .. "/lua/plugins/colorscheme.lua")
-  local found
-  for _, s in ipairs(spec) do
-    if s[1] == "LazyVim/LazyVim" then
-      found = s.opts.colorscheme
-    end
-  end
-  eq(found, "vintage", "LazyVim colorscheme")
-  local disabled = {}
-  for _, s in ipairs(spec) do
-    if s.enabled == false then
-      disabled[s[1]] = true
-    end
-  end
-  eq(disabled["folke/tokyonight.nvim"], true, "tokyonight disabled")
-  eq(disabled["catppuccin/nvim"], true, "catppuccin disabled")
-end)
-
 test("old colorscheme plugins and transparent groups are gone", function()
   eq(vim.uv.fs_stat(root .. "/lua/plugins/github.lua") ~= nil, false, "github.lua exists")
   eq(vim.uv.fs_stat(root .. "/lua/plugins/tokyonight.lua") ~= nil, false, "tokyonight.lua exists")
   for _, file in ipairs(vim.fn.glob(root .. "/lua/**/*.lua", false, true)) do
-    if not file:find("/archived/") and read(file:sub(#root + 2)):find('bg = "none"', 1, true) then
+    if read(file:sub(#root + 2)):find('bg = "none"', 1, true) then
       error("transparent group in " .. file)
     end
   end
-end)
-
-test("options.lua sets single popup borders", function()
-  dofile(root .. "/lua/config/options.lua")
-  if vim.fn.exists("+winborder") == 1 then
-    eq(vim.o.winborder, "single", "winborder")
-  end
-  eq(vim.diagnostic.config().float.border, "single", "diagnostic float border")
-end)
-
-test("blink.cmp completion and docs get single borders", function()
-  local spec = dofile(root .. "/lua/plugins/blink.lua")
-  local opts = spec.opts
-  eq(opts.completion.menu.border, "single", "menu border")
-  eq(opts.completion.documentation.window.border, "single", "documentation border")
 end)
 
 print(string.format("%d passed, %d failed", passed, #failures))

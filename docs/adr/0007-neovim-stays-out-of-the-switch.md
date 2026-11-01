@@ -1,5 +1,7 @@
 # Neovim stays out of the Switch
 
+Partly superseded by ADR 0014: Neovim still stays out of the Switch, but now always shows the **Marigold theme**.
+
 #134 would have had Neovim join the **Switch**: a generated colorscheme per **Theme**, and running sessions recoloring on `theme <name>`. Neovim isn't used much any more, so it doesn't join. Its hand-written `nvim/colors/vintage.lua` stays as it is, with the old dark IBM 5153 **Work surface** (the light one, #45, was never built), and it isn't generated from `themes/vintage.json`.
 
 ## Considered options
