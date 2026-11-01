@@ -1,7 +1,6 @@
 -- Headless checks for the `marigold` colorscheme (#196).
 -- Run: nvim --headless -u NONE -l nvim/tests/marigold_test.lua
 local root = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p:h:h")
-vim.opt.rtp:prepend(root)
 vim.o.termguicolors = true
 
 local failures, passed = {}, 0
@@ -44,7 +43,23 @@ for _, palette in pairs(vim.json.decode(read("../themes/marigold.json")).palette
   end
 end
 
-vim.cmd.colorscheme("marigold")
+-- Loads the colorscheme from a copy of the repo whose active Theme (themes/active,
+-- which a Switch writes) is `active`, or that has none, as before any Switch.
+local function load(active)
+  local copy = vim.fn.tempname()
+  vim.fn.mkdir(copy .. "/nvim/colors", "p")
+  vim.fn.mkdir(copy .. "/themes", "p")
+  vim.fn.writefile(vim.fn.readfile(root .. "/colors/marigold.lua"), copy .. "/nvim/colors/marigold.lua")
+  vim.fn.writefile(vim.fn.readfile(root .. "/../themes/marigold.json"), copy .. "/themes/marigold.json")
+  if active then
+    vim.fn.writefile({ active }, copy .. "/themes/active")
+  end
+  vim.opt.rtp:prepend(copy .. "/nvim")
+  vim.cmd.colorscheme("marigold")
+  vim.opt.rtp:remove(copy .. "/nvim")
+end
+
+load()
 
 test("sets colors_name and a dark background", function()
   eq(vim.g.colors_name, "marigold", "colors_name")
@@ -138,6 +153,33 @@ test("LazyVim uses marigold", function()
   end
   eq(disabled["folke/tokyonight.nvim"], true, "tokyonight disabled")
   eq(disabled["catppuccin/nvim"], true, "catppuccin disabled")
+end)
+
+test("under Marigold no window paints a background, so Ghostty's translucent window shows", function()
+  load("marigold")
+  local panes = {
+    "Normal", "NormalNC", "SignColumn", "FoldColumn", "WinSeparator", "WinBar", "WinBarNC", -- editor and splits
+    "NormalFloat", "FloatBorder", "Pmenu", "BlinkCmpMenu", "BlinkCmpDoc", -- inline code popups
+    "TelescopeNormal", "SnacksPicker", "WhichKeyNormal", -- pickers, the explorer and menus
+  }
+  for _, group in ipairs(panes) do
+    eq(get(group).bg, nil, group .. " bg")
+  end
+  eq(hex(get("Normal").fg), r.work_fg, "Normal fg")
+  eq(hex(get("SnacksPicker").fg), r.frame_text, "SnacksPicker fg")
+  -- Bars and highlighted rows still paint
+  eq(hex(get("StatusLine").bg), r.frame_face, "StatusLine bg")
+  eq(hex(get("TabLineSel").bg), r.frame_selection, "TabLineSel bg")
+  eq(hex(get("CursorLine").bg), r.work_cursorline, "CursorLine bg")
+  eq(hex(get("PmenuSel").bg), r.work_selection, "PmenuSel bg")
+  eq(hex(get("TelescopeSelection").bg), r.frame_light, "TelescopeSelection bg")
+end)
+
+test("under any other Theme every window paints its role, as Ghostty's window isn't Marigold's", function()
+  load("vintage")
+  eq(hex(get("Normal").bg), r.work_bg, "Normal bg")
+  eq(hex(get("NormalFloat").bg), r.work_bg, "NormalFloat bg")
+  eq(hex(get("SnacksPicker").bg), r.frame_face, "SnacksPicker bg")
 end)
 
 print(string.format("%d passed, %d failed", passed, #failures))

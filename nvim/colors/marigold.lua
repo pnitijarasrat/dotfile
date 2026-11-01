@@ -4,7 +4,8 @@
 -- Neovim stays out of the Switch, but this is its colorscheme under every Theme
 -- (docs/adr/0014-neovim-shows-marigold.md); it doesn't follow `theme <name>`.
 local here = vim.fn.resolve(debug.getinfo(1, "S").source:sub(2))
-local source = vim.fn.fnamemodify(here, ":p:h:h:h") .. "/themes/marigold.json"
+local themes = vim.fn.fnamemodify(here, ":p:h:h:h") .. "/themes"
+local source = themes .. "/marigold.json"
 
 local file = io.open(source, "r")
 if not file then
@@ -21,6 +22,18 @@ for _, palette in pairs(theme.palettes) do
   end
 end
 
+-- Translucency (docs/theme-spec-marigold.md, Theme rules): under Marigold, Ghostty's
+-- window is translucent work_bg, so no window here paints a background (the editor,
+-- splits, popups, pickers, the explorer) and Ghostty's shows behind them all. Bars
+-- and highlighted rows still paint. Under another Theme the window behind is that
+-- Theme's (Vintage's is white), so every window paints its role. The active Theme is
+-- read once, here (no file: Vintage, as before any Switch); a running session keeps
+-- what it started with.
+local active = vim.fn.filereadable(themes .. "/active") == 1 and vim.trim(vim.fn.readfile(themes .. "/active")[1] or "")
+local function pane(role)
+  return active == "marigold" and "NONE" or role
+end
+
 vim.cmd("highlight clear")
 if vim.fn.exists("syntax_on") == 1 then
   vim.cmd("syntax reset")
@@ -30,7 +43,7 @@ vim.g.colors_name = "marigold"
 
 local groups = {
   -- Editor: the Work surface
-  Normal = { fg = p.work_fg, bg = p.work_bg },
+  Normal = { fg = p.work_fg, bg = pane(p.work_bg) },
   NormalNC = { link = "Normal" },
   Cursor = { fg = p.work_cursor_text, bg = p.work_cursor },
   lCursor = { link = "Cursor" },
@@ -43,9 +56,9 @@ local groups = {
   LineNrAbove = { link = "LineNr" },
   LineNrBelow = { link = "LineNr" },
   CursorLineNr = { fg = p.work_cursor, bg = p.work_cursorline },
-  SignColumn = { bg = p.work_bg },
+  SignColumn = { bg = pane(p.work_bg) },
   CursorLineSign = { link = "CursorLine" },
-  FoldColumn = { fg = p.work_line_number, bg = p.work_bg },
+  FoldColumn = { fg = p.work_line_number, bg = pane(p.work_bg) },
   CursorLineFold = { link = "CursorLine" },
   Folded = { fg = p.syntax_comment, bg = p.work_cursorline },
   EndOfBuffer = { fg = p.work_grid },
@@ -53,7 +66,7 @@ local groups = {
   Whitespace = { fg = p.work_grid },
   SpecialKey = { fg = p.work_grid },
   Conceal = { fg = p.work_line_number },
-  WinSeparator = { fg = p.frame_highlight, bg = p.work_bg },
+  WinSeparator = { fg = p.frame_highlight, bg = pane(p.work_bg) },
   VertSplit = { link = "WinSeparator" },
   Visual = { fg = p.work_selection_text, bg = p.work_selection },
   VisualNOS = { link = "Visual" },
@@ -79,24 +92,24 @@ local groups = {
   TabLine = { fg = p.frame_gray_text, bg = p.frame_face },
   TabLineFill = { bg = p.frame_face },
   TabLineSel = { fg = p.frame_selection_text, bg = p.frame_selection, bold = true },
-  WinBar = { fg = p.frame_text, bg = p.work_bg },
-  WinBarNC = { fg = p.frame_gray_text, bg = p.work_bg },
+  WinBar = { fg = p.frame_text, bg = pane(p.work_bg) },
+  WinBarNC = { fg = p.frame_gray_text, bg = pane(p.work_bg) },
 
   -- Inline code popups: Work surface with a 1px work_popup_border
-  NormalFloat = { fg = p.work_fg, bg = p.work_bg },
-  FloatBorder = { fg = p.work_popup_border, bg = p.work_bg },
-  FloatTitle = { fg = p.frame_selection, bg = p.work_bg, bold = true },
-  FloatFooter = { fg = p.frame_gray_text, bg = p.work_bg },
-  Pmenu = { fg = p.work_fg, bg = p.work_bg },
+  NormalFloat = { fg = p.work_fg, bg = pane(p.work_bg) },
+  FloatBorder = { fg = p.work_popup_border, bg = pane(p.work_bg) },
+  FloatTitle = { fg = p.frame_selection, bg = pane(p.work_bg), bold = true },
+  FloatFooter = { fg = p.frame_gray_text, bg = pane(p.work_bg) },
+  Pmenu = { fg = p.work_fg, bg = pane(p.work_bg) },
   PmenuSel = { fg = p.work_selection_text, bg = p.work_selection },
-  PmenuKind = { fg = p.syntax_type, bg = p.work_bg },
+  PmenuKind = { fg = p.syntax_type, bg = pane(p.work_bg) },
   PmenuKindSel = { fg = p.syntax_type, bg = p.work_selection },
-  PmenuExtra = { fg = p.work_line_number, bg = p.work_bg },
+  PmenuExtra = { fg = p.work_line_number, bg = pane(p.work_bg) },
   PmenuExtraSel = { fg = p.work_line_number, bg = p.work_selection },
-  PmenuSbar = { bg = p.work_bg },
+  PmenuSbar = { bg = pane(p.work_bg) },
   PmenuThumb = { bg = p.work_popup_border },
   -- As VSCode: matched letters are marigold, which reads on work_selection
-  PmenuMatch = { fg = p.frame_selection, bg = p.work_bg, bold = true },
+  PmenuMatch = { fg = p.frame_selection, bg = pane(p.work_bg), bold = true },
   PmenuMatchSel = { fg = p.frame_selection, bg = p.work_selection, bold = true },
 
   -- blink.cmp
@@ -121,20 +134,21 @@ local groups = {
   BlinkCmpSignatureHelpBorder = { link = "FloatBorder" },
   BlinkCmpSignatureHelpActiveParameter = { fg = p.work_selection_text, bg = p.work_selection },
 
-  -- Pickers and menus are Frame: frame_face, frame_light for the hovered row
-  TelescopeNormal = { fg = p.frame_text, bg = p.frame_face },
-  TelescopeBorder = { fg = p.frame_highlight, bg = p.frame_face },
-  TelescopeTitle = { fg = p.frame_selection, bg = p.frame_face, bold = true },
-  TelescopePromptNormal = { fg = p.frame_text, bg = p.frame_face },
+  -- Pickers and menus are Frame: frame_face (none under Marigold, see pane()),
+  -- frame_light for the hovered row
+  TelescopeNormal = { fg = p.frame_text, bg = pane(p.frame_face) },
+  TelescopeBorder = { fg = p.frame_highlight, bg = pane(p.frame_face) },
+  TelescopeTitle = { fg = p.frame_selection, bg = pane(p.frame_face), bold = true },
+  TelescopePromptNormal = { fg = p.frame_text, bg = pane(p.frame_face) },
   TelescopePromptBorder = { link = "TelescopeBorder" },
   TelescopePromptTitle = { fg = p.frame_selection_text, bg = p.frame_selection, bold = true },
-  TelescopePromptPrefix = { fg = p.frame_selection, bg = p.frame_face },
+  TelescopePromptPrefix = { fg = p.frame_selection, bg = pane(p.frame_face) },
   TelescopeSelection = { fg = p.frame_text, bg = p.frame_light },
   TelescopeSelectionCaret = { fg = p.frame_selection, bg = p.frame_light },
-  TelescopeMultiSelection = { fg = p.frame_selection, bg = p.frame_face },
+  TelescopeMultiSelection = { fg = p.frame_selection, bg = pane(p.frame_face) },
   TelescopeMatching = { fg = p.frame_selection, bold = true },
-  TelescopePreviewTitle = { fg = p.frame_gray_text, bg = p.frame_face },
-  TelescopeResultsTitle = { fg = p.frame_gray_text, bg = p.frame_face },
+  TelescopePreviewTitle = { fg = p.frame_gray_text, bg = pane(p.frame_face) },
+  TelescopeResultsTitle = { fg = p.frame_gray_text, bg = pane(p.frame_face) },
   SnacksPicker = { link = "TelescopeNormal" },
   SnacksPickerBorder = { link = "TelescopeBorder" },
   SnacksPickerTitle = { link = "TelescopeTitle" },
@@ -142,9 +156,9 @@ local groups = {
   SnacksPickerMatch = { link = "TelescopeMatching" },
   SnacksPickerPrompt = { fg = p.frame_selection },
   WhichKey = { fg = p.frame_selection },
-  WhichKeyNormal = { fg = p.frame_text, bg = p.frame_face },
-  WhichKeyBorder = { fg = p.frame_highlight, bg = p.frame_face },
-  WhichKeyTitle = { fg = p.frame_selection, bg = p.frame_face, bold = true },
+  WhichKeyNormal = { fg = p.frame_text, bg = pane(p.frame_face) },
+  WhichKeyBorder = { fg = p.frame_highlight, bg = pane(p.frame_face) },
+  WhichKeyTitle = { fg = p.frame_selection, bg = pane(p.frame_face), bold = true },
   WhichKeyDesc = { fg = p.frame_text },
   WhichKeyGroup = { fg = p.syntax_type },
   WhichKeySeparator = { fg = p.frame_gray_text },
